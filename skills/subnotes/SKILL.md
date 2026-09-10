@@ -31,6 +31,15 @@ Detail belongs in `subnotes`, not in the task text. A task that needs a
 sentence of context is a short task plus a subnote. File paths and links go in
 a subnote too.
 
+Write a file path as a `file://` URL on a subnote line of its own — absolute,
+percent-encoded, no `~`. Subnotes renders those as clickable links; a bare path
+is inert text. It is not pretty, which is why it belongs on its own line under
+the task rather than inside the task's own text.
+
+Only for a file that will still be there later — something committed in a repo,
+or a document the user keeps. A path into a temp directory or a scratch file is
+a dead link by the time they read it, so describe the file instead.
+
 Priority is one of Today, Next, Soon, Someday, defaulting to Someday. Use Next
 only when the user says it is next; do not infer urgency from tone.
 
