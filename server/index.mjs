@@ -28,10 +28,10 @@ class UserError extends Error {}
 
 function manifest() {
   if (!DIR) throw new UserError(
-    'The Subnotes folder is not configured. Set it in the plugin settings — the path is shown in Subnotes Settings → Connector.');
+    'The Subnotes folder is not configured. Set it in the plugin settings — Subnotes shows the path under File → Reveal Connector Folder.');
   const path = join(DIR, 'manifest.json');
   if (!existsSync(path)) throw new UserError(
-    `No Subnotes connector folder at ${DIR}. Subnotes 1.4 or later is required, and the connector must be enabled in Settings.`);
+    `No Subnotes connector folder at ${DIR}. Subnotes 1.4 or later is required, and at least one notebook must be connected — right-click a notebook in Subnotes and choose Connect to Claude Code.`);
 
   let m;
   try {
@@ -57,7 +57,7 @@ function findNotebook(m, name) {
   const listed = m.notebooks.map(n => n.name).join(', ') || '(none)';
   if (hits.length === 0) throw new UserError(
     `No connected notebook called "${name}". Connected notebooks: ${listed}. ` +
-    `A notebook the user has not connected in Subnotes Settings is not visible here.`);
+    `A notebook the user has not connected in Subnotes is not visible here.`);
   throw new UserError(`"${name}" matches more than one connected notebook. Connected: ${listed}.`);
 }
 
@@ -65,7 +65,7 @@ function findNotebook(m, name) {
 
 function listNotebooks() {
   const m = manifest();
-  if (!m.notebooks.length) return 'No notebooks are connected. The user connects them in Subnotes Settings → Connector.';
+  if (!m.notebooks.length) return 'No notebooks are connected. The user connects one by right-clicking a notebook in Subnotes and choosing Connect to Claude Code.';
   return m.notebooks.map(n => {
     const lines = [`## ${n.name}`];
     if (n.purpose) lines.push(`Purpose: ${n.purpose}`);
