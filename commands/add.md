@@ -1,5 +1,5 @@
 ---
-description: Add a task to one of your Subnotes notebooks
+description: Capture a task into one of your connected notebooks
 ---
 
 Add this to the user's Subnotes: $ARGUMENTS

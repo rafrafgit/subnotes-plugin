@@ -1,5 +1,5 @@
 ---
-description: What this plugin can do, and what to do first
+description: Start here — what this plugin does and what to connect first
 ---
 
 Explain the Subnotes plugin to someone who has just installed it.
