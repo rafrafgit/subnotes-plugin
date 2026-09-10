@@ -12,6 +12,7 @@
 
 import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { createInterface } from 'node:readline';
 
@@ -19,7 +20,17 @@ const PROTOCOL_VERSION = '2024-11-05';
 const CONNECTOR_VERSION = 1;   // the contract number in manifest.json
 const PRIORITIES = ['Today', 'Next', 'Soon', 'Someday'];
 
-const DIR = process.env.SUBNOTES_DIR;
+// The connector folder lives at a fixed, known path inside the app's own
+// container. It is not user-chosen, so the plugin does not ask: an install
+// prompt demanding a constant is a step that can only be got wrong, and it
+// used to deadlock first run — the folder does not exist until a notebook is
+// connected, so there was nothing to copy the path from yet.
+//
+// The `folder` user config remains as an override for an unusual setup; an
+// unset one arrives here as an empty string from ${user_config.folder}, not as
+// undefined, which is why this tests for truthiness rather than existence.
+const DEFAULT_DIR = join(homedir(), 'Library/Containers/com.subnotes.app/Data/Documents/Connector');
+const DIR = process.env.SUBNOTES_DIR?.trim() || DEFAULT_DIR;
 
 // Every message the user could see when something is wrong says which of the
 // two halves to fix. A bare failure is the one outcome the manifest exists to
@@ -27,8 +38,6 @@ const DIR = process.env.SUBNOTES_DIR;
 class UserError extends Error {}
 
 function manifest() {
-  if (!DIR) throw new UserError(
-    'The Subnotes folder is not configured. Set it in the plugin settings — Subnotes shows the path under File → Reveal Connector Folder.');
   const path = join(DIR, 'manifest.json');
   if (!existsSync(path)) throw new UserError(
     `No Subnotes connector folder at ${DIR}. Subnotes 1.4 or later is required, and at least one notebook must be connected — right-click a notebook in Subnotes and choose Connect to Claude Code.`);

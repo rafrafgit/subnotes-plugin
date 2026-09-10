@@ -3,15 +3,15 @@
   "description": "Read your Subnotes notebooks and add tasks to them.",
   "version": "0.1.0",
   "author": {
-    "name": "Martin Ramsin",
+    "name": "rafrafgit",
     "url": "https://subnotes.app"
   },
   "userConfig": {
     "folder": {
       "type": "string",
       "title": "Subnotes Connector folder",
-      "description": "The folder Subnotes exports to. Copy it from Subnotes Settings \u2192 Connector.",
-      "required": true
+      "description": "Optional. Leave blank unless Subnotes stores its data somewhere unusual — the default is the folder Subnotes exports to inside its own app container.",
+      "required": false
     }
   }
 }
