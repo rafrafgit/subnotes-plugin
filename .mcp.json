@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "subnotes": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/index.mjs"],
+      "env": { "SUBNOTES_DIR": "${user_config.folder}" }
+    }
+  }
+}

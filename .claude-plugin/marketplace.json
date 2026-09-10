@@ -1,0 +1,14 @@
+{
+  "name": "subnotes-dev",
+  "owner": {
+    "name": "Martin Ramsin"
+  },
+  "plugins": [
+    {
+      "name": "subnotes",
+      "source": "./",
+      "description": "Read your Subnotes notebooks and add tasks to them."
+    }
+  ],
+  "description": "Local development marketplace for the Subnotes plugin."
+}
