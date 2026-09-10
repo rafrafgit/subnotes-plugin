@@ -1,5 +1,5 @@
 {
-  "name": "subnotes-dev",
+  "name": "Subnotes",
   "owner": {
     "name": "rafrafgit"
   },
@@ -10,5 +10,5 @@
       "description": "Read your Subnotes notebooks and add tasks to them."
     }
   ],
-  "description": "Local development marketplace for the Subnotes plugin."
+  "description": "The Subnotes plugin for Claude Code."
 }
