@@ -16,7 +16,19 @@ reads as if it only writes to a notebook called Subnotes.
 
 Call `list_notebooks` first. If the argument names a notebook or a section, use
 it — "… in Work", "… under UX bugs" — matching case-insensitively against what
-`list_notebooks` returned. Otherwise choose the notebook and section that fit. Write it as a physical, visible action. Report which
-notebook and section it went to, so a wrong guess is visible immediately.
+`list_notebooks` returned. Otherwise place it against the notebooks' purposes,
+and if none of them fits, ask where it belongs rather than settling for the
+least-bad one. Write it as a physical, visible action.
+
+Then say exactly what was added, one line per task — the user does not see the
+tool's own output, and the write cannot be taken back:
+
+```
+Tasks added:
+ * Deploy the CD_sharedWithAI field to the CloudKit Production schema to Subnotes 1.4, plugin 1.0 in Subnotes.
+```
+
+Name the purpose you placed it against too, when you chose the notebook rather
+than being told which one.
 
 If the argument is several things, add them in one `add_tasks` call.
