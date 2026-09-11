@@ -11,13 +11,34 @@
 // this ever needs sampling, resources or notifications.
 
 import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { createInterface } from 'node:readline';
 
 const PROTOCOL_VERSION = '2024-11-05';
 const CONNECTOR_VERSION = 1;   // the contract number in manifest.json
+
+// Read from plugin.json rather than declared here. A second constant beside
+// CONNECTOR_VERSION would drift the first time one is bumped and the other is
+// forgotten, and plugin.json is the field `claude plugin tag` validates
+// against the marketplace entry, so it is the one guaranteed honest at release
+// time. Resolved from this file's own location: ${CLAUDE_PLUGIN_ROOT} is
+// substituted into the launch arguments, not exported into the environment.
+//
+// Unreadable is not fatal. This is diagnostic information the app uses to say
+// "update the plugin" earlier than it otherwise could; failing a write over it
+// would trade a real feature for a cosmetic one.
+const PLUGIN_VERSION = (() => {
+  try {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const manifestPath = join(here, '..', '.claude-plugin', 'plugin.json');
+    return JSON.parse(readFileSync(manifestPath, 'utf8')).version ?? null;
+  } catch {
+    return null;
+  }
+})();
 const PRIORITIES = ['Today', 'Next', 'Soon', 'Someday'];
 
 // The connector folder lives at a fixed, known path inside the app's own
@@ -56,6 +77,16 @@ function manifest() {
   return m;
 }
 
+// Rendered one per line rather than comma-joined. Headings routinely contain a
+// comma ("Subnotes 1.4, plugin 1.0") and a double quote ('Mattias "feedback"'),
+// so neither a comma nor quoting delimits them unambiguously — and a heading
+// that reads as two costs a failed write whose error then lists the very name
+// it called missing, which looks like a bug in this server. A heading is always
+// one line, so a newline is the one delimiter the content cannot contain.
+function onePerLine(items) {
+  return items?.length ? items.map(s => `- ${s}`).join('\n') : '- (none)';
+}
+
 // Names are how the user refers to notebooks in conversation, so that is how
 // they are addressed. An unknown or ambiguous name lists what is connected
 // rather than guessing — writing to the wrong notebook is worse than failing.
@@ -63,11 +94,11 @@ function findNotebook(m, name) {
   const wanted = String(name ?? '').trim().toLowerCase();
   const hits = m.notebooks.filter(n => n.name.toLowerCase() === wanted);
   if (hits.length === 1) return hits[0];
-  const listed = m.notebooks.map(n => n.name).join(', ') || '(none)';
+  const listed = onePerLine(m.notebooks.map(n => n.name));
   if (hits.length === 0) throw new UserError(
-    `No connected notebook called "${name}". Connected notebooks: ${listed}. ` +
-    `A notebook the user has not connected in Subnotes is not visible here.`);
-  throw new UserError(`"${name}" matches more than one connected notebook. Connected: ${listed}.`);
+    `No connected notebook called "${name}". A notebook the user has not ` +
+    `connected in Subnotes is not visible here. Connected notebooks:\n${listed}`);
+  throw new UserError(`"${name}" matches more than one connected notebook. Connected:\n${listed}`);
 }
 
 // MARK: - Tools
@@ -79,7 +110,7 @@ function listNotebooks() {
     const lines = [`## ${n.name}`];
     if (n.purpose) lines.push(`Purpose: ${n.purpose}`);
     lines.push(`Open tasks: ${n.openTasks ?? 'unknown'}`);
-    lines.push(n.sections?.length ? `Sections: ${n.sections.join(', ')}` : 'Sections: (none)');
+    lines.push(n.sections?.length ? `Sections:\n${onePerLine(n.sections)}` : 'Sections: (none)');
     return lines.join('\n');
   }).join('\n\n');
 }
@@ -88,6 +119,46 @@ function readNotebook({ name }) {
   const m = manifest();
   const nb = findNotebook(m, name);
   return readFileSync(join(DIR, nb.file), 'utf8');
+}
+
+// The export format's task lines are "• text", with a priority tag trailing and
+// subnotes indented beneath. Read from the notebook file because the manifest
+// carries section names and counts but never task text — which is exactly why a
+// duplicate could not be seen before a write, and how one got appended above a
+// copy of itself that was already marked Done.
+//
+// Keyed on lowercased text; first occurrence wins, matching how the app resolves
+// a repeated heading. An absent tag means Someday, which is the one priority the
+// export leaves implicit.
+const TASK_LINE = /^\s*•\s*(.+?)\s*$/;
+const PRIORITY_TAG = new RegExp(`\\s*\\[(${[...PRIORITIES, 'Done'].join('|')})\\]\\s*$`, 'i');
+
+function existingTasks(nb) {
+  let text;
+  // A safety net, never a gate: an unreadable notebook file must not fail a
+  // write that is otherwise valid. Same trade as PLUGIN_VERSION above.
+  try {
+    text = readFileSync(join(DIR, nb.file), 'utf8');
+  } catch {
+    return null;
+  }
+  const found = new Map();
+  let section = null;
+  for (const line of text.split('\n')) {
+    const heading = /^###\s+(.*)$/.exec(line);
+    if (heading) {
+      section = heading[1].trim();
+      continue;
+    }
+    const task = TASK_LINE.exec(line);
+    if (!task) continue;
+    const tag = PRIORITY_TAG.exec(task[1]);
+    const body = (tag ? task[1].slice(0, tag.index) : task[1]).trim();
+    if (!body) continue;
+    const key = body.toLowerCase();
+    if (!found.has(key)) found.set(key, { text: body, priority: tag ? tag[1] : 'Someday', section });
+  }
+  return found;
 }
 
 function validateTask(t, nb) {
@@ -105,8 +176,9 @@ function validateTask(t, nb) {
   const section = t.section ? String(t.section).trim() : null;
   if (section && !(nb.sections ?? []).some(s => s.toLowerCase() === section.toLowerCase())) {
     throw new UserError(
-      `"${nb.name}" has no section called "${section}". Its sections are: ${(nb.sections ?? []).join(', ') || '(none)'}. ` +
-      `Sections are not created here — leave section out to add at the top of the notebook.`);
+      `"${nb.name}" has no section called "${section}". Sections are not created ` +
+      `here — leave section out to add at the top of the notebook. Its sections:\n` +
+      onePerLine(nb.sections ?? []));
   }
   // Match the manifest's own capitalisation, so the app matches the heading it
   // actually has rather than the one Claude typed.
@@ -116,16 +188,47 @@ function validateTask(t, nb) {
   return { text, priority, ...(canonical ? { section: canonical } : {}), ...(subnotes.length ? { subnotes } : {}) };
 }
 
-function addTasks({ notebook, tasks }) {
+function addTasks({ notebook, tasks, allowDuplicate = false }) {
   const m = manifest();
   const nb = findNotebook(m, notebook);
   if (!Array.isArray(tasks) || !tasks.length) throw new UserError('No tasks given.');
   const validated = tasks.map(t => validateTask(t, nb));
 
+  // Refused rather than warned, for the same reason an invented section is
+  // refused: a write cannot be edited or removed from here, so appending a
+  // second identical line costs the user a manual delete while a refusal costs
+  // one turn. Skipped entirely when the user has said to add it anyway —
+  // genuinely repeated tasks exist, and this is not the place to argue.
+  if (!allowDuplicate) {
+    const existing = existingTasks(nb);
+    const inThisWrite = new Set();
+    for (const t of validated) {
+      const key = t.text.toLowerCase();
+      const dup = existing?.get(key);
+      if (dup) throw new UserError(
+        `"${nb.name}" already has this task: "${dup.text}"` +
+        `${dup.section ? ` under "${dup.section}"` : ''}, priority ${dup.priority}. ` +
+        `Writes only add, so this would leave two identical lines and neither can be ` +
+        `edited or removed from here. Check with the user, then pass allowDuplicate: true ` +
+        `if they want it added again.`);
+      if (inThisWrite.has(key)) throw new UserError(
+        `This write adds "${t.text}" twice. Send it once, or pass allowDuplicate: true if ` +
+        `the user really wants two identical lines.`);
+      inThisWrite.add(key);
+    }
+  }
+
   // `id` makes the write idempotent: the app records applied ids, so a retry
   // after a timeout cannot double-add.
+  // pluginVersion is additive and one-sided: Swift's synthesized Codable
+  // ignores unknown keys, so an app that predates this field accepts a write
+  // carrying it and simply does not look. That is what lets this ship without
+  // a connectorVersion bump or an app release — see "What requires which
+  // bump" in the spec. Omitted entirely when unknown, rather than sent as a
+  // guess.
   const payload = {
     connectorVersion: CONNECTOR_VERSION,
+    ...(PLUGIN_VERSION ? { pluginVersion: PLUGIN_VERSION } : {}),
     id: randomUUID().slice(0, 8),
     op: 'add_tasks',
     notebook: nb.name,
@@ -147,6 +250,11 @@ function addTasks({ notebook, tasks }) {
     validated.map(t => `  • ${t.text} [${t.priority}]${where(t)}`).join('\n') +
     `\n\nSubnotes applies queued tasks when it is running, or at next launch if it is closed.`;
 }
+
+const ALLOW_DUPLICATE = {
+  type: 'boolean',
+  description: 'Only after the user has confirmed they want a task the notebook already has. Default false, which refuses such a write.',
+};
 
 const taskShape = {
   type: 'object',
@@ -174,14 +282,14 @@ const TOOLS = [
   },
   {
     name: 'add_task',
-    description: 'Append one task to a connected notebook. Appends only: it cannot edit, complete, delete or reorder anything.',
-    inputSchema: { type: 'object', properties: { notebook: { type: 'string' }, ...taskShape.properties }, required: ['notebook', 'text'] },
-    run: ({ notebook, ...task }) => addTasks({ notebook, tasks: [task] }),
+    description: 'Append one task to a connected notebook. Appends only: it cannot edit, complete, delete or reorder anything. Refuses a task the notebook already has, unless allowDuplicate is true.',
+    inputSchema: { type: 'object', properties: { notebook: { type: 'string' }, ...taskShape.properties, allowDuplicate: ALLOW_DUPLICATE }, required: ['notebook', 'text'] },
+    run: ({ notebook, allowDuplicate, ...task }) => addTasks({ notebook, allowDuplicate, tasks: [task] }),
   },
   {
     name: 'add_tasks',
-    description: 'Append several tasks to one connected notebook in a single write. Prefer this over repeated add_task calls: one file, one save, one sync cycle.',
-    inputSchema: { type: 'object', properties: { notebook: { type: 'string' }, tasks: { type: 'array', items: taskShape } }, required: ['notebook', 'tasks'] },
+    description: 'Append several tasks to one connected notebook in a single write. Prefer this over repeated add_task calls: one file, one save, one sync cycle. Refuses a task the notebook already has, unless allowDuplicate is true.',
+    inputSchema: { type: 'object', properties: { notebook: { type: 'string' }, tasks: { type: 'array', items: taskShape }, allowDuplicate: ALLOW_DUPLICATE }, required: ['notebook', 'tasks'] },
     run: addTasks,
   },
 ];
@@ -197,7 +305,7 @@ function handle(msg) {
       return reply({
         protocolVersion: PROTOCOL_VERSION,
         capabilities: { tools: {} },
-        serverInfo: { name: 'subnotes', version: '0.1.0' },
+        serverInfo: { name: 'subnotes', version: PLUGIN_VERSION ?? '0' },
       });
     case 'tools/list':
       return reply({ tools: TOOLS.map(({ name, description, inputSchema }) => ({ name, description, inputSchema })) });
