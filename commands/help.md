@@ -9,8 +9,10 @@ setup instruction the user has already completed is noise.
 
 **If it reports an error** (no connector folder, or nothing connected), the
 setup step is the whole answer. Tell them, in this order: Subnotes 1.4 or later
-on a Mac is required; right-clicking a notebook and choosing "Connect to Claude
-Code" is what makes it visible here; only the notebooks they connect are shared.
+on a Mac is required; Settings in Subnotes (⌘,) lists every notebook with a
+switch, and turning one on is what makes it visible here — right-clicking a
+single notebook does the same for one at a time; only the notebooks they turn
+on are shared.
 Do not list the tools — none of them work yet, and the one next step is what
 they need.
 

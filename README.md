@@ -4,9 +4,10 @@ Read your [Subnotes](https://subnotes.app) notebooks from Claude Code, and add
 tasks to them — so "let's put that on the backlog" lands in the notebook instead
 of dying with the conversation.
 
-**Requires Subnotes 1.4 or later, on macOS.** Connect a notebook by
-right-clicking it in Subnotes and choosing **Connect to Claude Code**. Only the
-notebooks you connect are visible here.
+**Requires Subnotes 1.4 or later, on macOS.** Connect notebooks in Subnotes'
+**Settings** (⌘,), which lists every notebook with a switch — or right-click a
+single notebook and choose **Connect to Claude Code**. Only the notebooks you
+turn on are visible here.
 
 ## What it does
 

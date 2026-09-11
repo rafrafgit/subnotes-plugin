@@ -61,7 +61,7 @@ class UserError extends Error {}
 function manifest() {
   const path = join(DIR, 'manifest.json');
   if (!existsSync(path)) throw new UserError(
-    `No Subnotes connector folder at ${DIR}. Subnotes 1.4 or later is required, and at least one notebook must be connected — right-click a notebook in Subnotes and choose Connect to Claude Code.`);
+    `No Subnotes connector folder at ${DIR}. Subnotes 1.4 or later is required, and at least one notebook must be connected — open Settings in Subnotes (⌘,) and turn one on.`);
 
   let m;
   try {
@@ -105,7 +105,7 @@ function findNotebook(m, name) {
 
 function listNotebooks() {
   const m = manifest();
-  if (!m.notebooks.length) return 'No notebooks are connected. The user connects one by right-clicking a notebook in Subnotes and choosing Connect to Claude Code.';
+  if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,), which lists every notebook with a switch.";
   return m.notebooks.map(n => {
     const lines = [`## ${n.name}`];
     if (n.purpose) lines.push(`Purpose: ${n.purpose}`);
