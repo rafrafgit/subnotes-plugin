@@ -9,6 +9,22 @@ of dying with the conversation.
 single notebook and choose **Connect to Claude Code**. Only the notebooks you
 turn on are visible here.
 
+## Install
+
+In Claude Code:
+
+```
+/plugin marketplace add rafrafgit/subnotes-plugin
+/plugin install subnotes@Subnotes
+```
+
+Then install [Subnotes](https://subnotes.app) 1.4 or later, open its
+**Settings** (⌘,), and turn on the notebooks you want Claude to see. Run
+`/subnotes:help` if you would rather be walked through it.
+
+Once the plugin is listed in the Claude plugin directory it can be installed
+from there instead, without adding this marketplace first.
+
 ## What it does
 
 - `list_notebooks` — names, purposes, section headings, open counts

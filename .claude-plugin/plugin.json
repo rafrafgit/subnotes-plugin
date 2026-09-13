@@ -25,5 +25,6 @@
     "macos"
   ],
   "homepage": "https://subnotes.app/claude.html",
-  "repository": "https://github.com/rafrafgit/subnotes-plugin"
+  "repository": "https://github.com/rafrafgit/subnotes-plugin",
+  "license": "MIT"
 }
