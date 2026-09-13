@@ -7,7 +7,7 @@
     {
       "name": "subnotes",
       "source": "./",
-      "description": "Read the Subnotes notebooks you connect and add tasks to them — so \"put that on the backlog\" lands in your notebook, not the transcript.",
+      "description": "Read the Subnotes notebooks you connect and add tasks to them — so \"put that on the backlog\" lands in your notebook, not the transcript. Needs the Subnotes app, macOS only.",
       "category": "productivity",
       "keywords": [
         "notes",
