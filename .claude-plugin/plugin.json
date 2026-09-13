@@ -1,6 +1,6 @@
 {
   "name": "subnotes",
-  "description": "Read your Subnotes notebooks and add tasks to them.",
+  "description": "Read your Subnotes notebooks and add tasks to them — so \"put that on the backlog\" lands in your notebook, not the transcript.",
   "version": "1.0.0",
   "author": {
     "name": "rafrafgit",
@@ -13,5 +13,17 @@
       "description": "Optional. Leave blank unless Subnotes stores its data somewhere unusual — the default is the folder Subnotes exports to inside its own app container.",
       "required": false
     }
-  }
+  },
+  "displayName": "Subnotes",
+  "keywords": [
+    "notes",
+    "tasks",
+    "todo",
+    "backlog",
+    "plain-text",
+    "notebook",
+    "macos"
+  ],
+  "homepage": "https://subnotes.app/claude.html",
+  "repository": "https://github.com/rafrafgit/subnotes-plugin"
 }

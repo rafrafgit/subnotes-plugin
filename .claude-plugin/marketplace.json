@@ -7,8 +7,18 @@
     {
       "name": "subnotes",
       "source": "./",
-      "description": "Read your Subnotes notebooks and add tasks to them."
+      "description": "Read your Subnotes notebooks and add tasks to them — so \"put that on the backlog\" lands in your notebook, not the transcript.",
+      "category": "productivity",
+      "keywords": [
+        "notes",
+        "tasks",
+        "todo",
+        "backlog",
+        "plain-text",
+        "notebook",
+        "macos"
+      ]
     }
   ],
-  "description": "The Subnotes plugin for Claude Code."
+  "description": "Subnotes — plain-text notes and to-do lists for Mac, iPhone and iPad."
 }
