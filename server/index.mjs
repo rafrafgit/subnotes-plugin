@@ -67,6 +67,20 @@ function manifest() {
   try {
     m = JSON.parse(readFileSync(path, 'utf8'));
   } catch (e) {
+    // A permission failure is not a broken manifest, and telling someone to
+    // reopen Subnotes when macOS is the one refusing sends them to rewrite a
+    // file that was never damaged. The two are easy to tell apart and they
+    // have nothing in common as fixes, so they get separate messages.
+    //
+    // macOS protects one app's container from another process: stat is
+    // allowed (existsSync above succeeds, which is why this is reached at
+    // all) while open is refused. The grant that lifts it is Full Disk
+    // Access, held by whichever app is running Claude Code — a terminal, or
+    // Claude Code itself — and it does not transfer between them, so running
+    // from a different terminal than the one that was granted looks exactly
+    // like a plugin that broke by itself.
+    if (e.code === 'EPERM' || e.code === 'EACCES') throw new UserError(
+      `macOS is blocking access to the Subnotes folder at ${DIR}. Grant Full Disk Access to the app running Claude Code (your terminal, or Claude Code itself) in System Settings > Privacy & Security > Full Disk Access, then restart it. Nothing is wrong with Subnotes or the plugin — this is the permission that lets one app read another's files.`);
     throw new UserError(`The Subnotes manifest could not be read (${e.message}). Reopening Subnotes will rewrite it.`);
   }
 
@@ -101,20 +115,6 @@ function findNotebook(m, name) {
   throw new UserError(`"${name}" matches more than one connected notebook. Connected:\n${listed}`);
 }
 
-// MARK: - Tools
-
-function listNotebooks() {
-  const m = manifest();
-  if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,), which lists every notebook with a switch.";
-  return m.notebooks.map(n => {
-    const lines = [`## ${n.name}`];
-    if (n.purpose) lines.push(`Purpose: ${n.purpose}`);
-    lines.push(`Open tasks: ${n.openTasks ?? 'unknown'}`);
-    lines.push(n.sections?.length ? `Sections:\n${sectionOutline(n)}` : 'Sections: (none)');
-    return lines.join('\n');
-  }).join('\n\n');
-}
-
 // Headings come in two levels, and every level is a section a task can be
 // added to. A Heading 3 is indented under the Heading 2 above it so the list
 // reads like the notebook does; one with no Heading 2 above it stays flush.
@@ -127,6 +127,20 @@ function sectionOutline(n) {
     if (h.level === 2) underHeading2 = true;
     return `${h.level === 3 && underHeading2 ? '  ' : ''}- ${h.name}`;
   }).join('\n');
+}
+
+// MARK: - Tools
+
+function listNotebooks() {
+  const m = manifest();
+  if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,), which lists every notebook with a switch.";
+  return m.notebooks.map(n => {
+    const lines = [`## ${n.name}`];
+    if (n.purpose) lines.push(`Purpose: ${n.purpose}`);
+    lines.push(`Open tasks: ${n.openTasks ?? 'unknown'}`);
+    lines.push(n.sections?.length ? `Sections:\n${sectionOutline(n)}` : 'Sections: (none)');
+    return lines.join('\n');
+  }).join('\n\n');
 }
 
 function readNotebook({ name }) {

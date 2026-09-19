@@ -51,6 +51,19 @@ exports and writes JSON files the app picks up, inside the app's own container.
 It has no dependencies: `node:fs`, `node:path`, `node:crypto` and
 `node:readline` only, speaking JSON-RPC over stdio.
 
+## If it can't read your notebooks
+
+macOS keeps one app's files out of reach of another. If Claude Code has not
+been granted Full Disk Access, the plugin can see that the Subnotes folder
+exists but cannot open anything in it, and every tool fails with a permission
+error.
+
+Grant it in **System Settings → Privacy & Security → Full Disk Access**, to
+whichever app is actually running Claude Code — your terminal, or Claude Code
+itself — then restart that app. The grant does not transfer between them, so
+running from a terminal you have not granted looks exactly like a plugin that
+stopped working on its own.
+
 ## Configuration
 
 None, normally. The server defaults to the folder Subnotes exports to inside

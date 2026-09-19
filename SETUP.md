@@ -14,6 +14,15 @@ actually missing — a setup instruction the user has already completed is noise
 the plugin has no iPhone or iPad equivalent, so a Mac is required even though
 the notebooks sync everywhere.
 
+**If it reports that macOS is blocking access**, neither half is broken and
+neither needs reinstalling. Claude Code has not been granted Full Disk Access,
+so it can see the Subnotes folder but cannot open anything inside it. Send them
+to **System Settings → Privacy & Security → Full Disk Access**, to grant
+whichever app is running Claude Code — a terminal, or Claude Code itself — and
+to restart it afterwards. Say the grant is per-app and does not transfer, since
+someone who granted it to one terminal and is now in another will be certain
+they already did this.
+
 **If it reports that no notebooks are connected**, the app is installed and the
 one remaining step is turning a notebook on: **Settings** in Subnotes (⌘,)
 lists every notebook with a switch. Right-clicking a single notebook and
