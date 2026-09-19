@@ -110,9 +110,23 @@ function listNotebooks() {
     const lines = [`## ${n.name}`];
     if (n.purpose) lines.push(`Purpose: ${n.purpose}`);
     lines.push(`Open tasks: ${n.openTasks ?? 'unknown'}`);
-    lines.push(n.sections?.length ? `Sections:\n${onePerLine(n.sections)}` : 'Sections: (none)');
+    lines.push(n.sections?.length ? `Sections:\n${sectionOutline(n)}` : 'Sections: (none)');
     return lines.join('\n');
   }).join('\n\n');
+}
+
+// Headings come in two levels, and every level is a section a task can be
+// added to. A Heading 3 is indented under the Heading 2 above it so the list
+// reads like the notebook does; one with no Heading 2 above it stays flush.
+// An app older than the two-level headings sends no `headings`, and its flat
+// `sections` list is shown as it always was.
+function sectionOutline(n) {
+  if (!n.headings?.length) return onePerLine(n.sections);
+  let underHeading2 = false;
+  return n.headings.map(h => {
+    if (h.level === 2) underHeading2 = true;
+    return `${h.level === 3 && underHeading2 ? '  ' : ''}- ${h.name}`;
+  }).join('\n');
 }
 
 function readNotebook({ name }) {
@@ -145,7 +159,7 @@ function existingTasks(nb) {
   const found = new Map();
   let section = null;
   for (const line of text.split('\n')) {
-    const heading = /^###\s+(.*)$/.exec(line);
+    const heading = /^#{2,3}\s+(.*)$/.exec(line);
     if (heading) {
       section = heading[1].trim();
       continue;
