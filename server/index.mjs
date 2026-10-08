@@ -195,8 +195,10 @@ function validateTask(t, nb) {
   if (text.includes('\n')) throw new UserError(
     `A task is one line. Put the detail in subnotes instead: "${text.split('\n')[0]}"`);
 
-  const priority = t.priority ?? 'Someday';
-  if (!PRIORITIES.includes(priority)) throw new UserError(
+  // Left out unless given: the app then starts the task with its section's
+  // schedule (a section scheduled Soon, a Soon task), or Someday.
+  const priority = t.priority ?? null;
+  if (priority !== null && !PRIORITIES.includes(priority)) throw new UserError(
     `Priority must be one of ${PRIORITIES.join(', ')} — got "${priority}".`);
 
   // A typo must not silently invent a heading. The app would have to create it,
@@ -213,7 +215,7 @@ function validateTask(t, nb) {
   const canonical = section ? (nb.sections ?? []).find(s => s.toLowerCase() === section.toLowerCase()) : null;
 
   const subnotes = (t.subnotes ?? []).map(s => String(s).trim()).filter(Boolean);
-  return { text, priority, ...(canonical ? { section: canonical } : {}), ...(subnotes.length ? { subnotes } : {}) };
+  return { text, ...(priority ? { priority } : {}), ...(canonical ? { section: canonical } : {}), ...(subnotes.length ? { subnotes } : {}) };
 }
 
 function addTasks({ notebook, tasks, allowDuplicate = false }) {
@@ -275,7 +277,7 @@ function addTasks({ notebook, tasks, allowDuplicate = false }) {
 
   const where = t => t.section ? ` → ${t.section}` : '';
   return `Queued ${validated.length} task${validated.length === 1 ? '' : 's'} for "${nb.name}":\n` +
-    validated.map(t => `  • ${t.text} [${t.priority}]${where(t)}`).join('\n') +
+    validated.map(t => `  • ${t.text}${t.priority ? ` [${t.priority}]` : ''}${where(t)}`).join('\n') +
     `\n\nSubnotes applies queued tasks when it is running, or at next launch if it is closed.`;
 }
 
@@ -289,7 +291,7 @@ const taskShape = {
   properties: {
     text: { type: 'string', description: 'The task, one line, naming a physical visible action.' },
     section: { type: 'string', description: 'An EXISTING section heading from list_notebooks. Omit to add at the top.' },
-    priority: { type: 'string', enum: PRIORITIES, description: 'Defaults to Someday.' },
+    priority: { type: 'string', enum: PRIORITIES, description: "Leave out to use the section's schedule (Someday if it has none)." },
     subnotes: { type: 'array', items: { type: 'string' }, description: 'Detail lines shown under the task. Paths and links go here, not in the text.' },
   },
   required: ['text'],

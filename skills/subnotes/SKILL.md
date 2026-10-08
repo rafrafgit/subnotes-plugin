@@ -86,8 +86,9 @@ Only for a file that will still be there later — something committed in a repo
 or a document the user keeps. A path into a temp directory or a scratch file is
 a dead link by the time they read it, so describe the file instead.
 
-Priority is one of Today, Next, Soon, Someday, defaulting to Someday. Use Next
-only when the user says it is next; do not infer urgency from tone.
+Priority is one of Today, Next, Soon, Someday. Leave it out unless the user
+gives one: the task then starts with its section's schedule, or Someday. Use
+Next only when the user says it is next; do not infer urgency from tone.
 
 Reply in the language the user is writing in.
 

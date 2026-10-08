@@ -89,7 +89,7 @@ if (added.length === 1) {
   const payload = JSON.parse(readFileSync(join(DIR, 'inbox', added[0]), 'utf8'));
   check('payload carries a version, an id and both tasks',
         payload.connectorVersion === 1 && !!payload.id && payload.tasks.length === 2);
-  check('priority defaults to Someday', payload.tasks[1].priority === 'Someday');
+  check('a priority not given is left to the app', !('priority' in payload.tasks[1]));
   check('section matches the manifest exactly', !section || payload.tasks[0].section === section);
   console.log(`\n${JSON.stringify(payload, null, 2)}\n`);
   rmSync(join(DIR, 'inbox', added[0]));
