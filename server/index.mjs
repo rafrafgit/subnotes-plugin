@@ -4,7 +4,7 @@
 // writing to a CloudKit-mirrored store is the failure mode this project has
 // already spent five rounds on.
 //
-// No dependencies, deliberately. The whole surface is four tools over
+// No dependencies, deliberately. The whole surface is six tools over
 // newline-delimited JSON-RPC on stdio, which is less code than the wiring to
 // use an SDK, and it removes the install step entirely: no package-lock, no
 // 60-second dependency fetch on first cache, nothing to go stale. Revisit if
@@ -281,6 +281,48 @@ function addTasks({ notebook, tasks, allowDuplicate = false }) {
     `\n\nSubnotes applies queued tasks when it is running, or at next launch if it is closed.`;
 }
 
+// MARK: - Journals
+
+// A review agent's memory of one notebook (/subnotes:review): what it noticed,
+// what it suggested and what became of it, what it has learned. Plain text, in
+// a folder of the connector's own that the app never reads or prunes — it
+// only ever deletes its notebook files and the inbox files it has applied —
+// so a journal is the agent's alone, and the user's to read and correct.
+//
+// Keyed by the notebook's name, which is how everything here addresses a
+// notebook; a renamed notebook starts a fresh journal. Only a connected
+// notebook has one: findNotebook refuses the rest, as it does for a read.
+const JOURNAL_LIMIT = 20_000;
+
+function journalPath(nb) {
+  // A name may hold "/" or ":", which a file name can't.
+  const safe = nb.name.replace(/[\/:\0]/g, '-').trim() || 'notebook';
+  return join(DIR, 'agent', `${safe}.md`);
+}
+
+function readJournal({ notebook }) {
+  const nb = findNotebook(manifest(), notebook);
+  const path = journalPath(nb);
+  if (!existsSync(path)) return `No journal yet for "${nb.name}" — this is the first review of it.`;
+  return readFileSync(path, 'utf8');
+}
+
+// Replaces the whole journal: the agent keeps it short by rewriting it, not
+// by appending forever. Temp file then rename, as for the inbox.
+function writeJournal({ notebook, content }) {
+  const nb = findNotebook(manifest(), notebook);
+  const text = String(content ?? '');
+  if (!text.trim()) throw new UserError('A journal needs content. To start over, write a one-line note saying so.');
+  if (text.length > JOURNAL_LIMIT) throw new UserError(
+    `The journal is ${text.length} characters, over the ${JOURNAL_LIMIT} limit. Summarise older entries and write it again.`);
+  const path = journalPath(nb);
+  mkdirSync(dirname(path), { recursive: true });
+  const tmp = `${path}.tmp`;
+  writeFileSync(tmp, text.endsWith('\n') ? text : text + '\n');
+  renameSync(tmp, path);
+  return `Journal for "${nb.name}" saved (${text.length} characters).`;
+}
+
 const ALLOW_DUPLICATE = {
   type: 'boolean',
   description: 'Only after the user has confirmed they want a task the notebook already has. Default false, which refuses such a write.',
@@ -321,6 +363,18 @@ const TOOLS = [
     description: 'Append several tasks to one connected notebook in a single write. Prefer this over repeated add_task calls: one file, one save, one sync cycle. Refuses a task the notebook already has, unless allowDuplicate is true.',
     inputSchema: { type: 'object', properties: { notebook: { type: 'string' }, tasks: { type: 'array', items: taskShape }, allowDuplicate: ALLOW_DUPLICATE }, required: ['notebook', 'tasks'] },
     run: addTasks,
+  },
+  {
+    name: 'read_journal',
+    description: "Read the review agent's journal for one connected notebook (/subnotes:review): its notes from earlier reviews. Says so when there is none yet.",
+    inputSchema: { type: 'object', properties: { notebook: { type: 'string' } }, required: ['notebook'] },
+    run: readJournal,
+  },
+  {
+    name: 'write_journal',
+    description: "Replace the review agent's journal for one connected notebook with new content — the whole journal, kept short by rewriting rather than appending. Only for /subnotes:review; never the notebook itself.",
+    inputSchema: { type: 'object', properties: { notebook: { type: 'string' }, content: { type: 'string' } }, required: ['notebook', 'content'] },
+    run: writeJournal,
   },
 ];
 

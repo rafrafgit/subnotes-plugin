@@ -123,3 +123,9 @@ it again only if they say to, with `allowDuplicate`.
 
 Reading is limited to connected notebooks. Do not speculate about what an
 unconnected notebook contains.
+
+## Journals
+
+`read_journal` and `write_journal` are the review agent's memory
+(`/subnotes:review`). Use them only for that review, never to store anything
+else, and never treat a journal as the notebook itself.

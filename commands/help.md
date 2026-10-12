@@ -23,6 +23,11 @@ they need.
 - Say "put that on the backlog" mid-conversation and it lands in the right
   notebook and section. No command needed; this is the common case.
 - `/subnotes:add <thing>` when they want to be explicit about it.
+- `/subnotes:review` — a review agent per notebook: it reads the notebook
+  against its purpose, remembers earlier visits in a journal, and suggests a
+  next step or two in a section called Suggestions. It reviews only notebooks
+  that have a purpose and a Suggestions section, so adding that section is how
+  a notebook opts in.
 
 Then state the two limits plainly, because both are surprising if discovered
 later: writes only ever add — nothing can be marked done, edited, deleted or

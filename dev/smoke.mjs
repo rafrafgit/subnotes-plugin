@@ -7,7 +7,7 @@ import { spawn } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
-import { readdirSync, readFileSync, rmSync } from 'node:fs';
+import { readdirSync, readFileSync, rmSync, existsSync } from 'node:fs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIR = process.env.SUBNOTES_DIR
@@ -52,7 +52,7 @@ const init = await send('initialize', {});
 check('initialize', init.result?.serverInfo?.name === 'subnotes');
 
 const tools = await send('tools/list', {});
-check('four tools', tools.result.tools.length === 4,
+check('six tools', tools.result.tools.length === 6,
       tools.result.tools.map(t => t.name).join(', '));
 
 const list = await call('list_notebooks');
@@ -105,6 +105,25 @@ check('an unknown priority refuses', badPriority.isError);
 const multiline = await call('add_task', { notebook: first, text: 'line one\nline two' });
 check('a multi-line task refuses and points at subnotes',
       multiline.isError && multiline.text.includes('subnotes'));
+
+// Journals: a round trip, unless the notebook already has a real one — this
+// runs against the real connector folder, and a journal is the agent's memory.
+const journal = join(DIR, 'agent', `${first.replace(/[\/:\0]/g, '-')}.md`);
+if (existsSync(journal)) {
+  console.log('  --   journal round trip skipped: a real journal exists');
+} else {
+  const none = await call('read_journal', { notebook: first });
+  check('read_journal says when there is none', !none.isError && none.text.includes('No journal yet'));
+  const saved = await call('write_journal', { notebook: first, content: '# Smoke test journal' });
+  check('write_journal saves', !saved.isError && existsSync(journal));
+  const back = await call('read_journal', { notebook: first });
+  check('read_journal returns it', back.text.trim() === '# Smoke test journal');
+  rmSync(journal);
+}
+const emptyJournal = await call('write_journal', { notebook: first, content: '  ' });
+check('an empty journal refuses', emptyJournal.isError);
+const strayJournal = await call('read_journal', { notebook: 'Definitely Not Connected' });
+check('a journal for an unconnected notebook refuses', strayJournal.isError);
 
 proc.kill();
 console.log(failures ? `\n${failures} failed` : '\nall passed');
