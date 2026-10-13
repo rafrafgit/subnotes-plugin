@@ -38,8 +38,8 @@ time, and list the ones skipped and why at the end, in one line each.
    this notebook. That is the point of the journal.
 
    When one of your open suggestions asked for context, look for the answer
-   — under it, or in the notebook — and keep it in the journal's learning,
-   so you never ask twice.
+   — under it, in the purpose, or in a section the user added — and keep it
+   in the journal's learning, so you never ask twice.
 
 3. **Notice what changed** since the last visit: tasks added, done or
    rescheduled, sections written, how long since anything moved. On a first
@@ -58,17 +58,26 @@ time, and list the ones skipped and why at the end, in one line each.
    - **A vague task** that could be a physical, visible action.
    - **Drift:** recent work that doesn't seem to serve the purpose. Asked as a
      question, never judged.
-   - **Missing context:** a fact you would need to judge the purpose well —
-     a deadline, what "done" or "good" looks like, a constraint, why
-     something stalled — that neither the notebook nor the journal gives.
-     Ask for one fact, as a task: "Write down: …". Ask only when the answer
-     would change what you suggest, and never for what the notebook or
-     journal already says. The user may answer anywhere in the notebook,
-     often as a subnote under the question itself.
+   - **Missing context:** something you would need to judge the purpose
+     well that neither the notebook nor the journal gives. Ask for it as a
+     task the user does in the notebook, for example:
+     - the purpose is too vague to tell a good next step from a bad one —
+       "Sharpen the purpose: what will be true when this notebook has done
+       its job?"
+     - nothing says where things stand or what comes next — "Add a section
+       Current status: three lines on where this stands today", or a Goal
+       or Next steps section
+     - one missing fact — a deadline, what "done" or "good" looks like, a
+       constraint, why something stalled — "Write down: …"
+
+     Ask only when the answer would change what you suggest, about what
+     matters now rather than plans months ahead, and never for what the
+     notebook or journal already says. One such question open at a time.
 
    Never suggest something already declined or ignored, or anything the
-   journal says this user doesn't want. Don't suggest reorganising their
-   notes — you can't, and they didn't ask.
+   journal says this user doesn't want. Don't suggest reorganising what's
+   already there — you can't, and they didn't ask. Asking for a new section
+   that would hold missing context is fine.
 
 5. **Write** at most two suggestions, and at most twenty in any 7 days for this
    notebook (count them in the journal). Each one:
