@@ -30,12 +30,17 @@ time, and list the ones skipped and why at the end, in one line each.
 2. **See what became of your open suggestions.** For each one the journal
    lists as open:
    - scheduled, moved out of Suggestions, or done — **accepted**
+   - done with a `Why dropped:` subnote — **declined**, for that reason
    - gone from the notebook — **declined**
    - still in Suggestions, unchanged — **waiting**; after 7 days, **ignored**
      (drop it from the open list, and don't raise it again)
 
    Write down what each outcome teaches you about what this user wants from
    this notebook. That is the point of the journal.
+
+   Any `Why …:` subnote on a task (`Why Today:`, `Why Someday:`,
+   `Why dropped:`) is the user's own reason for a decision: keep what it
+   teaches in the journal's learning, whether or not the task was yours.
 
    When one of your open suggestions asked for context, look for the answer
    — under it, in the purpose, or in a section the user added — and keep it
