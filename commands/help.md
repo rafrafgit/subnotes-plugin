@@ -28,6 +28,9 @@ they need.
   next step or two in a section called Suggestions. It reviews only notebooks
   that have a purpose and a Suggestions section, so adding that section is how
   a notebook opts in.
+- `/subnotes:schedule` runs that review by itself once a day, on the first
+  prompt to Claude Code while Subnotes is open;
+  `/subnotes:unschedule` stops it.
 
 Then state the two limits plainly, because both are surprising if discovered
 later: writes only ever add — nothing can be marked done, edited, deleted or

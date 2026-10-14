@@ -7,6 +7,9 @@ reader per notebook, who remembers its earlier visits and works toward that
 notebook's purpose over weeks. Notebook to review, if one was named:
 $ARGUMENTS
 
+`--scheduled` there is not a notebook: it means the daily run turned on by
+`/subnotes:schedule` started this, with nobody watching (see step 1).
+
 ## Which notebooks
 
 Call `list_notebooks`. Review a notebook only when it has both:
@@ -23,14 +26,32 @@ time, and list the ones skipped and why at the end, in one line each.
 
 ## Each notebook, in order
 
-1. **Read** its journal (`read_journal`) and the notebook (`read_notebook`).
-   The journal is your memory: what you noticed, suggested and planned last
-   time. Its first line says when you last visited.
+1. **Read** its journal (`read_journal`). The journal is your memory: what
+   you noticed, suggested and planned last time. Its first line says when you
+   last visited.
+
+   On a `--scheduled` run, which may start more than once a day, decide
+   whether to visit at all before reading further:
+   - **Last visit today:** stop here — "already reviewed today".
+   - **Nothing changed:** the notebook's "Last changed" (`list_notebooks`
+     shows it) is a day before the last visit or earlier, and that visit was
+     under 7 days ago — stop here, "no change since last visit". After 7
+     days, visit anyway: a stall is worth noticing.
+
+   Either way, leave the journal as it is. Otherwise read the notebook
+   (`read_notebook`).
+
+   Below the notebook, `read_notebook` may add a part "From the connector, not
+   part of the notebook": when it last changed, and tasks queued for it that
+   Subnotes hasn't added yet, because it hasn't been open since they were
+   written. Those queued tasks are yours, still on their way.
 
 2. **See what became of your open suggestions.** For each one the journal
    lists as open:
    - scheduled, moved out of Suggestions, or done — **accepted**
    - done with a `Why dropped:` subnote — **declined**, for that reason
+   - queued, not yet in the notebook — **waiting**: it hasn't arrived, so
+     it can't have been seen
    - gone from the notebook — **declined**
    - still in Suggestions, unchanged — **waiting**; after 7 days, **ignored**
      (drop it from the open list, and don't raise it again)
@@ -124,7 +145,8 @@ Subnotes — 1 suggestion:
 Friends of AI — nothing to add (last change 2 days ago, next step clear)
 ```
 
-Then the skipped notebooks, one line each. No other commentary.
+Then the skipped notebooks, one line each. If a `write_journal` reply asked
+for a line at the end of the report, add it last. No other commentary.
 
 ## Limits
 

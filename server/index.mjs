@@ -10,7 +10,7 @@
 // 60-second dependency fetch on first cache, nothing to go stale. Revisit if
 // this ever needs sampling, resources or notifications.
 
-import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
@@ -138,6 +138,8 @@ function listNotebooks() {
     const lines = [`## ${n.name}`];
     if (n.purpose) lines.push(`Purpose: ${n.purpose}`);
     lines.push(`Open tasks: ${n.openTasks ?? 'unknown'}`);
+    const changed = lastChanged(n);
+    if (changed) lines.push(`Last changed: ${changed}`);
     lines.push(n.sections?.length ? `Sections:\n${sectionOutline(n)}` : 'Sections: (none)');
     return lines.join('\n');
   }).join('\n\n');
@@ -146,7 +148,57 @@ function listNotebooks() {
 function readNotebook({ name }) {
   const m = manifest();
   const nb = findNotebook(m, name);
-  return readFileSync(join(DIR, nb.file), 'utf8');
+  const text = readFileSync(join(DIR, nb.file), 'utf8');
+  const notes = [];
+  const changed = lastChanged(nb);
+  if (changed) notes.push(`Last changed: ${changed}`);
+  const queued = queuedTasks(nb);
+  if (queued.length) notes.push(
+    'Queued, not yet in the notebook — Subnotes adds these when it next opens:\n' +
+    queued.map(t => `  • ${t.text}${t.priority ? ` [${t.priority}]` : ''}` +
+      `${t.section ? ` → ${t.section}` : ''} (written ${t.written})`).join('\n'));
+  if (!notes.length) return text;
+  return `${text.replace(/\n*$/, '')}\n\n— From the connector, not part of the notebook —\n${notes.join('\n')}\n`;
+}
+
+// When the notebook's text last changed, as the Mac app last exported it. The
+// app rewrites a notebook file only when its text differs, so the file's
+// modification time is the last change — though only the last one the Mac has
+// seen: edits made on the iPhone arrive when the Mac app next opens.
+function lastChanged(nb) {
+  try {
+    return localTime(statSync(join(DIR, nb.file)).mtime);
+  } catch {
+    return null;
+  }
+}
+
+function localTime(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// Tasks written here that the app hasn't applied yet, because it hasn't been
+// running since. Without these, a reader takes a queued suggestion for one the
+// user deleted, and the duplicate check lets the same task be queued twice.
+// Unreadable files are skipped: this is a view of the inbox, never a gate.
+function queuedTasks(nb) {
+  let files;
+  try {
+    files = readdirSync(join(DIR, 'inbox')).filter(f => f.endsWith('.json')).sort();
+  } catch {
+    return [];
+  }
+  const found = [];
+  for (const f of files) {
+    try {
+      const p = JSON.parse(readFileSync(join(DIR, 'inbox', f), 'utf8'));
+      if (p.notebook !== nb.name || !Array.isArray(p.tasks)) continue;
+      const written = localTime(statSync(join(DIR, 'inbox', f)).mtime);
+      for (const t of p.tasks) found.push({ ...t, written });
+    } catch {}
+  }
+  return found;
 }
 
 // The export format's task lines are "• text", with a priority tag trailing and
@@ -185,6 +237,10 @@ function existingTasks(nb) {
     if (!body) continue;
     const key = body.toLowerCase();
     if (!found.has(key)) found.set(key, { text: body, priority: tag ? tag[1] : 'Someday', section });
+  }
+  for (const t of queuedTasks(nb)) {
+    const key = String(t.text ?? '').trim().toLowerCase();
+    if (key && !found.has(key)) found.set(key, { text: t.text, priority: t.priority ?? 'Someday', section: t.section ?? null, queued: true });
   }
   return found;
 }
@@ -236,7 +292,7 @@ function addTasks({ notebook, tasks, allowDuplicate = false }) {
       const key = t.text.toLowerCase();
       const dup = existing?.get(key);
       if (dup) throw new UserError(
-        `"${nb.name}" already has this task: "${dup.text}"` +
+        `"${nb.name}" already has this task${dup.queued ? ' queued, waiting for Subnotes to open' : ''}: "${dup.text}"` +
         `${dup.section ? ` under "${dup.section}"` : ''}, priority ${dup.priority}. ` +
         `Writes only add, so this would leave two identical lines and neither can be ` +
         `edited or removed from here. Check with the user, then pass allowDuplicate: true ` +
@@ -320,7 +376,29 @@ function writeJournal({ notebook, content }) {
   const tmp = `${path}.tmp`;
   writeFileSync(tmp, text.endsWith('\n') ? text : text + '\n');
   renameSync(tmp, path);
-  return `Journal for "${nb.name}" saved (${text.length} characters).`;
+  return `Journal for "${nb.name}" saved (${text.length} characters).` + scheduleHint();
+}
+
+// Offers /subnotes:schedule once, at the end of a review run by hand — the
+// moment someone has just seen what a review does. Here rather than in the
+// prompt, which would need a shell command (and a permission prompt) to look
+// at these files; write_journal is only ever called by the review. Never on
+// the daily run itself, never once it's on, and never twice: the marker is
+// written as the hint is given.
+const SCHEDULE_DIR = join(homedir(), '.claude', 'subnotes');
+
+function scheduleHint() {
+  if (process.env.SUBNOTES_REVIEW_RUN) return '';
+  const marker = join(SCHEDULE_DIR, 'schedule-hint-shown');
+  try {
+    if (existsSync(join(SCHEDULE_DIR, 'daily-review')) || existsSync(marker)) return '';
+    mkdirSync(SCHEDULE_DIR, { recursive: true });
+    writeFileSync(marker, new Date().toISOString() + '\n');
+  } catch {
+    return '';
+  }
+  return '\n\nThe daily review is off. End your report with this line: ' +
+    '"Run this by itself once a day: /subnotes:schedule"';
 }
 
 const ALLOW_DUPLICATE = {

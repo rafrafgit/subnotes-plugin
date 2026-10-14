@@ -35,6 +35,13 @@ Ask what is on a notebook, or what to pick up next — reading is half the point
 Say "put that on the backlog" mid-conversation and it lands in the right
 notebook and section, or use `/subnotes:add <thing>` to be explicit.
 
+`/subnotes:review` reads each notebook that has a purpose and a section called
+Suggestions, remembers earlier visits in a journal, and adds a next step or two
+to Suggestions when one is worth it. `/subnotes:schedule` turns on a daily run:
+your first prompt to Claude Code each day, while Subnotes is open, starts it
+in the background with only this plugin's tools allowed (a `UserPromptSubmit`
+hook, which does nothing until it's turned on). `/subnotes:unschedule` stops it.
+
 ## Two rules that shape everything
 
 **Writes are append-only.** Tasks can be added; nothing can be edited, deleted,
