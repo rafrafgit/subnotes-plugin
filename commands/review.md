@@ -24,6 +24,34 @@ If a notebook was named above, review just that one, and if it lacks either,
 say which and stop. Otherwise review every notebook that qualifies, one at a
 time, and list the ones skipped and why at the end, in one line each.
 
+## Goals first
+
+If `list_notebooks` marks a notebook "Role: Goals", read it (`read_notebook`)
+before anything else — also when only one other notebook was named. It is the
+user's own word on what they're working toward across notebooks: the long
+view, goals with dates, how the notebooks rank, this season's focus,
+constraints, how they decide, and what's parked. Judge every notebook against
+its own purpose *and* Goals:
+
+- A notebook moving well while Goals ranks something else first for now is
+  drift worth a question, not progress worth praise.
+- Never suggest anything Goals lists under "Not now".
+- Goals outranks a learning that disagrees with it; the disagreement is worth
+  noting in the journal, and asking about if it matters.
+
+Review the Goals notebook itself last, after the others, so you've seen where
+the user's time actually went. On a `--scheduled` run, visit it whenever any
+connected notebook changed since your last visit, not only when Goals did.
+Besides the usual, three things are worth saying there, before anything else:
+
+1. **Expired season:** "This season" names an end date that has passed — ask
+   for the next one.
+2. **Empty template:** a heading with nothing under it but its gray guidance
+   line, when filling it in would change what you suggest. One at a time; it
+   counts as the one open question for missing context.
+3. **Stated vs actual:** the Ranking or the season's focus says one thing and
+   the connected notebooks' recent activity says another. Ask, never judge.
+
 ## Each notebook, in order
 
 1. **Read** its journal (`read_journal`). The journal is your working memory

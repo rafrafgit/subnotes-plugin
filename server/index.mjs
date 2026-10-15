@@ -131,11 +131,18 @@ function sectionOutline(n) {
 
 // MARK: - Tools
 
+// The app marks its Goals notebook by role, not name (GOALS_NOTEBOOK_SPEC.md
+// in the app's repo), so a rename doesn't hide it. Said where it's listed,
+// because that's what every skill calls first.
+const GOALS_ROLE = 'Role: Goals — what the user is working toward and how their notebooks rank. ' +
+  'Read it before working in any notebook, and judge each notebook against it as well as its own purpose.';
+
 function listNotebooks() {
   const m = manifest();
   if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,), which lists every notebook with a switch.";
   return m.notebooks.map(n => {
     const lines = [`## ${n.name}`];
+    if (n.role === 'goals') lines.push(GOALS_ROLE);
     if (n.purpose) lines.push(`Purpose: ${n.purpose}`);
     lines.push(`Open tasks: ${n.openTasks ?? 'unknown'}`);
     const changed = lastChanged(n);
@@ -150,6 +157,7 @@ function readNotebook({ name }) {
   const nb = findNotebook(m, name);
   const text = readFileSync(join(DIR, nb.file), 'utf8');
   const notes = [];
+  if (nb.role === 'goals') notes.push(GOALS_ROLE);
   const changed = lastChanged(nb);
   if (changed) notes.push(`Last changed: ${changed}`);
   const queued = queuedTasks(nb);

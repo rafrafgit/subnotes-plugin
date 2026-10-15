@@ -20,6 +20,10 @@ If none clearly is, ask which one; don't settle for the least-bad one.
 
 ## Which tasks
 
+If `list_notebooks` marks a notebook "Role: Goals", read it first: "most
+useful" below means most useful against its ranking and this season's focus,
+and a task it parks under "Not now" goes to the third group with that reason.
+
 Read the notebook (`read_notebook`) and what has been learned about it and
 about the user (`read_learnings` with the notebook) — what other skills found
 out about how they work applies here too. Take its open tasks scheduled

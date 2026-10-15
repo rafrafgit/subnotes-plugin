@@ -124,6 +124,14 @@ it again only if they say to, with `allowDuplicate`.
 Reading is limited to connected notebooks. Do not speculate about what an
 unconnected notebook contains.
 
+## The Goals notebook
+
+One notebook may be marked "Role: Goals" in `list_notebooks`: what the user is
+working toward across notebooks, and how they rank. Read it before answering
+what to pick up next, or before judging any notebook's work. It is the user's
+writing like any other notebook — append only to its Suggestions, and only
+when asked.
+
 ## Journals and learnings
 
 `read_journal` and `write_journal` are the review agent's working memory
