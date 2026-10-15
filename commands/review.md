@@ -76,6 +76,10 @@ time, and list the ones skipped and why at the end, in one line each.
    the user didn't need costs their attention and your credibility. Worth
    saying, roughly in this order:
    - **No clear next step** toward the purpose: propose one.
+   - **Too big for a day:** a Today or Next task that can't be finished in
+     one working day. That is often why it hasn't moved. Propose its first
+     step, one that fits in a day, and name the task it starts in the `Why:`.
+     You can't split the task itself, so the first step is the suggestion.
    - **A stall:** something that matters for the purpose hasn't moved in
      weeks. Ask, as a task, whether it is still wanted — "Decide: … or move it
      to Someday".
