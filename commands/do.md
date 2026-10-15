@@ -20,8 +20,10 @@ If none clearly is, ask which one; don't settle for the least-bad one.
 
 ## Which tasks
 
-Read the notebook (`read_notebook`). Take its open tasks scheduled `[Today]`,
-then `[Next]`. If that gives fewer than three, add `[Soon]` ones and say that
+Read the notebook (`read_notebook`) and what has been learned about it and
+about the user (`read_learnings` with the notebook) — what other skills found
+out about how they work applies here too. Take its open tasks scheduled
+`[Today]`, then `[Next]`. If that gives fewer than three, add `[Soon]` ones and say that
 you did. Skip `[Done]` and unscheduled tasks, tasks in a section called
 Suggestions (those are the review's ideas, not the user's decisions yet), and
 headings: a scheduled heading is a project, not a task.
@@ -72,3 +74,9 @@ the work. That review is theirs on purpose.
 If the work turned up follow-ups, offer to add them to the notebook with
 `add_tasks`, and add them only if they say yes. Then offer the next task from
 the list.
+
+When the user tells you something about how they want work done that will
+hold next time — "don't run the tests while the app is open", "one commit per
+task" — add it (`add_learning`, source `do`): with the notebook when it's
+about that project, without when it's about them. Say in one line that you
+did. Not what happened today, and not what's already there.

@@ -24,8 +24,9 @@ they need.
   notebook and section. No command needed; this is the common case.
 - `/subnotes:add <thing>` when they want to be explicit about it.
 - `/subnotes:review` — a review agent per notebook: it reads the notebook
-  against its purpose, remembers earlier visits in a journal, and suggests a
-  next step or two in a section called Suggestions. It reviews only notebooks
+  against its purpose, remembers earlier visits in a journal, keeps what it
+  learns about the notebook and about them where every skill reads it, and
+  suggests a next step or two in a section called Suggestions. It reviews only notebooks
   that have a purpose and a Suggestions section, so adding that section is how
   a notebook opts in.
 - `/subnotes:schedule` runs that review by itself once a day, on the first

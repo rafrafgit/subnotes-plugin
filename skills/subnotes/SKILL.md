@@ -124,8 +124,15 @@ it again only if they say to, with `allowDuplicate`.
 Reading is limited to connected notebooks. Do not speculate about what an
 unconnected notebook contains.
 
-## Journals
+## Journals and learnings
 
-`read_journal` and `write_journal` are the review agent's memory
+`read_journal` and `write_journal` are the review agent's working memory
 (`/subnotes:review`). Use them only for that review, never to store anything
 else, and never treat a journal as the notebook itself.
+
+`read_learnings`, `add_learning` and `correct_learning` are what Subnotes'
+skills have learned — about one notebook, and (no notebook given) about the
+user wherever they work. Every skill shares them. Read them before doing work
+in a notebook. Add a line only for something that will still hold next time,
+with your skill's name as `source`; never as a place for notes or tasks,
+which belong in the notebook.

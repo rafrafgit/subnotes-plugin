@@ -52,7 +52,7 @@ const init = await send('initialize', {});
 check('initialize', init.result?.serverInfo?.name === 'subnotes');
 
 const tools = await send('tools/list', {});
-check('six tools', tools.result.tools.length === 6,
+check('nine tools', tools.result.tools.length === 9,
       tools.result.tools.map(t => t.name).join(', '));
 
 const list = await call('list_notebooks');
@@ -108,8 +108,11 @@ check('a multi-line task refuses and points at subnotes',
 
 // Journals: a round trip, unless the notebook already has a real one — this
 // runs against the real connector folder, and a journal is the agent's memory.
-const journal = join(DIR, 'agent', `${first.replace(/[\/:\0]/g, '-')}.md`);
-if (existsSync(journal)) {
+const journal = join(DIR, 'agent', 'review', `${first.replace(/[\/:\0]/g, '-')}.md`);
+// Before 1.2 journals sat directly in agent/, and the server moves one on
+// first read — so an old-path journal is a real one too.
+const legacyJournal = join(DIR, 'agent', `${first.replace(/[\/:\0]/g, '-')}.md`);
+if (existsSync(journal) || existsSync(legacyJournal)) {
   console.log('  --   journal round trip skipped: a real journal exists');
 } else {
   const none = await call('read_journal', { notebook: first });
@@ -124,6 +127,32 @@ const emptyJournal = await call('write_journal', { notebook: first, content: '  
 check('an empty journal refuses', emptyJournal.isError);
 const strayJournal = await call('read_journal', { notebook: 'Definitely Not Connected' });
 check('a journal for an unconnected notebook refuses', strayJournal.isError);
+
+// Learnings: the same rule — only in a notebook that has none of its own yet.
+// The shared file is only read, never written, from here.
+const learnings = join(DIR, 'agent', 'learnings', `${first.replace(/[\/:\0]/g, '-')}.md`);
+if (existsSync(learnings)) {
+  console.log('  --   learnings round trip skipped: real learnings exist');
+} else {
+  const added = await call('add_learning', { notebook: first, text: 'Smoke test learning', source: 'smoke' });
+  check('add_learning adds', !added.isError && existsSync(learnings), added.text);
+  const line = readFileSync(learnings, 'utf8').split('\n').find(l => l.includes('Smoke test learning'));
+  check('an entry says when and which skill', /^- \d{4}-\d{2}-\d{2} · smoke · Smoke test learning$/.test(line ?? ''), line);
+  const twice = await call('add_learning', { notebook: first, text: 'smoke test learning', source: 'smoke' });
+  check('the same learning twice refuses', twice.isError);
+  const noSource = await call('add_learning', { notebook: first, text: 'x' });
+  check('a learning without a source refuses', noSource.isError);
+  const read = await call('read_learnings', { notebook: first });
+  check('read_learnings returns the notebook and shared', read.text.includes('Smoke test learning') && read.text.includes('— shared'));
+  await call('add_learning', { notebook: first, text: 'Smoke test other', source: 'smoke' });
+  const vague = await call('correct_learning', { notebook: first, match: 'smoke test', text: 'y', reason: 'r', source: 'smoke' });
+  check('a correction matching two entries refuses', vague.isError && vague.text.includes('matches 2'));
+  const fixed = await call('correct_learning', { notebook: first, match: 'test learning', text: 'Smoke test corrected', reason: 'testing', source: 'smoke' });
+  check('a correction keeps the old wording', !fixed.isError && readFileSync(learnings, 'utf8').includes('was: "Smoke test learning"'));
+  const gone = await call('correct_learning', { notebook: first, match: 'other', reason: 'testing', source: 'smoke' });
+  check('a correction without text removes', !gone.isError && !readFileSync(learnings, 'utf8').includes('Smoke test other'));
+  rmSync(learnings);
+}
 
 proc.kill();
 console.log(failures ? `\n${failures} failed` : '\nall passed');

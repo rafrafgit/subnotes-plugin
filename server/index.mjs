@@ -4,7 +4,7 @@
 // writing to a CloudKit-mirrored store is the failure mode this project has
 // already spent five rounds on.
 //
-// No dependencies, deliberately. The whole surface is six tools over
+// No dependencies, deliberately. The whole surface is nine tools over
 // newline-delimited JSON-RPC on stdio, which is less code than the wiring to
 // use an SDK, and it removes the install step entirely: no package-lock, no
 // 60-second dependency fetch on first cache, nothing to go stale. Revisit if
@@ -348,12 +348,44 @@ function addTasks({ notebook, tasks, allowDuplicate = false }) {
 // Keyed by the notebook's name, which is how everything here addresses a
 // notebook; a renamed notebook starts a fresh journal. Only a connected
 // notebook has one: findNotebook refuses the rest, as it does for a read.
+//
+// The agent folder has one shape throughout: a folder per kind of memory, and
+// in each a file per notebook plus shared.md for what isn't about one
+// notebook.
+//
+//   agent/review/<notebook>.md     the review's working state (its journal)
+//   agent/learnings/<notebook>.md  what any skill has learned about a notebook
+//   agent/learnings/shared.md      what any skill has learned that isn't
+//                                  about one notebook — the user, mostly
+//
+// Working state is one skill's own and is rewritten freely. Learnings are
+// every skill's, so they are only ever added to or corrected one entry at a
+// time, each entry saying which skill wrote it and when: a whole-file rewrite
+// would let one skill prune what another learned without knowing what it was
+// for.
 const JOURNAL_LIMIT = 20_000;
+const AGENT_DIR = join(DIR, 'agent');
+const SHARED = 'shared';
 
+// A name may hold "/" or ":", which a file name can't. "shared" is reserved
+// for the file beside the notebooks', so a notebook of that name gets its own.
+function agentFile(folder, nb) {
+  if (!nb) return join(AGENT_DIR, folder, `${SHARED}.md`);
+  let safe = nb.name.replace(/[\/:\0]/g, '-').trim() || 'notebook';
+  if (safe.toLowerCase() === SHARED) safe = `${safe} (notebook)`;
+  return join(AGENT_DIR, folder, `${safe}.md`);
+}
+
+// Journals used to sit at agent/<notebook>.md. Moved on first use rather than
+// by a migration step, which a plugin has nowhere to run.
 function journalPath(nb) {
-  // A name may hold "/" or ":", which a file name can't.
-  const safe = nb.name.replace(/[\/:\0]/g, '-').trim() || 'notebook';
-  return join(DIR, 'agent', `${safe}.md`);
+  const path = agentFile('review', nb);
+  const legacy = join(AGENT_DIR, `${nb.name.replace(/[\/:\0]/g, '-').trim() || 'notebook'}.md`);
+  if (!existsSync(path) && existsSync(legacy)) {
+    mkdirSync(dirname(path), { recursive: true });
+    renameSync(legacy, path);
+  }
+  return path;
 }
 
 function readJournal({ notebook }) {
@@ -377,6 +409,111 @@ function writeJournal({ notebook, content }) {
   writeFileSync(tmp, text.endsWith('\n') ? text : text + '\n');
   renameSync(tmp, path);
   return `Journal for "${nb.name}" saved (${text.length} characters).` + scheduleHint();
+}
+
+// MARK: - Learnings
+
+const LEARNING_LIMIT = 500;
+const ENTRY = /^- (\d{4}-\d{2}-\d{2}) · ([^·]+?) · (.*)$/;
+
+function today() {
+  return localTime(new Date()).slice(0, 10);
+}
+
+// The skill that wrote an entry, as one short word: review, do, prioritize.
+function sourceName(source) {
+  const name = String(source ?? '').trim().toLowerCase();
+  if (!/^[a-z][a-z-]{0,23}$/.test(name)) throw new UserError(
+    'A learning needs `source`: the skill writing it, as one word — "review", "do", "prioritize".');
+  return name;
+}
+
+// Optional notebook: named, the notebook's file; left out, shared.md.
+function learningsTarget(notebook) {
+  const given = notebook !== undefined && notebook !== null && String(notebook).trim() !== '';
+  const nb = given ? findNotebook(manifest(), notebook) : null;
+  return { nb, path: agentFile('learnings', nb), label: nb ? `"${nb.name}"` : 'shared' };
+}
+
+function learningsHeader(nb) {
+  return `# What agents have learned — ${nb ? nb.name : 'shared'}\n\n` +
+    (nb ? `About this notebook. Anything not about it is in shared.md.\n`
+        : `Not about one notebook: the owner, how they work, what holds everywhere.\n`) +
+    `Written by Subnotes' skills, one line each, saying which skill and when. Yours to read and correct.\n\n`;
+}
+
+function readLearningsFile(path) {
+  return existsSync(path) ? readFileSync(path, 'utf8') : null;
+}
+
+function writeLearningsFile(path, text) {
+  mkdirSync(dirname(path), { recursive: true });
+  const tmp = `${path}.tmp`;
+  writeFileSync(tmp, text);
+  renameSync(tmp, path);
+}
+
+function entryCount(text) {
+  return text.split('\n').filter(l => ENTRY.test(l)).length;
+}
+
+function readLearnings({ notebook }) {
+  const { nb, path } = learningsTarget(notebook);
+  const parts = [];
+  if (nb) parts.push(readLearningsFile(path) ?? `# What agents have learned — ${nb.name}\n\n(nothing yet)\n`);
+  parts.push(readLearningsFile(agentFile('learnings', null)) ?? `# What agents have learned — shared\n\n(nothing yet)\n`);
+  return parts.join('\n');
+}
+
+function addLearning({ notebook, text, source }) {
+  const who = sourceName(source);
+  const line = String(text ?? '').trim();
+  if (!line) throw new UserError('A learning needs text.');
+  if (line.includes('\n')) throw new UserError('A learning is one line. Split it into two, or say it shorter.');
+  if (line.length > LEARNING_LIMIT) throw new UserError(
+    `A learning is ${line.length} characters, over the ${LEARNING_LIMIT} limit. Say it shorter.`);
+  const { nb, path, label } = learningsTarget(notebook);
+  const current = readLearningsFile(path) ?? learningsHeader(nb);
+  // Refused rather than added twice — the same reason as add_task's check.
+  const same = current.split('\n').find(l => ENTRY.exec(l)?.[3].trim().toLowerCase() === line.toLowerCase());
+  if (same) throw new UserError(`Already learned, in ${label}: ${same}`);
+  // One newline before the entry: a file's last line may lack its own, and a
+  // fresh header ends in the blank line that sets it off from the entries.
+  const base = entryCount(current) ? current.replace(/\n*$/, '\n') : current;
+  writeLearningsFile(path, base + `- ${today()} · ${who} · ${line}\n`);
+  const n = entryCount(current) + 1;
+  const crowded = n > 40 ? ` That is ${n} entries: correct or remove what no longer holds.` : '';
+  return `Learned, in ${label}: ${line}${crowded}`;
+}
+
+// Changes or removes one entry, matched by a piece of its text the way a
+// mutating notebook write would be (see the spec's match precondition): it
+// must pick out exactly one entry, or nothing changes. The old wording stays
+// beside the new, so a correction can itself be judged.
+function correctLearning({ notebook, match, text, reason, source }) {
+  const who = sourceName(source);
+  const needle = String(match ?? '').trim().toLowerCase();
+  if (!needle) throw new UserError('`match` is needed: a piece of the entry\'s text that only it contains.');
+  const why = String(reason ?? '').trim();
+  if (!why) throw new UserError('A correction needs `reason`: why the entry no longer holds.');
+  const { path, label } = learningsTarget(notebook);
+  const current = readLearningsFile(path);
+  if (current === null) throw new UserError(`Nothing learned yet in ${label}.`);
+  const lines = current.split('\n');
+  const hits = lines.map((l, i) => [l, i]).filter(([l]) => ENTRY.exec(l)?.[3].toLowerCase().includes(needle));
+  if (hits.length !== 1) throw new UserError(hits.length
+    ? `"${match}" matches ${hits.length} entries in ${label}. Use more of the one you mean:\n${hits.map(([l]) => l).join('\n')}`
+    : `No entry in ${label} contains "${match}".`);
+  const [old, i] = hits[0];
+  const replacement = String(text ?? '').trim();
+  if (replacement.includes('\n')) throw new UserError('A learning is one line.');
+  if (replacement) {
+    lines[i] = `- ${today()} · ${who} · ${replacement} (corrected: ${why}; was: "${ENTRY.exec(old)[3]}")`;
+  } else {
+    lines.splice(i, 1);
+  }
+  writeLearningsFile(path, lines.join('\n'));
+  return replacement ? `Corrected, in ${label}: ${replacement}` : `Removed from ${label}: ${old}`;
 }
 
 // Offers /subnotes:schedule once, at the end of a review run by hand — the
@@ -441,6 +578,34 @@ const TOOLS = [
     description: 'Append several tasks to one connected notebook in a single write. Prefer this over repeated add_task calls: one file, one save, one sync cycle. Refuses a task the notebook already has, unless allowDuplicate is true.',
     inputSchema: { type: 'object', properties: { notebook: { type: 'string' }, tasks: { type: 'array', items: taskShape }, allowDuplicate: ALLOW_DUPLICATE }, required: ['notebook', 'tasks'] },
     run: addTasks,
+  },
+  {
+    name: 'read_learnings',
+    description: "Read what Subnotes' skills have learned: about one notebook, if named, and always the shared learnings — the owner and how they work, anything not about one notebook. Read before deciding what to suggest or do.",
+    inputSchema: { type: 'object', properties: { notebook: { type: 'string', description: 'A connected notebook. Leave out for the shared learnings alone.' } } },
+    run: readLearnings,
+  },
+  {
+    name: 'add_learning',
+    description: "Add one thing learned, as one line, to a notebook's learnings or (no notebook) the shared ones. Something that will still hold next time and would change what a skill suggests or does — not what happened today. Adds only; refuses one already there.",
+    inputSchema: { type: 'object', properties: {
+      notebook: { type: 'string', description: 'The notebook it is about. Leave out when it is about the owner or holds across notebooks.' },
+      text: { type: 'string', description: 'One line, plainly written: the owner may read it.' },
+      source: { type: 'string', description: 'The skill writing it, one word: review, do, prioritize.' },
+    }, required: ['text', 'source'] },
+    run: addLearning,
+  },
+  {
+    name: 'correct_learning',
+    description: 'Change or remove one learned entry that no longer holds. `match` must pick out exactly one entry; leave `text` out to remove it. Keeps the old wording beside a change.',
+    inputSchema: { type: 'object', properties: {
+      notebook: { type: 'string', description: 'Leave out for the shared learnings.' },
+      match: { type: 'string', description: "A piece of the entry's text that only it contains." },
+      text: { type: 'string', description: 'The corrected line. Leave out to remove the entry.' },
+      reason: { type: 'string', description: 'Why it no longer holds.' },
+      source: { type: 'string', description: 'The skill correcting it, one word.' },
+    }, required: ['match', 'reason', 'source'] },
+    run: correctLearning,
   },
   {
     name: 'read_journal',

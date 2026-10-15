@@ -26,9 +26,9 @@ time, and list the ones skipped and why at the end, in one line each.
 
 ## Each notebook, in order
 
-1. **Read** its journal (`read_journal`). The journal is your memory: what
-   you noticed, suggested and planned last time. Its first line says when you
-   last visited.
+1. **Read** its journal (`read_journal`). The journal is your working memory
+   of this notebook: what you noticed, suggested and planned last time. Its
+   first line says when you last visited.
 
    On a `--scheduled` run, which may start more than once a day, decide
    whether to visit at all before reading further:
@@ -39,7 +39,10 @@ time, and list the ones skipped and why at the end, in one line each.
      days, visit anyway: a stall is worth noticing.
 
    Either way, leave the journal as it is. Otherwise read the notebook
-   (`read_notebook`).
+   (`read_notebook`) and what has been learned (`read_learnings` with the
+   notebook): about this notebook, and the shared learnings about the user
+   that hold in every notebook. Other skills add to these too, so an entry
+   may not be yours — weigh it the same.
 
    Below the notebook, `read_notebook` may add a part "From the connector, not
    part of the notebook": when it last changed, and tasks queued for it that
@@ -56,16 +59,26 @@ time, and list the ones skipped and why at the end, in one line each.
    - still in Suggestions, unchanged — **waiting**; after 7 days, **ignored**
      (drop it from the open list, and don't raise it again)
 
-   Write down what each outcome teaches you about what this user wants from
-   this notebook. That is the point of the journal.
+   Add what an outcome teaches you about what this user wants
+   (`add_learning`, source `review`) — that is the point of looking. About
+   this notebook, give the notebook; about the user wherever they work ("doesn't
+   want outreach"), leave it out, so it lands in the shared learnings and
+   every notebook's review and every other skill sees it. Add only what will
+   still hold next time and would change what you suggest; skip what is
+   already there.
 
    Any `Why …:` subnote on a task (`Why Today:`, `Why Someday:`,
-   `Why dropped:`) is the user's own reason for a decision: keep what it
-   teaches in the journal's learning, whether or not the task was yours.
+   `Why dropped:`) is the user's own reason for a decision: add what it
+   teaches, whether or not the task was yours.
 
    When one of your open suggestions asked for context, look for the answer
-   — under it, in the purpose, or in a section the user added — and keep it
-   in the journal's learning, so you never ask twice.
+   — under it, in the purpose, or in a section the user added — and add it as
+   a learning, so you never ask twice.
+
+   When the notebook shows that an entry no longer holds — the user did what
+   it says they never do — correct or remove it (`correct_learning`), with the
+   reason. You keep the learnings tidy for every skill: if a file runs past
+   40 entries, merge or drop the weakest.
 
 3. **Notice what changed** since the last visit: tasks added, done or
    rescheduled, sections written, how long since anything moved. On a first
@@ -89,7 +102,7 @@ time, and list the ones skipped and why at the end, in one line each.
    - **Drift:** recent work that doesn't seem to serve the purpose. Asked as a
      question, never judged.
    - **Missing context:** something you would need to judge the purpose
-     well that neither the notebook nor the journal gives. Ask for it as a
+     well that neither the notebook, the journal nor the learnings give. Ask for it as a
      task the user does in the notebook, for example:
      - the purpose is too vague to tell a good next step from a bad one —
        "Sharpen the purpose: what will be true when this notebook has done
@@ -102,10 +115,10 @@ time, and list the ones skipped and why at the end, in one line each.
 
      Ask only when the answer would change what you suggest, about what
      matters now rather than plans months ahead, and never for what the
-     notebook or journal already says. One such question open at a time.
+     notebook, journal or learnings already say. One such question open at a time.
 
    Never suggest something already declined or ignored, or anything the
-   journal says this user doesn't want. Don't suggest reorganising what's
+   learnings say this user doesn't want. Don't suggest reorganising what's
    already there — you can't, and they didn't ask. Asking for a new section
    that would hold missing context is fine.
 
@@ -125,8 +138,7 @@ time, and list the ones skipped and why at the end, in one line each.
    ## Open suggestions
    - 2026-10-12 — Sketch the morning review's output — why: the AI section has no next step
 
-   ## What I've learned about this notebook and its owner
-   - Acts on next-step suggestions; declined a push on a Next item (2026-10-08)
+   Suggestions this week: 1
 
    ## Observations
    - 2026-10-12 — Kanban Board marked Next, unchanged since 2026-09-28
@@ -135,8 +147,9 @@ time, and list the ones skipped and why at the end, in one line each.
    - Check whether the Kanban heading has moved
    ```
 
-   Keep the learning; summarise or drop old observations. Under 60 lines. Use
-   today's date.
+   This is your working state, not what you've learned — that went to
+   `add_learning` above, where other skills can use it. Summarise or drop old
+   observations. Under 60 lines. Use today's date.
 
 ## Then report
 
@@ -158,5 +171,5 @@ for a line at the end of the report, add it last. No other commentary.
 - Writes only ever add: you can't edit, complete, move or delete anything, so
   never claim to have.
 - Never write or change a purpose.
-- The journal is for you and the user. Write it plainly — they may read it,
-  and correct it.
+- The journal and the learnings are for you, the other skills and the user.
+  Write them plainly — the user may read them, and correct them.

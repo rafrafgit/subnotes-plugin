@@ -30,6 +30,9 @@ from there instead, without adding this marketplace first.
 - `list_notebooks` — names, purposes, section headings, open counts
 - `read_notebook` — one notebook as plain text
 - `add_task` / `add_tasks` — append tasks to a notebook
+- `read_learnings` / `add_learning` / `correct_learning` — what the skills
+  have learned, about one notebook or about you, shared by all of them
+- `read_journal` / `write_journal` — the review's working memory per notebook
 
 Ask what is on a notebook, or what to pick up next — reading is half the point.
 Say "put that on the backlog" mid-conversation and it lands in the right
