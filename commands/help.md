@@ -31,6 +31,8 @@ they need.
 - `/subnotes:schedule` runs that review by itself once a day, on the first
   prompt to Claude Code while Subnotes is open;
   `/subnotes:unschedule` stops it.
+- `/subnotes:do <notebook>` — finds the Today and Next tasks Claude can do in
+  this session, and does the one they pick. They mark it Done afterwards.
 
 Then state the two limits plainly, because both are surprising if discovered
 later: writes only ever add — nothing can be marked done, edited, deleted or

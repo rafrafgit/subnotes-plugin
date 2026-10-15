@@ -42,6 +42,12 @@ your first prompt to Claude Code each day, while Subnotes is open, starts it
 in the background with only this plugin's tools allowed (a `UserPromptSubmit`
 hook, which does nothing until it's turned on). `/subnotes:unschedule` stops it.
 
+`/subnotes:do [notebook]` goes the other way: it reads a notebook's Today and
+Next tasks, sorts them into what Claude can do in this session, what needs
+your input first, and what only you can do, then does the one you pick, with
+your usual permission prompts. You mark it Done in Subnotes after looking at
+the work.
+
 ## Two rules that shape everything
 
 **Writes are append-only.** Tasks can be added; nothing can be edited, deleted,
