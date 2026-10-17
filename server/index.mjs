@@ -4,7 +4,7 @@
 // writing to a CloudKit-mirrored store is the failure mode this project has
 // already spent five rounds on.
 //
-// No dependencies, deliberately. The whole surface is fourteen tools over
+// No dependencies, deliberately. The whole surface is fifteen tools over
 // newline-delimited JSON-RPC on stdio, which is less code than the wiring to
 // use an SDK, and it removes the install step entirely: no package-lock, no
 // 60-second dependency fetch on first cache, nothing to go stale. Revisit if
@@ -88,6 +88,7 @@ function manifest() {
     'This plugin is older than your Subnotes. Update the plugin.');
   if (m.connectorVersion < CONNECTOR_VERSION) throw new UserError(
     'Subnotes is older than this plugin expects. Update Subnotes.');
+  followRenames(m);
   return m;
 }
 
@@ -156,6 +157,13 @@ function readNotebook({ name }) {
   const m = manifest();
   const nb = findNotebook(m, name);
   const text = readFileSync(join(DIR, nb.file), 'utf8');
+  const notes = connectorNotes(nb);
+  if (!notes.length) return text;
+  return `${text.replace(/\n*$/, '')}\n\n— From the connector, not part of the notebook —\n${notes.join('\n')}\n`;
+}
+
+// What the connector knows about a notebook that its text doesn't say.
+function connectorNotes(nb) {
   const notes = [];
   if (nb.role === 'goals') notes.push(GOALS_ROLE);
   const changed = lastChanged(nb);
@@ -165,8 +173,7 @@ function readNotebook({ name }) {
     'Queued, not yet in the notebook — Subnotes adds these when it next opens:\n' +
     queued.map(t => `  • ${t.text}${t.priority ? ` [${t.priority}]` : ''}` +
       `${t.section ? ` → ${t.section}` : ''} (written ${t.written})`).join('\n'));
-  if (!notes.length) return text;
-  return `${text.replace(/\n*$/, '')}\n\n— From the connector, not part of the notebook —\n${notes.join('\n')}\n`;
+  return notes;
 }
 
 // When the notebook's text last changed, as the Mac app last exported it. The
@@ -221,6 +228,14 @@ function queuedTasks(nb) {
 const TASK_LINE = /^\s*•\s*(.+?)\s*$/;
 const PRIORITY_TAG = new RegExp(`\\s*\\[(${[...PRIORITIES, 'Done'].join('|')})\\]\\s*$`, 'i');
 
+function taskOf(line) {
+  const task = TASK_LINE.exec(line);
+  if (!task) return null;
+  const tag = PRIORITY_TAG.exec(task[1]);
+  const text = (tag ? task[1].slice(0, tag.index) : task[1]).trim();
+  return text ? { text, priority: tag ? tag[1] : 'Someday' } : null;
+}
+
 function existingTasks(nb) {
   let text;
   // A safety net, never a gate: an unreadable notebook file must not fail a
@@ -238,13 +253,10 @@ function existingTasks(nb) {
       section = heading[1].trim();
       continue;
     }
-    const task = TASK_LINE.exec(line);
+    const task = taskOf(line);
     if (!task) continue;
-    const tag = PRIORITY_TAG.exec(task[1]);
-    const body = (tag ? task[1].slice(0, tag.index) : task[1]).trim();
-    if (!body) continue;
-    const key = body.toLowerCase();
-    if (!found.has(key)) found.set(key, { text: body, priority: tag ? tag[1] : 'Someday', section });
+    const key = task.text.toLowerCase();
+    if (!found.has(key)) found.set(key, { ...task, section });
   }
   for (const t of queuedTasks(nb)) {
     const key = String(t.text ?? '').trim().toLowerCase();
@@ -354,8 +366,9 @@ function addTasks({ notebook, tasks, allowDuplicate = false }) {
 // so a journal is the agent's alone, and the user's to read and correct.
 //
 // Keyed by the notebook's name, which is how everything here addresses a
-// notebook; a renamed notebook starts a fresh journal. Only a connected
-// notebook has one: findNotebook refuses the rest, as it does for a read.
+// notebook; followRenames moves the files when a notebook is renamed. Only a
+// connected notebook has one: findNotebook refuses the rest, as it does for a
+// read.
 //
 // The agent folder has one shape throughout: a folder per kind of memory, and
 // in each a file per notebook plus shared.md for what isn't about one
@@ -384,6 +397,53 @@ function agentFile(folder, nb) {
   let safe = nb.name.replace(/[\/:\0]/g, '-').trim() || 'notebook';
   if (safe.toLowerCase() === SHARED) safe = `${safe} (notebook)`;
   return join(AGENT_DIR, folder, `${safe}.md`);
+}
+
+// The brain is filed by notebook name, and a rename used to strand it: the
+// notebook came back under its new name with no learnings, questions or
+// journal (2026-10-17). The app sends an `id` per notebook that a rename
+// doesn't change, and agent/ids.json remembers the name each id last had.
+// When one comes back under a new name, its files move to that name — every
+// time the manifest is read, so a rename is followed before any tool looks.
+// A file already at the new name is left alone rather than overwritten, and
+// nothing here ever stops a read: at worst the brain stays where it was.
+const RENAMED_FILES = [
+  ['review', '.md'], ['review', '.snapshot.json'], ['review', '.pending.json'],
+  ['learnings', '.md'], ['questions', '.md'], ['thoughts', '.json'],
+];
+
+function followRenames(m) {
+  const path = join(AGENT_DIR, 'ids.json');
+  try {
+    const known = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {};
+    let changed = false;
+    for (const nb of m.notebooks) {
+      if (!nb.id) continue;
+      const was = known[nb.id];
+      if (was !== undefined && was !== nb.name) moveBrain(was, nb.name);
+      if (was !== nb.name) { known[nb.id] = nb.name; changed = true; }
+    }
+    if (changed) writeEntryFile(path, JSON.stringify(known, null, 2) + '\n');
+  } catch {
+    // An unreadable ids.json or a failed move: carry on with the names as
+    // they are.
+  }
+}
+
+function moveBrain(from, to) {
+  for (const [folder, ext] of RENAMED_FILES) {
+    const src = agentFile(folder, { name: from }).replace(/\.md$/, ext);
+    const dst = agentFile(folder, { name: to }).replace(/\.md$/, ext);
+    if (src === dst || !existsSync(src) || existsSync(dst)) continue;
+    renameSync(src, dst);
+    // Learnings and questions files name their notebook in the title line.
+    const kind = KINDS[folder];
+    if (kind) {
+      const text = readFileSync(dst, 'utf8');
+      const old = `# ${kind.title} — ${from}\n`;
+      if (text.startsWith(old)) writeEntryFile(dst, `# ${kind.title} — ${to}\n` + text.slice(old.length));
+    }
+  }
 }
 
 // Journals used to sit at agent/<notebook>.md. Moved on first use rather than
@@ -418,6 +478,7 @@ function writeJournal({ notebook, content }) {
   const tmp = `${path}.tmp`;
   writeFileSync(tmp, text.endsWith('\n') ? text : text + '\n');
   renameSync(tmp, path);
+  keepSnapshot(nb);
   return `Journal for "${nb.name}" saved (${text.length} characters).` + scheduleHint();
 }
 
@@ -450,11 +511,11 @@ function today() {
   return localTime(new Date()).slice(0, 10);
 }
 
-// The skill that wrote an entry, as one short word: review, do, prioritize.
+// The skill that wrote an entry, as one short word: review, do, plan.
 function sourceName(source) {
   const name = String(source ?? '').trim().toLowerCase();
   if (!/^[a-z][a-z-]{0,23}$/.test(name)) throw new UserError(
-    'This needs `source`: the skill writing it, as one word — "review", "do", "prioritize".');
+    'This needs `source`: the skill writing it, as one word — "review", "do", "plan".');
   return name;
 }
 
@@ -665,6 +726,198 @@ function markThoughtsHandled({ notebook, thoughts }) {
   return `Marked ${thoughts.length} thought${thoughts.length === 1 ? '' : 's'} handled in "${nb.name}".`;
 }
 
+// MARK: - What changed since the last visit
+
+// A review used to read every notebook whole to find the one line that moved,
+// and the largest notebook is hundreds of lines. Instead the review keeps a
+// snapshot of each notebook as it last saw it, and review_context shows only
+// what differs from it.
+//
+// Fingerprints again, as for Thoughts: a hash per line, never the line, so
+// nothing the user wrote is copied into the agent folder. Section names are
+// kept as text — they're already in the manifest — and so is each task's
+// priority, which is what lets a changed line say "was Next".
+//
+// The snapshot is of what review_context showed, not of the notebook when the
+// journal is written: an edit made between the two would otherwise be counted
+// as seen. review_context leaves it pending; write_journal keeps it. A visit
+// that writes no journal keeps the old snapshot, so its changes show again.
+const SECTION_HEADING = /^(#{1,3})\s+(.*?)\s*$/;
+const TOP = '(above the first heading)';
+const SHOWN_WHOLE = 12;      // a changed section this short is shown whole
+const MOSTLY_NEW = 0.5;      // past this share of new lines, the whole notebook
+
+// Flat: every heading starts a section, whatever its level. A heading's
+// schedule tag is not part of its name, so rescheduling one reads as a
+// changed line in the same section, not a section removed and another added.
+// A repeated heading is numbered so the two stay apart.
+function sectionsOf(text) {
+  const sections = [{ name: TOP, lines: [] }];
+  const seen = new Map();
+  for (const line of text.split('\n')) {
+    const h = SECTION_HEADING.exec(line);
+    if (!h) {
+      sections[sections.length - 1].lines.push(line);
+      continue;
+    }
+    const base = h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim() || '(untitled)';
+    const n = (seen.get(base.toLowerCase()) ?? 0) + 1;
+    seen.set(base.toLowerCase(), n);
+    sections.push({ name: n > 1 ? `${base} (${n})` : base, lines: [line] });
+  }
+  return sections;
+}
+
+const lineFingerprint = line => createHash('sha256').update(line.replace(/\s+$/, '')).digest('hex').slice(0, 16);
+
+function snapshotOf(text) {
+  const sections = sectionsOf(text);
+  const tasks = {};
+  for (const s of sections) for (const line of s.lines) {
+    const t = taskOf(line);
+    const key = t && fingerprint(t.text.toLowerCase());
+    if (key && !(key in tasks)) tasks[key] = { priority: t.priority, section: s.name };
+  }
+  return {
+    taken: localTime(new Date()),
+    sections: sections.map(s => ({ name: s.name, lines: s.lines.filter(l => l.trim()).map(lineFingerprint) })),
+    tasks,
+  };
+}
+
+function snapshotPath(nb, pending = false) {
+  return agentFile('review', nb).replace(/\.md$/, pending ? '.pending.json' : '.snapshot.json');
+}
+
+function readSnapshot(path) {
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function keepSnapshot(nb) {
+  const pending = snapshotPath(nb, true);
+  if (existsSync(pending)) return renameSync(pending, snapshotPath(nb));
+  try {
+    writeEntryFile(snapshotPath(nb), JSON.stringify(snapshotOf(readFileSync(join(DIR, nb.file), 'utf8'))) + '\n');
+  } catch {}
+}
+
+// The notebook's changes as text: each changed section with its new lines
+// marked "+", a task that changed schedule or section saying what it was, and
+// a count of lines gone, which can't be named — only their fingerprints were
+// kept. Null when so much is new that the whole notebook reads better.
+function changesSince(old, text) {
+  const before = new Map(old.sections.map(s => [s.name, s]));
+  const out = [];
+  let total = 0, fresh = 0;
+  for (const s of sectionsOf(text)) {
+    const prev = before.get(s.name);
+    before.delete(s.name);
+    const pool = new Map();
+    for (const f of prev?.lines ?? []) pool.set(f, (pool.get(f) ?? 0) + 1);
+    const shown = [];
+    let added = 0;
+    for (const line of s.lines) {
+      if (!line.trim()) continue;
+      total++;
+      const f = lineFingerprint(line);
+      if (pool.get(f)) {
+        pool.set(f, pool.get(f) - 1);
+        shown.push({ line: `  ${line}`, isNew: false });
+        continue;
+      }
+      added++;
+      const t = taskOf(line);
+      const was = t && old.tasks?.[fingerprint(t.text.toLowerCase())];
+      const notes = [];
+      if (was && was.section !== s.name) notes.push(`moved from "${was.section}"`);
+      if (was && was.priority.toLowerCase() !== t.priority.toLowerCase()) notes.push(`was ${was.priority}`);
+      if (t && !was) notes.push('new task');
+      shown.push({ line: `+ ${line}${notes.length ? `   ← ${notes.join(', ')}` : ''}`, isNew: true });
+    }
+    fresh += added;
+    const removed = [...pool.values()].reduce((a, b) => a + b, 0);
+    if (!added && !removed) continue;
+    const head = `### ${s.name}${prev ? '' : ' (new section)'}` +
+      (removed ? ` — ${removed} line${removed === 1 ? '' : 's'} gone` : '');
+    const body = shown.length <= SHOWN_WHOLE
+      ? shown.map(x => x.line)
+      : [...shown.filter(x => x.isNew).map(x => x.line), `  (${shown.length - added} unchanged lines not shown)`];
+    out.push([head, ...body].join('\n'));
+  }
+  if (total && fresh / total > MOSTLY_NEW) return null;
+  for (const [name, s] of before) out.push(`### ${name} — section gone (${s.lines.length} lines)`);
+  return out;
+}
+
+function sharedEntryLines(kind) {
+  const lines = (readEntryFile(agentFile(kind, null)) ?? '').split('\n').filter(l => ENTRY.test(l));
+  return lines.length ? lines.join('\n') : '(none)';
+}
+
+function contextFor(nb) {
+  const text = readFileSync(join(DIR, nb.file), 'utf8');
+  const entries = kind => {
+    const lines = (readEntryFile(agentFile(kind, nb)) ?? '').split('\n').filter(l => ENTRY.test(l));
+    return lines.length ? lines.join('\n') : '(none)';
+  };
+  const journal = journalPath(nb);
+  const old = readSnapshot(snapshotPath(nb));
+  const changes = old ? changesSince(old, text) : null;
+
+  let changed;
+  if (!old) changed = 'No snapshot from an earlier visit, so here is the whole notebook:\n\n' + text.replace(/\n*$/, '');
+  else if (!changes) changed = `Most of it is new since ${old.taken}, so here is the whole notebook:\n\n` + text.replace(/\n*$/, '');
+  else if (!changes.length) changed = `Nothing has changed since the last visit (${old.taken}).`;
+  else changed = `Since the last visit (${old.taken}) — "+" is a new or changed line, the rest is unchanged context:\n\n` + changes.join('\n\n');
+
+  // Pending until write_journal keeps it: see the top of this section.
+  writeEntryFile(snapshotPath(nb, true), JSON.stringify(snapshotOf(text)) + '\n');
+
+  const notes = connectorNotes(nb);
+  return [
+    `# ${nb.name}`,
+    ...(nb.purpose ? [`Purpose: ${nb.purpose}`] : []),
+    '',
+    '## Journal',
+    existsSync(journal) ? readFileSync(journal, 'utf8').trim() : 'No journal yet — this is the first review of it.',
+    '',
+    '## Learnings about this notebook',
+    entries('learnings'),
+    '',
+    '## Open questions about this notebook',
+    entries('questions'),
+    '',
+    '## Thoughts',
+    newThoughts({ notebook: nb.name }),
+    '',
+    '## What changed',
+    changed,
+    ...(notes.length ? ['', '## From the connector, not part of the notebook', ...notes] : []),
+  ].join('\n');
+}
+
+// Everything one visit needs, for every notebook the review is visiting, in
+// one call: the shared learnings and questions once, then per notebook its
+// journal, learnings, questions, new thoughts and what changed.
+function reviewContext({ notebooks }) {
+  const m = manifest();
+  const names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
+  if (!names.length) throw new UserError('Name at least one notebook.');
+  const nbs = names.map(n => findNotebook(m, n));
+  return [
+    '# Shared learnings — hold in every notebook',
+    sharedEntryLines('learnings'),
+    '',
+    '# Shared open questions',
+    sharedEntryLines('questions'),
+    ...nbs.flatMap(nb => ['', contextFor(nb)]),
+  ].join('\n');
+}
+
 // Offers /subnotes:schedule once, at the end of a review run by hand — the
 // moment someone has just seen what a review does. Here rather than in the
 // prompt, which would need a shell command (and a permission prompt) to look
@@ -740,7 +993,7 @@ const TOOLS = [
     inputSchema: { type: 'object', properties: {
       notebook: { type: 'string', description: 'The notebook it is about. Leave out when it is about the owner or holds across notebooks.' },
       text: { type: 'string', description: 'One line, plainly written: the owner may read it.' },
-      source: { type: 'string', description: 'The skill writing it, one word: review, do, prioritize.' },
+      source: { type: 'string', description: 'The skill writing it, one word: review, do, plan.' },
     }, required: ['text', 'source'] },
     run: addLearning,
   },
@@ -768,7 +1021,7 @@ const TOOLS = [
     inputSchema: { type: 'object', properties: {
       notebook: { type: 'string', description: 'The notebook it affects. Leave out when it spans notebooks.' },
       text: { type: 'string', description: 'The question, one line, never quoting the user at length.' },
-      source: { type: 'string', description: 'The skill recording it, one word: review, do, prioritize.' },
+      source: { type: 'string', description: 'The skill recording it, one word: review, do, plan.' },
     }, required: ['text', 'source'] },
     run: addQuestion,
   },
@@ -797,6 +1050,14 @@ const TOOLS = [
       thoughts: { type: 'array', items: { type: 'string' } },
     }, required: ['notebook', 'thoughts'] },
     run: markThoughtsHandled,
+  },
+  {
+    name: 'review_context',
+    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its journal, learnings, open questions, new thoughts, and only what changed since the review last wrote that notebook's journal (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_journal, read_notebook, read_learnings, read_questions and new_thoughts for each.",
+    inputSchema: { type: 'object', properties: {
+      notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks to visit.' },
+    }, required: ['notebooks'] },
+    run: reviewContext,
   },
   {
     name: 'read_journal',

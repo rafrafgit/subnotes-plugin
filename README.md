@@ -37,6 +37,9 @@ from there instead, without adding this marketplace first.
 - `new_thoughts` / `mark_thoughts_handled` — what's new in a notebook's
   Thoughts section (fingerprints only, never a copy of the text)
 - `read_journal` / `write_journal` — the review's working memory per notebook
+- `review_context` — everything a review visit needs, for several notebooks in
+  one call, with only what changed since the last visit (kept as line
+  fingerprints, never a copy of the text)
 
 Ask what is on a notebook, or what to pick up next — reading is half the point.
 Say "put that on the backlog" mid-conversation and it lands in the right

@@ -30,9 +30,11 @@ the user (`read_learnings` with the notebook), and what is still open
 here too. A task that hangs on an open question goes to "with your input",
 naming the question. Take its open tasks scheduled
 `[Today]`, then `[Next]`. If that gives fewer than three, add `[Soon]` ones and say that
-you did. Skip `[Done]` and unscheduled tasks, tasks in a section called
-Suggestions (those are the review's ideas, not the user's decisions yet), and
-headings: a scheduled heading is a project, not a task.
+you did. Skip `[Done]` and unscheduled tasks, and headings: a scheduled
+heading is a project, not a task. In a section called Suggestions, skip what
+is still unscheduled — the review's ideas, not the user's decisions yet — but
+take one the user has scheduled: that is how they accept a suggestion, often
+leaving it where it is.
 
 ## Sort them honestly
 
@@ -81,8 +83,12 @@ If the work turned up follow-ups, offer to add them to the notebook with
 `add_tasks`, and add them only if they say yes. Then offer the next task from
 the list.
 
-When the user tells you something about how they want work done that will
-hold next time — "don't run the tests while the app is open", "one commit per
-task" — add it (`add_learning`, source `do`): with the notebook when it's
-about that project, without when it's about them. Say in one line that you
-did. Not what happened today, and not what's already there.
+Before you report, look back over the work for what the user told you that
+will hold next time, and add each one (`add_learning`, source `do`): with the
+notebook when it's about that project, without when it's about them. That
+covers how they want work done ("don't run the tests while the app is open",
+"one commit per task"), and the decisions and principles they state along
+the way, whether or not they put them as rules ("a view nobody can see
+shouldn't be kept up to date", "don't ship a feature that's slow"). Say in
+one line what you added. Not what happened today, and not what's already
+there.

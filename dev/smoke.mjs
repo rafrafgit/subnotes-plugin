@@ -52,7 +52,7 @@ const init = await send('initialize', {});
 check('initialize', init.result?.serverInfo?.name === 'subnotes');
 
 const tools = await send('tools/list', {});
-check('fourteen tools', tools.result.tools.length === 14,
+check('fifteen tools', tools.result.tools.length === 15,
       tools.result.tools.map(t => t.name).join(', '));
 
 const list = await call('list_notebooks');
@@ -180,9 +180,12 @@ if (existsSync(questions) || existsSync(learned)) {
 if (process.env.SUBNOTES_DIR) {
   const file = join(DIR, JSON.parse(readFileSync(join(DIR, 'manifest.json'), 'utf8')).notebooks.find(n => n.name === first).file);
   const original = readFileSync(file, 'utf8');
+  // A notebook with a Thoughts section of its own (Goals has one) would be
+  // read instead of the test's, so its heading is renamed while this runs.
+  const bare = original.replace(/^(#{1,3})\s+thoughts\b(.*)$/gim, '$1 Earlier notes$2');
   const store = join(DIR, 'agent', 'thoughts', `${first.replace(/[\/:\0]/g, '-')}.json`);
   rmSync(store, { force: true });
-  writeFileSync(file, original + '\n## Thoughts\nI wonder about one thing\n\twith a detail\n• A task-like thought [Next]\n## After\nnot a thought\n');
+  writeFileSync(file, bare + '\n## Thoughts\nI wonder about one thing\n\twith a detail\n• A task-like thought [Next]\n## After\nnot a thought\n');
   const fresh = await call('new_thoughts', { notebook: first });
   check('new_thoughts lists the section, subnotes joined, tags dropped',
         fresh.text.includes('1. I wonder about one thing — with a detail') && fresh.text.includes('2. A task-like thought')
@@ -193,10 +196,46 @@ if (process.env.SUBNOTES_DIR) {
   const after = await call('new_thoughts', { notebook: first });
   check('a handled thought is not new again', !after.text.includes('I wonder') && after.text.includes('A task-like thought'), after.text);
   check('the store holds fingerprints, not text', !readFileSync(store, 'utf8').includes('wonder'));
-  writeFileSync(file, original);
+  writeFileSync(file, bare);
   const none = await call('new_thoughts', { notebook: first });
   check('no Thoughts section says so', none.text.includes('no Thoughts section'));
+  writeFileSync(file, original);
   rmSync(store, { force: true });
+}
+
+// review_context writes a snapshot and write_journal a journal, so only in a
+// fixture folder too — and whatever journal the fixture had is put back.
+if (process.env.SUBNOTES_DIR) {
+  const safe = first.replace(/[\/:\0]/g, '-');
+  const file = join(DIR, JSON.parse(readFileSync(join(DIR, 'manifest.json'), 'utf8')).notebooks.find(n => n.name === first).file);
+  const original = readFileSync(file, 'utf8');
+  const journalFile = join(DIR, 'agent', 'review', `${safe}.md`);
+  const savedJournal = existsSync(journalFile) ? readFileSync(journalFile, 'utf8') : null;
+  const snap = join(DIR, 'agent', 'review', `${safe}.snapshot.json`);
+  const pending = join(DIR, 'agent', 'review', `${safe}.pending.json`);
+  rmSync(snap, { force: true }); rmSync(pending, { force: true });
+
+  const firstVisit = await call('review_context', { notebooks: [first] });
+  check('review_context: a first visit shows the whole notebook, shared learnings once',
+        !firstVisit.isError && firstVisit.text.includes('No snapshot') && firstVisit.text.split('# Shared learnings').length === 2,
+        firstVisit.text.slice(0, 80));
+  check('review_context leaves its snapshot pending', existsSync(pending) && !existsSync(snap));
+  await call('write_journal', { notebook: first, content: '# Smoke test journal' });
+  check('write_journal keeps the pending snapshot', existsSync(snap) && !existsSync(pending));
+  const same = await call('review_context', { notebooks: [first] });
+  check('an unchanged notebook says so', same.text.includes('Nothing has changed since the last visit'));
+  writeFileSync(file, original.replace(/\n*$/, '\n') + '## Smoke section\n• Smoke diff task [Next]\n');
+  const diff = await call('review_context', { notebooks: [first] });
+  check('a change shows only the changed section, its lines marked',
+        diff.text.includes('### Smoke section (new section)') && diff.text.includes('+ • Smoke diff task [Next]   ← new task')
+        && !diff.text.includes('No snapshot'), diff.text.split('## What changed')[1]);
+  check('a snapshot holds fingerprints, not text', !readFileSync(pending, 'utf8').includes('Smoke diff'));
+  const stray = await call('review_context', { notebooks: ['Definitely Not Connected'] });
+  check('review_context refuses an unconnected notebook', stray.isError);
+
+  writeFileSync(file, original);
+  if (savedJournal === null) rmSync(journalFile, { force: true }); else writeFileSync(journalFile, savedJournal);
+  rmSync(snap, { force: true }); rmSync(pending, { force: true });
 }
 
 proc.kill();
