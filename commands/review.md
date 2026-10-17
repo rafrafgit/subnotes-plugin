@@ -20,6 +20,10 @@ Call `list_notebooks`. Review a notebook only when it has both:
 - a section called **Suggestions** (any case) — the user's opt-in, and the only
   place you write.
 
+A notebook that doesn't qualify but has a section called **Thoughts** still
+has its new thoughts read (step 3) — Thoughts is an opt-in of its own — and
+nothing else done in it.
+
 If a notebook was named above, review just that one, and if it lacks either,
 say which and stop. Otherwise review every notebook that qualifies, one at a
 time, and list the ones skipped and why at the end, in one line each.
@@ -67,10 +71,11 @@ Besides the usual, three things are worth saying there, before anything else:
      days, visit anyway: a stall is worth noticing.
 
    Either way, leave the journal as it is. Otherwise read the notebook
-   (`read_notebook`) and what has been learned (`read_learnings` with the
-   notebook): about this notebook, and the shared learnings about the user
-   that hold in every notebook. Other skills add to these too, so an entry
-   may not be yours — weigh it the same.
+   (`read_notebook`), what has been learned (`read_learnings` with the
+   notebook) and what is still open (`read_questions` with the notebook):
+   about this notebook, and the shared ones that hold in every notebook.
+   Other skills add to these too, so an entry may not be yours — weigh it
+   the same.
 
    Below the notebook, `read_notebook` may add a part "From the connector, not
    part of the notebook": when it last changed, and tasks queued for it that
@@ -108,11 +113,40 @@ Besides the usual, three things are worth saying there, before anything else:
    reason. You keep the learnings tidy for every skill: if a file runs past
    40 entries, merge or drop the weakest.
 
-3. **Notice what changed** since the last visit: tasks added, done or
+3. **Read new thoughts,** if the notebook has a section called Thoughts
+   (`new_thoughts`). This is the user telling the brain what's on their mind
+   about this notebook — doubts, hunches, intentions — and the most direct
+   signal you get. Each thought is one of five kinds, with one place to go:
+
+   - **An open question** — something unsettled that decisions depend on
+     ("I wonder if Mattias is as committed as I am"): `add_question`, source
+     `thoughts`, for the notebook it's about, phrased as the question.
+   - **A fact, as said by the user** ("I'm drained after interviews"):
+     `add_learning`, source `thoughts`, for this notebook — never the shared
+     learnings, unless this notebook is Goals.
+   - **An intention** ("I should call the recruiter"): a suggestion in this
+     notebook's Suggestions (step 6), ahead of your own ideas. If the
+     notebook has no Suggestions, record it as an open question instead
+     ("Still meaning to call the recruiter?").
+   - **A change of direction** ("making money from this matters less now"):
+     a suggestion in the Goals notebook's Suggestions to update it — Goals
+     stays in the user's own words.
+   - **Just thinking aloud:** nothing.
+
+   Anything you record from a thought takes source `thoughts`, never
+   `review`, so the user can tell what they raised from what you noticed.
+
+   Never quote a thought anywhere: say what it means for the work ("Talk to
+   Mattias about his commitment to Strategy"), not what the user wrote. A
+   thought that answers an open question closes it (`close_question`), and
+   the answer becomes a learning. Then `mark_thoughts_handled` with every
+   thought you were given, whatever became of it, exactly as given.
+
+4. **Notice what changed** since the last visit: tasks added, done or
    rescheduled, sections written, how long since anything moved. On a first
    visit, take the notebook as it stands.
 
-4. **Decide whether anything is worth saying,** against the purpose. Most
+5. **Decide whether anything is worth saying,** against the purpose. Most
    visits the answer is nothing, and that is a good outcome — a suggestion
    the user didn't need costs their attention and your credibility. Worth
    saying, roughly in this order:
@@ -145,12 +179,17 @@ Besides the usual, three things are worth saying there, before anything else:
      matters now rather than plans months ahead, and never for what the
      notebook, journal or learnings already say. One such question open at a time.
 
+   **Open questions** change what's worth saying. Before suggesting work
+   that hangs on one, suggest settling the question instead. A question open
+   over three weeks is a stall: "Decide: … or drop the question". When the
+   notebook shows a question answered, close it.
+
    Never suggest something already declined or ignored, or anything the
    learnings say this user doesn't want. Don't suggest reorganising what's
    already there — you can't, and they didn't ask. Asking for a new section
    that would hold missing context is fine.
 
-5. **Write** at most two suggestions, and at most twenty in any 7 days for this
+6. **Write** at most two suggestions, and at most twenty in any 7 days for this
    notebook (count them in the journal). Each one:
    - with `add_task`, section `Suggestions`, **no priority** — the user
      schedules what they accept
@@ -158,7 +197,7 @@ Besides the usual, three things are worth saying there, before anything else:
    - one subnote starting `Why:` — one sentence linking it to the purpose or
      to what you noticed
 
-6. **Rewrite the journal** (`write_journal`) — the whole journal, kept short:
+7. **Rewrite the journal** (`write_journal`) — the whole journal, kept short:
 
    ```
    Last visit: 2026-10-12
@@ -188,7 +227,10 @@ a write can't be taken back:
 Subnotes — 1 suggestion:
  * Sketch the morning review's output
 Friends of AI — nothing to add (last change 2 days ago, next step clear)
+AI Native — 2 thoughts read: an open question, a suggestion
 ```
+
+Say what each thought became, not what it said.
 
 Then the skipped notebooks, one line each. If a `write_journal` reply asked
 for a line at the end of the report, add it last. No other commentary.

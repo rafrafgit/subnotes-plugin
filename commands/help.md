@@ -29,6 +29,10 @@ they need.
   suggests a next step or two in a section called Suggestions. It reviews only notebooks
   that have a purpose and a Suggestions section, so adding that section is how
   a notebook opts in.
+- A section called **Thoughts** is the other direction: what's on their mind
+  about a notebook — doubts, hunches, intentions. The review reads what's new
+  there each visit and turns it into open questions, learnings, or
+  suggestions, never quoting it. Opt-in per notebook, like Suggestions.
 - `/subnotes:schedule` runs that review by itself once a day, on the first
   prompt to Claude Code while Subnotes is open;
   `/subnotes:unschedule` stops it.

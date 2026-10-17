@@ -24,9 +24,11 @@ If `list_notebooks` marks a notebook "Role: Goals", read it first: "most
 useful" below means most useful against its ranking and this season's focus,
 and a task it parks under "Not now" goes to the third group with that reason.
 
-Read the notebook (`read_notebook`) and what has been learned about it and
-about the user (`read_learnings` with the notebook) — what other skills found
-out about how they work applies here too. Take its open tasks scheduled
+Read the notebook (`read_notebook`), what has been learned about it and about
+the user (`read_learnings` with the notebook), and what is still open
+(`read_questions` with the notebook) — what other skills found out applies
+here too. A task that hangs on an open question goes to "with your input",
+naming the question. Take its open tasks scheduled
 `[Today]`, then `[Next]`. If that gives fewer than three, add `[Soon]` ones and say that
 you did. Skip `[Done]` and unscheduled tasks, tasks in a section called
 Suggestions (those are the review's ideas, not the user's decisions yet), and

@@ -7,7 +7,7 @@ import { spawn } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
-import { readdirSync, readFileSync, rmSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIR = process.env.SUBNOTES_DIR
@@ -52,7 +52,7 @@ const init = await send('initialize', {});
 check('initialize', init.result?.serverInfo?.name === 'subnotes');
 
 const tools = await send('tools/list', {});
-check('nine tools', tools.result.tools.length === 9,
+check('fourteen tools', tools.result.tools.length === 14,
       tools.result.tools.map(t => t.name).join(', '));
 
 const list = await call('list_notebooks');
@@ -63,8 +63,11 @@ console.log(`\n${list.text}\n`);
 
 const read = await call('read_notebook', { name: first.toLowerCase() });
 check('read_notebook matches case-insensitively', !read.isError, `${read.text.length} chars`);
-check('reading is much dearer than listing', read.text.length > list.text.length * 2,
-      `${list.text.length} vs ${read.text.length} chars`);
+// Against this notebook's own block of the listing, not the whole listing: a
+// small first notebook (Goals) can be shorter than every notebook's listing.
+const block = list.text.split(/\n(?=## )/).find(b => b.startsWith(`## ${first}\n`)) ?? list.text;
+check('reading is dearer than its listing', read.text.length > block.length,
+      `${block.length} vs ${read.text.length} chars`);
 
 const unknown = await call('read_notebook', { name: 'Definitely Not Connected' });
 check('unknown notebook refuses and lists what is connected',
@@ -152,6 +155,48 @@ if (existsSync(learnings)) {
   const gone = await call('correct_learning', { notebook: first, match: 'other', reason: 'testing', source: 'smoke' });
   check('a correction without text removes', !gone.isError && !readFileSync(learnings, 'utf8').includes('Smoke test other'));
   rmSync(learnings);
+}
+
+// Open questions: the same rule as learnings.
+const questions = join(DIR, 'agent', 'questions', `${first.replace(/[\/:\0]/g, '-')}.md`);
+const learned = join(DIR, 'agent', 'learnings', `${first.replace(/[\/:\0]/g, '-')}.md`);
+if (existsSync(questions) || existsSync(learned)) {
+  console.log('  --   questions round trip skipped: real questions or learnings exist');
+} else {
+  const asked = await call('add_question', { notebook: first, text: 'Is the smoke test committed?', source: 'smoke' });
+  check('add_question records it', !asked.isError && existsSync(questions), asked.text);
+  const again = await call('add_question', { notebook: first, text: 'is the smoke test committed?', source: 'smoke' });
+  check('the same question twice refuses', again.isError);
+  const open = await call('read_questions', { notebook: first });
+  check('read_questions returns it', open.text.includes('Is the smoke test committed?'));
+  const closed = await call('close_question', { notebook: first, match: 'smoke test', answer: 'Yes', source: 'smoke' });
+  check('close_question removes it and learns the answer',
+        !closed.isError && !readFileSync(questions, 'utf8').includes('committed?')
+        && readFileSync(learned, 'utf8').includes('Answered: Is the smoke test committed? — Yes'), closed.text);
+  rmSync(questions); rmSync(learned);
+}
+
+// Thoughts need a section in a notebook file, so only in a fixture folder.
+if (process.env.SUBNOTES_DIR) {
+  const file = join(DIR, JSON.parse(readFileSync(join(DIR, 'manifest.json'), 'utf8')).notebooks.find(n => n.name === first).file);
+  const original = readFileSync(file, 'utf8');
+  const store = join(DIR, 'agent', 'thoughts', `${first.replace(/[\/:\0]/g, '-')}.json`);
+  rmSync(store, { force: true });
+  writeFileSync(file, original + '\n## Thoughts\nI wonder about one thing\n\twith a detail\n• A task-like thought [Next]\n## After\nnot a thought\n');
+  const fresh = await call('new_thoughts', { notebook: first });
+  check('new_thoughts lists the section, subnotes joined, tags dropped',
+        fresh.text.includes('1. I wonder about one thing — with a detail') && fresh.text.includes('2. A task-like thought')
+        && !fresh.text.includes('not a thought'), fresh.text);
+  const wrong = await call('mark_thoughts_handled', { notebook: first, thoughts: ['made up'] });
+  check('marking a thought the notebook lacks refuses', wrong.isError);
+  await call('mark_thoughts_handled', { notebook: first, thoughts: ['I wonder about one thing — with a detail'] });
+  const after = await call('new_thoughts', { notebook: first });
+  check('a handled thought is not new again', !after.text.includes('I wonder') && after.text.includes('A task-like thought'), after.text);
+  check('the store holds fingerprints, not text', !readFileSync(store, 'utf8').includes('wonder'));
+  writeFileSync(file, original);
+  const none = await call('new_thoughts', { notebook: first });
+  check('no Thoughts section says so', none.text.includes('no Thoughts section'));
+  rmSync(store, { force: true });
 }
 
 proc.kill();

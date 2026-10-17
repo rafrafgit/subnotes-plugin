@@ -4,7 +4,7 @@
 // writing to a CloudKit-mirrored store is the failure mode this project has
 // already spent five rounds on.
 //
-// No dependencies, deliberately. The whole surface is nine tools over
+// No dependencies, deliberately. The whole surface is fourteen tools over
 // newline-delimited JSON-RPC on stdio, which is less code than the wiring to
 // use an SDK, and it removes the install step entirely: no package-lock, no
 // 60-second dependency fetch on first cache, nothing to go stale. Revisit if
@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync, readdir
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { createInterface } from 'node:readline';
 
 const PROTOCOL_VERSION = '2024-11-05';
@@ -365,6 +365,8 @@ function addTasks({ notebook, tasks, allowDuplicate = false }) {
 //   agent/learnings/<notebook>.md  what any skill has learned about a notebook
 //   agent/learnings/shared.md      what any skill has learned that isn't
 //                                  about one notebook — the user, mostly
+//   agent/questions/…              open questions, the same shape
+//   agent/thoughts/<notebook>.json fingerprints of the Thoughts handled
 //
 // Working state is one skill's own and is rewritten freely. Learnings are
 // every skill's, so they are only ever added to or corrected one entry at a
@@ -419,10 +421,30 @@ function writeJournal({ notebook, content }) {
   return `Journal for "${nb.name}" saved (${text.length} characters).` + scheduleHint();
 }
 
-// MARK: - Learnings
+// MARK: - Learnings and open questions
 
-const LEARNING_LIMIT = 500;
+// Two kinds of shared memory with one shape (see the agent folder above): a
+// file per notebook plus shared.md, one dated line per entry saying which
+// skill wrote it, added and changed one entry at a time. Learnings are what
+// holds; open questions are what isn't settled yet but decisions depend on
+// (THOUGHTS_SPEC.md in the app's repo). A question, once answered, becomes a
+// learning.
+const ENTRY_LIMIT = 500;
 const ENTRY = /^- (\d{4}-\d{2}-\d{2}) · ([^·]+?) · (.*)$/;
+const KINDS = {
+  learnings: {
+    noun: 'learning', title: 'What agents have learned',
+    aboutNotebook: 'About this notebook. Anything not about it is in shared.md.',
+    aboutShared: 'Not about one notebook: the owner, how they work, what holds everywhere.',
+    added: 'Learned', duplicate: 'Already learned',
+  },
+  questions: {
+    noun: 'question', title: 'Open questions',
+    aboutNotebook: "Not settled yet, and decisions here depend on them. Anything not about this notebook is in shared.md.",
+    aboutShared: 'Not settled yet, and not about one notebook.',
+    added: 'Open question recorded', duplicate: 'Already an open question',
+  },
+};
 
 function today() {
   return localTime(new Date()).slice(0, 10);
@@ -432,29 +454,28 @@ function today() {
 function sourceName(source) {
   const name = String(source ?? '').trim().toLowerCase();
   if (!/^[a-z][a-z-]{0,23}$/.test(name)) throw new UserError(
-    'A learning needs `source`: the skill writing it, as one word — "review", "do", "prioritize".');
+    'This needs `source`: the skill writing it, as one word — "review", "do", "prioritize".');
   return name;
 }
 
 // Optional notebook: named, the notebook's file; left out, shared.md.
-function learningsTarget(notebook) {
+function entryTarget(kind, notebook) {
   const given = notebook !== undefined && notebook !== null && String(notebook).trim() !== '';
   const nb = given ? findNotebook(manifest(), notebook) : null;
-  return { nb, path: agentFile('learnings', nb), label: nb ? `"${nb.name}"` : 'shared' };
+  return { nb, path: agentFile(kind, nb), label: nb ? `"${nb.name}"` : 'shared' };
 }
 
-function learningsHeader(nb) {
-  return `# What agents have learned — ${nb ? nb.name : 'shared'}\n\n` +
-    (nb ? `About this notebook. Anything not about it is in shared.md.\n`
-        : `Not about one notebook: the owner, how they work, what holds everywhere.\n`) +
+function entryHeader(kind, nb) {
+  const k = KINDS[kind];
+  return `# ${k.title} — ${nb ? nb.name : 'shared'}\n\n${nb ? k.aboutNotebook : k.aboutShared}\n` +
     `Written by Subnotes' skills, one line each, saying which skill and when. Yours to read and correct.\n\n`;
 }
 
-function readLearningsFile(path) {
+function readEntryFile(path) {
   return existsSync(path) ? readFileSync(path, 'utf8') : null;
 }
 
-function writeLearningsFile(path, text) {
+function writeEntryFile(path, text) {
   mkdirSync(dirname(path), { recursive: true });
   const tmp = `${path}.tmp`;
   writeFileSync(tmp, text);
@@ -465,63 +486,183 @@ function entryCount(text) {
   return text.split('\n').filter(l => ENTRY.test(l)).length;
 }
 
-function readLearnings({ notebook }) {
-  const { nb, path } = learningsTarget(notebook);
+function readEntries(kind, notebook) {
+  const { nb, path } = entryTarget(kind, notebook);
+  const empty = name => `# ${KINDS[kind].title} — ${name}\n\n(nothing yet)\n`;
   const parts = [];
-  if (nb) parts.push(readLearningsFile(path) ?? `# What agents have learned — ${nb.name}\n\n(nothing yet)\n`);
-  parts.push(readLearningsFile(agentFile('learnings', null)) ?? `# What agents have learned — shared\n\n(nothing yet)\n`);
+  if (nb) parts.push(readEntryFile(path) ?? empty(nb.name));
+  parts.push(readEntryFile(agentFile(kind, null)) ?? empty('shared'));
   return parts.join('\n');
 }
 
-function addLearning({ notebook, text, source }) {
-  const who = sourceName(source);
+function oneLine(text, what) {
   const line = String(text ?? '').trim();
-  if (!line) throw new UserError('A learning needs text.');
-  if (line.includes('\n')) throw new UserError('A learning is one line. Split it into two, or say it shorter.');
-  if (line.length > LEARNING_LIMIT) throw new UserError(
-    `A learning is ${line.length} characters, over the ${LEARNING_LIMIT} limit. Say it shorter.`);
-  const { nb, path, label } = learningsTarget(notebook);
-  const current = readLearningsFile(path) ?? learningsHeader(nb);
+  if (!line) throw new UserError(`A ${what} needs text.`);
+  if (line.includes('\n')) throw new UserError(`A ${what} is one line. Split it into two, or say it shorter.`);
+  if (line.length > ENTRY_LIMIT) throw new UserError(
+    `A ${what} is ${line.length} characters, over the ${ENTRY_LIMIT} limit. Say it shorter.`);
+  return line;
+}
+
+function addEntry(kind, { notebook, text, source }) {
+  const k = KINDS[kind];
+  const who = sourceName(source);
+  const line = oneLine(text, k.noun);
+  const { nb, path, label } = entryTarget(kind, notebook);
+  const current = readEntryFile(path) ?? entryHeader(kind, nb);
   // Refused rather than added twice — the same reason as add_task's check.
   const same = current.split('\n').find(l => ENTRY.exec(l)?.[3].trim().toLowerCase() === line.toLowerCase());
-  if (same) throw new UserError(`Already learned, in ${label}: ${same}`);
+  if (same) throw new UserError(`${k.duplicate}, in ${label}: ${same}`);
   // One newline before the entry: a file's last line may lack its own, and a
   // fresh header ends in the blank line that sets it off from the entries.
   const base = entryCount(current) ? current.replace(/\n*$/, '\n') : current;
-  writeLearningsFile(path, base + `- ${today()} · ${who} · ${line}\n`);
+  writeEntryFile(path, base + `- ${today()} · ${who} · ${line}\n`);
   const n = entryCount(current) + 1;
   const crowded = n > 40 ? ` That is ${n} entries: correct or remove what no longer holds.` : '';
-  return `Learned, in ${label}: ${line}${crowded}`;
+  return `${k.added}, in ${label}: ${line}${crowded}`;
 }
 
-// Changes or removes one entry, matched by a piece of its text the way a
-// mutating notebook write would be (see the spec's match precondition): it
-// must pick out exactly one entry, or nothing changes. The old wording stays
-// beside the new, so a correction can itself be judged.
-function correctLearning({ notebook, match, text, reason, source }) {
-  const who = sourceName(source);
+// One entry, matched by a piece of its text the way a mutating notebook write
+// would be (see the spec's match precondition): it must pick out exactly one,
+// or nothing changes.
+function findEntry(kind, notebook, match) {
   const needle = String(match ?? '').trim().toLowerCase();
   if (!needle) throw new UserError('`match` is needed: a piece of the entry\'s text that only it contains.');
-  const why = String(reason ?? '').trim();
-  if (!why) throw new UserError('A correction needs `reason`: why the entry no longer holds.');
-  const { path, label } = learningsTarget(notebook);
-  const current = readLearningsFile(path);
-  if (current === null) throw new UserError(`Nothing learned yet in ${label}.`);
+  const { path, label } = entryTarget(kind, notebook);
+  const current = readEntryFile(path);
+  if (current === null) throw new UserError(`No ${KINDS[kind].noun}s yet in ${label}.`);
   const lines = current.split('\n');
   const hits = lines.map((l, i) => [l, i]).filter(([l]) => ENTRY.exec(l)?.[3].toLowerCase().includes(needle));
   if (hits.length !== 1) throw new UserError(hits.length
     ? `"${match}" matches ${hits.length} entries in ${label}. Use more of the one you mean:\n${hits.map(([l]) => l).join('\n')}`
     : `No entry in ${label} contains "${match}".`);
   const [old, i] = hits[0];
+  return { path, label, lines, i, old, text: ENTRY.exec(old)[3] };
+}
+
+const readLearnings = ({ notebook }) => readEntries('learnings', notebook);
+const addLearning = args => addEntry('learnings', args);
+
+// Changes or removes one learning. The old wording stays beside the new, so a
+// correction can itself be judged.
+function correctLearning({ notebook, match, text, reason, source }) {
+  const who = sourceName(source);
+  const why = String(reason ?? '').trim();
+  if (!why) throw new UserError('A correction needs `reason`: why the entry no longer holds.');
+  const found = findEntry('learnings', notebook, match);
   const replacement = String(text ?? '').trim();
   if (replacement.includes('\n')) throw new UserError('A learning is one line.');
   if (replacement) {
-    lines[i] = `- ${today()} · ${who} · ${replacement} (corrected: ${why}; was: "${ENTRY.exec(old)[3]}")`;
+    found.lines[found.i] = `- ${today()} · ${who} · ${replacement} (corrected: ${why}; was: "${found.text}")`;
   } else {
-    lines.splice(i, 1);
+    found.lines.splice(found.i, 1);
   }
-  writeLearningsFile(path, lines.join('\n'));
-  return replacement ? `Corrected, in ${label}: ${replacement}` : `Removed from ${label}: ${old}`;
+  writeEntryFile(found.path, found.lines.join('\n'));
+  return replacement ? `Corrected, in ${found.label}: ${replacement}` : `Removed from ${found.label}: ${found.old}`;
+}
+
+const readQuestions = ({ notebook }) => readEntries('questions', notebook);
+const addQuestion = args => addEntry('questions', args);
+
+// An answered question leaves the open list and its answer joins the same
+// scope's learnings — the learning is written first, so a refused one leaves
+// the question open rather than lost.
+function closeQuestion({ notebook, match, answer, source }) {
+  const said = String(answer ?? '').trim();
+  if (!said) throw new UserError('`answer` is needed: what settled it. To drop a question nobody will answer, say that.');
+  const found = findEntry('questions', notebook, match);
+  const learned = `Answered: ${found.text.replace(/\?$/, '')}? — ${said}`;
+  oneLine(learned, 'learning');
+  addEntry('learnings', { notebook, text: learned, source });
+  found.lines.splice(found.i, 1);
+  writeEntryFile(found.path, found.lines.join('\n'));
+  return `Closed, in ${found.label}: ${found.text}\nAnd learned: ${learned}`;
+}
+
+// MARK: - Thoughts
+
+// A section called Thoughts, in any case, is where the user writes what's on
+// their mind about a notebook (THOUGHTS_SPEC.md): the user → agents half of
+// the channel Suggestions is the other half of. One word, so a near-miss of
+// the name can't silently opt a notebook out.
+//
+// The review can only append, so it can't clear what it has read. It keeps a
+// fingerprint of each thought instead — a hash of the text, never the text —
+// so nothing the user wrote is copied into the agent folder, and an edited
+// line reads as a new thought.
+const THOUGHTS_HEADING = /^(#{1,3})\s+(.*?)\s*$/;
+
+function thoughtsIn(nb) {
+  const text = readFileSync(join(DIR, nb.file), 'utf8');
+  const lines = text.split('\n');
+  const title = l => {
+    const h = THOUGHTS_HEADING.exec(l);
+    return h ? { level: h[1].length, name: h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim().toLowerCase() } : null;
+  };
+  const start = lines.findIndex(l => title(l)?.name === 'thoughts');
+  if (start < 0) return null;
+  const level = title(lines[start]).level;
+  const thoughts = [];
+  for (const line of lines.slice(start + 1)) {
+    const h = title(line);
+    if (h && h.level <= level) break;
+    if (!line.trim() || h) continue;
+    if (line.startsWith('\t') && thoughts.length) {
+      thoughts[thoughts.length - 1].subs.push(line.trim());
+      continue;
+    }
+    const bare = line.trim().replace(/^(•|-|\d+\.|>)\s+/, '').replace(PRIORITY_TAG, '').trim();
+    if (bare) thoughts.push({ main: bare, subs: [] });
+  }
+  return thoughts.map(t => (t.subs.length ? `${t.main} — ${t.subs.join('; ')}` : t.main));
+}
+
+function fingerprint(text) {
+  return createHash('sha256').update(text.trim()).digest('hex').slice(0, 16);
+}
+
+function thoughtsStore(nb) {
+  return agentFile('thoughts', nb).replace(/\.md$/, '.json');
+}
+
+function handledFingerprints(nb) {
+  try {
+    return new Set(JSON.parse(readFileSync(thoughtsStore(nb), 'utf8')).handled ?? []);
+  } catch {
+    return new Set();
+  }
+}
+
+function newThoughts({ notebook }) {
+  const nb = findNotebook(manifest(), notebook);
+  const thoughts = thoughtsIn(nb);
+  if (thoughts === null) return `"${nb.name}" has no Thoughts section — nothing to read.`;
+  const handled = handledFingerprints(nb);
+  const fresh = thoughts.filter(t => !handled.has(fingerprint(t)));
+  if (!fresh.length) return `No new thoughts in "${nb.name}" (${thoughts.length} handled before).`;
+  return `New thoughts in "${nb.name}" — the user's own words; handle each, then mark_thoughts_handled:\n` +
+    fresh.map((t, i) => `${i + 1}. ${t}`).join('\n');
+}
+
+// Records the given thoughts as handled. Each must be a thought the notebook
+// has now, exactly as new_thoughts gave it. Fingerprints of thoughts no longer
+// in the notebook are dropped, so the store only ever holds what's there.
+function markThoughtsHandled({ notebook, thoughts }) {
+  const nb = findNotebook(manifest(), notebook);
+  const current = thoughtsIn(nb);
+  if (current === null) throw new UserError(`"${nb.name}" has no Thoughts section.`);
+  if (!Array.isArray(thoughts) || !thoughts.length) throw new UserError('No thoughts given.');
+  const now = new Map(current.map(t => [t.trim(), fingerprint(t)]));
+  const missing = thoughts.map(t => String(t).trim()).filter(t => !now.has(t));
+  if (missing.length) throw new UserError(
+    `Not a thought in "${nb.name}" as it stands — pass each exactly as new_thoughts gave it:\n` +
+    missing.map(t => `- ${t}`).join('\n'));
+  const keep = new Set(now.values());
+  const handled = new Set([...handledFingerprints(nb)].filter(f => keep.has(f)));
+  for (const t of thoughts) handled.add(now.get(String(t).trim()));
+  const path = thoughtsStore(nb);
+  writeEntryFile(path, JSON.stringify({ handled: [...handled] }, null, 2) + '\n');
+  return `Marked ${thoughts.length} thought${thoughts.length === 1 ? '' : 's'} handled in "${nb.name}".`;
 }
 
 // Offers /subnotes:schedule once, at the end of a review run by hand — the
@@ -614,6 +755,48 @@ const TOOLS = [
       source: { type: 'string', description: 'The skill correcting it, one word.' },
     }, required: ['match', 'reason', 'source'] },
     run: correctLearning,
+  },
+  {
+    name: 'read_questions',
+    description: "Read the open questions: what isn't settled yet but decisions depend on — about one notebook, if named, and always the shared ones. Read before suggesting or doing work that may hang on one.",
+    inputSchema: { type: 'object', properties: { notebook: { type: 'string', description: 'A connected notebook. Leave out for the shared questions alone.' } } },
+    run: readQuestions,
+  },
+  {
+    name: 'add_question',
+    description: "Record one open question, as one line: something unsettled that decisions depend on (\"Is Mattias as committed as I am to the Strategy idea?\"). Not a task, not a learning. Refuses one already open.",
+    inputSchema: { type: 'object', properties: {
+      notebook: { type: 'string', description: 'The notebook it affects. Leave out when it spans notebooks.' },
+      text: { type: 'string', description: 'The question, one line, never quoting the user at length.' },
+      source: { type: 'string', description: 'The skill recording it, one word: review, do, prioritize.' },
+    }, required: ['text', 'source'] },
+    run: addQuestion,
+  },
+  {
+    name: 'close_question',
+    description: 'Close one open question that has been answered. `match` must pick out exactly one; the answer becomes a learning in the same place.',
+    inputSchema: { type: 'object', properties: {
+      notebook: { type: 'string', description: 'Leave out for the shared questions.' },
+      match: { type: 'string', description: "A piece of the question's text that only it contains." },
+      answer: { type: 'string', description: 'What settled it, one line.' },
+      source: { type: 'string', description: 'The skill closing it, one word.' },
+    }, required: ['match', 'answer', 'source'] },
+    run: closeQuestion,
+  },
+  {
+    name: 'new_thoughts',
+    description: "The thoughts in a notebook's Thoughts section not handled yet — what the user wrote about what's on their mind. Says so when there is no such section.",
+    inputSchema: { type: 'object', properties: { notebook: { type: 'string' } }, required: ['notebook'] },
+    run: newThoughts,
+  },
+  {
+    name: 'mark_thoughts_handled',
+    description: 'Record thoughts as handled, each exactly as new_thoughts gave it, so they are not read again. Keeps a fingerprint, never the text.',
+    inputSchema: { type: 'object', properties: {
+      notebook: { type: 'string' },
+      thoughts: { type: 'array', items: { type: 'string' } },
+    }, required: ['notebook', 'thoughts'] },
+    run: markThoughtsHandled,
   },
   {
     name: 'read_journal',

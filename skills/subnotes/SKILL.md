@@ -132,6 +132,14 @@ what to pick up next, or before judging any notebook's work. It is the user's
 writing like any other notebook — append only to its Suggestions, and only
 when asked.
 
+## Thoughts and open questions
+
+A section called Thoughts is the user's own writing about what's on their
+mind; only the review processes it (`new_thoughts`, `mark_thoughts_handled`).
+`read_questions` gives what's still unsettled — read it alongside the
+learnings before judging a notebook's next step, and close a question
+(`close_question`) when the user answers it.
+
 ## Journals and learnings
 
 `read_journal` and `write_journal` are the review agent's working memory

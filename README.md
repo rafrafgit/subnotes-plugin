@@ -32,6 +32,10 @@ from there instead, without adding this marketplace first.
 - `add_task` / `add_tasks` — append tasks to a notebook
 - `read_learnings` / `add_learning` / `correct_learning` — what the skills
   have learned, about one notebook or about you, shared by all of them
+- `read_questions` / `add_question` / `close_question` — open questions that
+  decisions depend on; an answered one becomes a learning
+- `new_thoughts` / `mark_thoughts_handled` — what's new in a notebook's
+  Thoughts section (fingerprints only, never a copy of the text)
 - `read_journal` / `write_journal` — the review's working memory per notebook
 
 Ask what is on a notebook, or what to pick up next — reading is half the point.
@@ -44,6 +48,11 @@ to Suggestions when one is worth it. `/subnotes:schedule` turns on a daily run:
 your first prompt to Claude Code each day, while Subnotes is open, starts it
 in the background with only this plugin's tools allowed (a `UserPromptSubmit`
 hook, which does nothing until it's turned on). `/subnotes:unschedule` stops it.
+
+A section called **Thoughts** in a notebook is the other direction: write what's
+on your mind about it — "I wonder if Mattias is as committed as I am" — and the
+review turns each new thought into an open question, a learning, or a
+suggestion, without ever quoting it.
 
 `/subnotes:do [notebook]` goes the other way: it reads a notebook's Today and
 Next tasks, sorts them into what Claude can do in this session, what needs
