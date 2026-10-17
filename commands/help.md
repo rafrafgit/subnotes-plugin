@@ -36,6 +36,11 @@ they need.
 - `/subnotes:schedule` runs that review by itself once a day, on the first
   prompt to Claude Code while Subnotes is open;
   `/subnotes:unschedule` stops it.
+- `/subnotes:plan [notebook]` — checks with them that their goals have a
+  measure and a date, that a plan exists for each, and that the plan can reach
+  the goal in time; works out what's missing with them. The review won't
+  suggest anything else in a notebook until it has a goal and a plan, and
+  points here.
 - `/subnotes:do <notebook>` — finds the Today and Next tasks Claude can do in
   this session, and does the one they pick. They mark it Done afterwards.
 

@@ -57,6 +57,12 @@ on your mind about it — "I wonder if Mattias is as committed as I am" — and 
 review turns each new thought into an open question, a learning, or a
 suggestion, without ever quoting it.
 
+`/subnotes:plan [notebook]` checks your goals and plans with you: that each
+goal has a measure and a date, that there's a plan for it, and that the plan
+can get there in time — with the arithmetic shown. It works out what's
+missing with you and adds the next steps you agree to. The review asks for a
+goal and a plan before it suggests anything else, and sends you here.
+
 `/subnotes:do [notebook]` goes the other way: it reads a notebook's Today and
 Next tasks, sorts them into what Claude can do in this session, what needs
 your input first, and what only you can do, then does the one you pick, with
