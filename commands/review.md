@@ -97,8 +97,8 @@ exists.
 goal in Goals it serves — Goals links it or names its work — so it always has
 one. Its plan may be in it, or in what Goals' strategy says about it. With no
 plan, ask for one and make no other suggestion this visit. Its thoughts are
-still read and their intentions still go to Suggestions (step 3): they are
-the user's, not yours. One exception: a dated commitment in the next 14 days
+still read and their intentions and next actions still go to Suggestions
+(step 3): they are the user's, not yours. One exception: a dated commitment in the next 14 days
 — an interview, a deadline — still gets its suggestion.
 
 Asking is one suggestion: "Run /subnotes:plan to write a plan for Work",
@@ -213,6 +213,19 @@ lines.
      stays in the user's own words.
    - **Just thinking aloud:** nothing.
 
+   Then look for a **next action** in every thought you were given, whatever its
+   kind: the user wrote it because it's on their mind, and they want it moved,
+   not only filed. When there's one physical step that would move it toward the
+   purpose, suggest it, besides recording the thought where it goes. For an open
+   question, a step toward settling it ("How do we get Claude to suggest the
+   work?" → "Sketch what a Today skill would hand you each morning"). For a
+   fact, a step it calls for, when there is one ("Typing is slow again" →
+   "Record a trace while typing in the big notebook on iPhone"). For a change of
+   direction, the Goals suggestion is the action. These go ahead of your own
+   ideas, within the two a visit. With more than two, the ones that matter most
+   for the purpose now; the open questions keep the rest. When no step would
+   change anything, don't invent one.
+
    Anything you record from a thought takes source `thoughts`, never
    `review`, so the user can tell what they raised from what you noticed.
 
@@ -318,7 +331,7 @@ a write can't be taken back:
 Subnotes — 1 suggestion:
  * Sketch the morning review's output
 Friends of AI — nothing to add (last change 2 days ago, next step clear)
-AI Native — 2 thoughts read: an open question, a suggestion
+AI Native — 2 thoughts read: an open question with a next step, a suggestion
 Work — paused: no plan yet (asked 2026-10-10; /subnotes:plan)
 ```
 
