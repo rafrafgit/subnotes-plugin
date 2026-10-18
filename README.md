@@ -34,7 +34,7 @@ from there instead, without adding this marketplace first.
   have learned, about one notebook or about you, shared by all of them
 - `read_questions` / `add_question` / `close_question` — open questions that
   decisions depend on; an answered one becomes a learning
-- `new_thoughts` / `mark_thoughts_seen` — a notebook's new and still-open
+- `new_thoughts` / `mark_thoughts_seen` — a notebook's new and still-open `#idea`
   thoughts, with what became of each (fingerprints only, never a copy of the text)
 - `read_journal` / `write_journal` — the review's working memory per notebook
 - `review_context` — everything a review visit needs, for several notebooks in
@@ -45,20 +45,20 @@ Ask what is on a notebook, or what to pick up next — reading is half the point
 Say "put that on the backlog" mid-conversation and it lands in the right
 notebook and section, or use `/subnotes:add <thing>` to be explicit.
 
-`/subnotes:review` reads each notebook that has a purpose and a section called
-Suggestions, remembers earlier visits in a journal, and proposes a next step or
+`/subnotes:review` reads each notebook that has a purpose, remembers earlier visits in a journal, and proposes a next step or
 two when one is worth it: run by hand, you keep, drop or change each one in
 Claude Code, and a kept one goes straight to the section it belongs in; the
-daily run adds them to Suggestions.
+daily run adds them as tasks tagged `#idea` in the section they're about.
 `/subnotes:schedule` turns on a daily run:
 your first prompt to Claude Code each day, while Subnotes is open, starts it
 in the background with only this plugin's tools allowed (a `UserPromptSubmit`
 hook, which does nothing until it's turned on). `/subnotes:unschedule` stops it.
 
-A section called **Thoughts** in a notebook is the other direction: write what's
-on your mind about it — "I wonder if Mattias is as committed as I am" — and the
-review turns each new thought into an open question, a learning, or a
-suggestion, without ever quoting it.
+Tag any line `#idea` for the other direction: write what's on your mind,
+where it belongs — "I wonder if Mattias is as committed as I am #idea" — and
+the review turns each new one into an open question, a learning, or a
+suggestion, without ever quoting it. Its own suggestions are `#idea` tasks
+too: schedule one or take the tag off to accept it.
 
 `/subnotes:plan [notebook]` checks your goals and plans with you: that each
 goal has a measure and a date, that there's a plan for it, and that the plan

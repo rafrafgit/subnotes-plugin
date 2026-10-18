@@ -12,21 +12,23 @@ $ARGUMENTS
 
 ## Which notebooks
 
-Call `list_notebooks`. Review a notebook only when it has both:
+Call `list_notebooks`. Review every connected notebook that has a
+**purpose** — the user's own words for what they want from it. Never write,
+infer or rephrase one. Connecting a notebook and giving it a purpose is the
+opt-in.
 
-- a **purpose** — the user's own words for what they want from it. Never write,
-  infer or rephrase one. A notebook without a purpose is skipped: there is
-  nothing to work toward.
-- a section called **Suggestions** (any case) — the user's opt-in, and the only
-  place you write unasked.
+**Ideas are tasks tagged `#idea`** (2026-10-18), not sections: an idea is a
+task that isn't decided yet (THOUGHTS_SPEC.md, "Idea as a task state"). The
+user's ideas and yours look the same — you know yours from the journal. There
+is no Thoughts section to read and no Suggestions section to write to; a
+section that still has one of those names is just a section.
 
-A notebook that doesn't qualify but has a section called **Thoughts**, or
-lines tagged `#idea`, still has its new thoughts read (step 3) — Thoughts is
-an opt-in of its own — and nothing else done in it.
+A notebook without a purpose still has its `#idea` lines read (step 3) — the
+user tagging one is an opt-in of its own — and nothing else done in it.
 
-If a notebook was named above, review just that one, and if it lacks either,
-say which and stop. Otherwise review every notebook that qualifies, one at a
-time, and list the ones skipped and why at the end, in one line each.
+If a notebook was named above, review just that one, and if it has no
+purpose, say so and stop. Otherwise review every notebook that qualifies, one
+at a time, and list the ones skipped and why at the end, in one line each.
 
 ## Read everything at once
 
@@ -37,11 +39,11 @@ has one more write turn after the user has kept or dropped your suggestions
 
 - `review_context` once, with every notebook you'll visit, Goals included.
   It gives the shared learnings and open questions once, then for each
-  notebook its journal, learnings, open questions, new thoughts and **what
+  notebook its journal, learnings, open questions, `#idea` lines and **what
   changed** since your last visit — not the whole notebook, which you get
   only on a first visit or when most of it is new.
 - `read_notebook` for the Goals notebook, which you read whole every time.
-- `new_thoughts` for each notebook that is only there for its Thoughts.
+- `new_thoughts` for each notebook that is only there for its `#idea` lines.
 
 Read the whole of another notebook (`read_notebook`) only when what changed
 isn't enough to judge it — a first step for a task the change list doesn't
@@ -89,17 +91,17 @@ This gate is for what is **absent**, not what is imperfect. When in doubt, it
 exists.
 
 **In the Goals notebook,** first, before any other notebook:
-- No goal anywhere in it: ask for one in its Suggestions, and stop the whole
-  review there. No other notebook is visited; their journals stay as they are.
+- No goal anywhere in it: ask for one, as an idea in it (step 6), and stop
+  the whole review there. No other notebook is visited; their journals stay as they are.
 - Goals but no plan for them, in Goals or in a notebook it names: the same,
   asking for the plan.
 
 **In each notebook,** its goal is its purpose, any goal it states, and any
 goal in Goals it serves — Goals links it or names its work — so it always has
 one. Its plan may be in it, or in what Goals' strategy says about it. With no
-plan, ask for one and make no other suggestion this visit. Its thoughts are
-still read and their intentions and next actions still go to Suggestions
-(step 3): they are the user's, not yours. One exception: a dated commitment in the next 14 days
+plan, ask for one and make no other suggestion this visit. Its `#idea`
+lines are still read and their intentions and next actions still get
+suggestions (step 3): they are the user's, not yours. One exception: a dated commitment in the next 14 days
 — an interview, a deadline — still gets its suggestion.
 
 Asking is one suggestion: "Run /subnotes:plan to write a plan for Work",
@@ -171,13 +173,17 @@ lines.
    what the notebook shows of it — read from the notebook, not your memory.
    When it says the journal words one differently, find it yourself. Each
    one is:
-   - scheduled, moved out of Suggestions, or done — **accepted**
+   - scheduled, `#idea` taken off, or done — **accepted**
    - done with a `Why dropped:` subnote — **declined**, for that reason
    - queued, not yet in the notebook — **waiting**: it hasn't arrived, so
      it can't have been seen
    - gone from the notebook — **declined**
-   - still in Suggestions, unchanged — **waiting**; after 7 days, **ignored**
-     (drop it from the open list, and don't raise it again)
+   - still an `#idea`, unscheduled — **waiting**; after 7 days, **ignored**
+     (drop it from the open list, and don't raise it again). It stays in the
+     notebook as an `#idea` line: mark it seen, `became` "own suggestion,
+     ignored", so it never reads as the user's
+   - still in a Suggestions section from before 2026-10-18, unscheduled —
+     the same as an `#idea`
 
    Add what an outcome teaches you about what this user wants
    (`add_learning`, source `review`) — that is the point of looking. About
@@ -200,17 +206,16 @@ lines.
    reason. You keep the learnings tidy for every skill: if a file runs past
    40 entries, merge or drop the weakest.
 
-3. **Read new thoughts,** if the notebook has a section called Thoughts or
-   lines tagged `#idea` (under Thoughts in `review_context`).
-
-   **`#idea` is a test** (2026-10-18) of ideas as a state of a task rather
-   than a section (THOUGHTS_SPEC.md, "Idea as a task state"). A line tagged
-   `#idea` anywhere is a thought, read with where it sits: "· under: <task>"
+3. **Read new thoughts:** the notebook's lines tagged `#idea`, under "Ideas"
+   in `review_context`. Each is read with where it sits: "· under: <task>"
    is a subtask or subnote of that task, so it's input on that task, and
-   "· in: <section>" is about that section. One the journal lists as your
-   own kept idea is yours, not the user's: mark it seen ("own idea") and
-   follow it as an open suggestion instead — but comment on it when the
-   notebook shows it changed or sitting unmoved.
+   "· in: <section>" is about that section.
+
+   One marked "your own open suggestion" — or seen before with a `became`
+   that says it's yours — is yours, not the user's: mark it seen ("own
+   suggestion") and follow it in step 2 instead. When the user has added a
+   subnote or subtask to it, that is their reply: read it as a thought on
+   that suggestion.
 
    This is the user telling the brain what's on their mind
    about this notebook — doubts, hunches, intentions — and the most direct
@@ -222,20 +227,18 @@ lines.
    - **A fact, as said by the user** ("I'm drained after interviews"):
      `add_learning`, source `thoughts`, for this notebook — never the shared
      learnings, unless this notebook is Goals.
-   - **An intention** ("I should call the recruiter"): a suggestion in this
-     notebook's Suggestions (step 6), ahead of your own ideas. If the
-     notebook has no Suggestions, record it as an open question instead
-     ("Still meaning to call the recruiter?").
+   - **An intention** ("I should call the recruiter"): a suggestion (step
+     6), ahead of your own ideas — in a notebook without a purpose too,
+     since the user asked by tagging it.
    - **A problem** with the notebook's work — something broken, slow or
      wrong ("typing in the big notebook is slow again"): the user wants it
      fixed, so it goes where an intention does — a suggestion to fix it,
-     ahead of your own ideas, or an open question when there's no
-     Suggestions. Not a learning: a problem that only sits in the learnings
-     never becomes work. (A lasting fact it reveals, such as which notebook
-     is the largest, can be a learning as well.)
+     ahead of your own ideas. Not a learning: a problem that only sits in
+     the learnings never becomes work. (A lasting fact it reveals, such as
+     which notebook is the largest, can be a learning as well.)
    - **A change of direction** ("making money from this matters less now"):
-     a suggestion in the Goals notebook's Suggestions to update it — Goals
-     stays in the user's own words.
+     a suggestion in the Goals notebook to update it, in the section it
+     touches — Goals stays in the user's own words.
    - **Just thinking aloud:** nothing.
 
    Then look for a **next action** in every thought you were given, whatever its
@@ -260,12 +263,12 @@ lines.
    thought that answers an open question closes it (`close_question`), and
    the answer becomes a learning.
 
-   **A thought stays open until the user deletes it** — that is how they
-   say it's dealt with, not your suggestion. Thoughts seen on an earlier
-   visit come back under "Seen before and still open", with what became of
-   them. Their learnings and questions are already recorded; what's left is
-   their suggestion:
-   - still in Suggestions, or accepted — nothing: it's the user's now
+   **A thought stays open until the user deletes it, marks it Done or takes
+   the tag off** — that is how they say it's dealt with, not your
+   suggestion. Thoughts seen on an earlier visit come back under "Seen
+   before and still open", with what became of them. Their learnings and
+   questions are already recorded; what's left is their suggestion:
+   - still waiting as an `#idea`, or accepted — nothing: it's the user's now
    - declined (gone, not done) while the thought stays — the idea wasn't
      good, and the thought still matters: suggest a different one, with
      options (step 6), never the same again. Keep trying on later visits
@@ -342,9 +345,13 @@ lines.
    that would hold missing context is fine.
 
 6. **Write** at most two suggestions, and at most twenty in any 7 days for this
-   notebook (count them in the journal). Each one:
-   - with `add_task`, section `Suggestions`, **no priority** — the user
-     schedules what they accept
+   notebook (count them in the journal). Each one is an idea:
+   - with `add_task`, its text ending ` #idea`, **no priority** — the user
+     accepts one by scheduling it or taking the tag off
+   - **where it belongs:** the existing section (from `list_notebooks`) the
+     work is about — the section an `#idea` you're answering sits in, its
+     task's section for one under a task — Backlog when none fits better.
+     You can only append to the end of a section, and can't write a subtask
    - text: one physical, visible action, in the user's language and voice —
      first person, as they'd write it themselves: "Connect my Personal
      notebook", never "Connect your Personal notebook". The `Why:` is you
@@ -373,15 +380,14 @@ lines.
    and hold three: the suggestions, `mark_thoughts_seen`, and the journal.
    Show the suggestions in the report (see Then report) and wait. Then, in
    one turn:
-   - **kept:** the user has accepted it, so it doesn't go to Suggestions to
-     be accepted again: `add_task` it as the task itself, to the section it
-     belongs in — an existing one from `list_notebooks`, Backlog when none
-     fits better — with no priority and its subnotes and `Why:`. Never a task
-     about adding a task. **changed:** the same, with the user's version
-     (2026-10-18). A reply to an `#idea` goes to the end of the section the
-     idea sits in — its task's section for one under a task, since you can
-     only append — tagged `#idea` itself, so the user accepts it by
-     scheduling it and removing the tag (test, 2026-10-18)
+   - **kept:** the user has accepted it, so it isn't written as an idea to
+     be accepted again: `add_task` it as the task itself, without `#idea`,
+     where it belongs (as above), with no priority and its subnotes and
+     `Why:`. Never a task about adding a task. **changed:** the same, with
+     the user's version (2026-10-18). One exception: a reply to the user's
+     `#idea` keeps the tag, so the user accepts it by scheduling it and
+     taking the tag off — keeping the reply here only says it's worth
+     writing (2026-10-18)
    - **dropped:** nothing in the notebook. Add a learning when the drop, or
      a reason the user gives, teaches something that will still hold; name
      it in the journal's Observations ("dropped at review: …") so it is
@@ -394,8 +400,8 @@ lines.
      the twenty
 
    A visit with no suggestions makes all its writes at once. On a
-   `--scheduled` run, nobody is there to answer: write the suggestions to
-   Suggestions as above, unasked.
+   `--scheduled` run, nobody is there to answer: write the suggestions as
+   `#idea` tasks as above, unasked.
 
 7. **Rewrite the journal** (`write_journal`) — the whole journal, kept short.
    Writing it also marks the notebook as seen: the next visit's change list
@@ -423,8 +429,9 @@ lines.
 
    This is your working state, not what you've learned — that went to
    `add_learning` above, where other skills can use it. **Facts, not plans:**
-   - each open suggestion's text exactly as you wrote it to Suggestions, so
-     the next visit can find it in the notebook
+   - each open suggestion's text exactly as you wrote it, without the
+     `#idea` tag, so the next visit can find it in the notebook and tell it
+     from the user's ideas
    - observations are what the notebook showed, dated — never what you mean
      to suggest next time. That is decided fresh each visit, from the
      notebook, and a plan written down ahead goes stale the moment the user
@@ -456,8 +463,8 @@ for a line at the end of the report, add it last. No other commentary.
 
 On a run by hand, the report names suggestions as proposed, not written
 ("Subnotes — 1 suggestion proposed"), and ends with them, numbered across
-notebooks, each with the section a kept one goes to, and its subnotes and
-`Why:` as they would be written:
+notebooks, each with the section it goes to, and its subnotes and `Why:` as
+they would be written:
 
 ```
 Proposed — keep, drop or change each (or "keep all"):
@@ -485,8 +492,8 @@ offer the next one.
 
 ## Limits
 
-- Only `Suggestions` gets written to, and on a run by hand the section of a
-  suggestion the user kept. Nothing else in a notebook is yours.
+- You write only `#idea` tasks, at the end of an existing section, and on a
+  run by hand the task the user kept. Nothing else in a notebook is yours.
 - Writes only ever add: you can't edit, complete, move or delete anything, so
   never claim to have.
 - Never write or change a purpose.

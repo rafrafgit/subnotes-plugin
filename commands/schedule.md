@@ -26,10 +26,9 @@ reported.
 1. **macOS.** `uname` is `Darwin`. Otherwise say this needs a Mac, as the
    connector does.
 2. **Something to review.** Call `list_notebooks`. If it errors, that error is
-   the answer (`/subnotes:help` walks through setup). If no notebook has both
-   a purpose and a section called Suggestions, say a daily review would have
-   nothing to do, and that adding a Suggestions section is how a notebook
-   opts in.
+   the answer (`/subnotes:help` walks through setup). If no notebook has a
+   purpose, say a daily review would have nothing to do, and that giving a
+   notebook a purpose is how it opts in.
 
 Then `mkdir -p ~/.claude/subnotes && touch ~/.claude/subnotes/daily-review`.
 
@@ -51,7 +50,7 @@ Why it works this way, so it isn't "improved" later:
   prompt.
 - **`--allowedTools` is the plugin's own tools and nothing else.** Nobody is
   there to approve a tool call, and notebook text is not the user typing — so
-  the run can read notebooks, write journals and add to Suggestions, and
+  the run can read notebooks, write journals and add `#idea` tasks, and
   cannot run commands, edit files or reach the web.
 
 ## Then report

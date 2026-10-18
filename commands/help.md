@@ -26,13 +26,13 @@ they need.
 - `/subnotes:review` — a review agent per notebook: it reads the notebook
   against its purpose, remembers earlier visits in a journal, keeps what it
   learns about the notebook and about them where every skill reads it, and
-  suggests a next step or two in a section called Suggestions. It reviews only notebooks
-  that have a purpose and a Suggestions section, so adding that section is how
-  a notebook opts in.
-- A section called **Thoughts** is the other direction: what's on their mind
-  about a notebook — doubts, hunches, intentions. The review reads what's new
-  there each visit and turns it into open questions, learnings, or
-  suggestions, never quoting it. Opt-in per notebook, like Suggestions.
+  suggests a next step or two as tasks tagged `#idea`, in the section they're
+  about. It reviews every connected notebook that has a purpose.
+- Tagging any line `#idea` is the other direction: what's on their mind about
+  a notebook — doubts, hunches, intentions — written where it belongs. The
+  review reads new ones each visit and turns them into open questions,
+  learnings, or suggestions, never quoting them. An idea is accepted by
+  scheduling it or taking the tag off.
 - `/subnotes:schedule` runs that review by itself once a day, on the first
   prompt to Claude Code while Subnotes is open;
   `/subnotes:unschedule` stops it.

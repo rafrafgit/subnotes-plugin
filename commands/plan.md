@@ -80,16 +80,16 @@ Goals › Strategy, as a new first line:
 - Land an education role by March 2027: the income that carries the rest.
 ```
 
-and put them where they'll see them: a task in that notebook's Suggestions
-("Add as the first line of Strategy"), with the agreed lines as subnotes and
-a last subnote "Why: agreed in /subnotes:plan, <today>", so the review knows
-it isn't its own. Not when they say they've already written it in. A
-notebook without Suggestions keeps the lines in the chat only.
+and put them where they'll see them: a task at the end of the section they
+go in, tagged `#idea` ("Add as the first line of Strategy #idea"), with the
+agreed lines as subnotes and a last subnote "Why: agreed in
+/subnotes:plan, <today>", so the review knows it isn't its own. Not when
+they say they've already written it in.
 
 Then the next steps that follow from it, as tasks, in the first person ("Ask
 my manager…", not "Ask your manager…"). Show them, with the section
 each goes in, and add them (`add_tasks`) only when they say yes, into a
-section that exists — the one the work belongs in, not Suggestions: they've
+section that exists — the one the work belongs in, without `#idea`: they've
 already accepted them. Scheduled as they agree; leave priority out if they
 don't say.
 
@@ -111,7 +111,7 @@ notebook.
 
 ```
 Goals — goal clear; strategy has no route to the 5k by August 2027
- Agreed: education job first (lines for Strategy in Goals › Suggestions)
+ Agreed: education job first (lines for Strategy in Goals › Strategy, as an #idea)
  Added: 2 tasks to Work › Backlog
 Subnotes — serves learning, not income; Goals says so. No gap.
 ```

@@ -33,10 +33,9 @@ here too. A task that hangs on an open question goes to "with your input",
 naming the question. Take its open tasks scheduled
 `[Today]`, then `[Next]`. If that gives fewer than three, add `[Soon]` ones and say that
 you did. Skip `[Done]` and unscheduled tasks, and headings: a scheduled
-heading is a project, not a task. In a section called Suggestions, skip what
-is still unscheduled — the review's ideas, not the user's decisions yet — but
-take one the user has scheduled: that is how they accept a suggestion, often
-leaving it where it is.
+heading is a project, not a task. A task tagged `#idea` is an idea, not a
+decision yet — skip it while it's unscheduled, but take one the user has
+scheduled: that is how they accept it, often leaving the tag on.
 
 ## Sort them honestly
 

@@ -379,7 +379,7 @@ function addTasks({ notebook, tasks, allowDuplicate = false }) {
 //   agent/learnings/shared.md      what any skill has learned that isn't
 //                                  about one notebook — the user, mostly
 //   agent/questions/…              open questions, the same shape
-//   agent/thoughts/<notebook>.json fingerprints of the Thoughts seen, and what became of each
+//   agent/thoughts/<notebook>.json fingerprints of the #idea lines seen, and what became of each
 //
 // Working state is one skill's own and is rewritten freely. Learnings are
 // every skill's, so they are only ever added to or corrected one entry at a
@@ -642,63 +642,40 @@ function closeQuestion({ notebook, match, answer, source }) {
 
 // MARK: - Thoughts
 
-// A section called Thoughts, in any case, is where the user writes what's on
-// their mind about a notebook (THOUGHTS_SPEC.md): the user → agents half of
-// the channel Suggestions is the other half of. One word, so a near-miss of
-// the name can't silently opt a notebook out.
+// A line tagged #idea, anywhere in a notebook, is the user telling the
+// agents what's on their mind (THOUGHTS_SPEC.md, "Idea as a task state"): an
+// idea is a task that isn't decided yet. It replaced the Thoughts and
+// Suggestions sections on 2026-10-18 — the review writes its own suggestions
+// as #idea tasks too, and knows them from its journal. Done ones are dealt
+// with. Each says where it sits, so the review reads a subtask's idea with the
+// task it's about — and so moving one reads as a new thought, as editing one
+// does.
 //
 // The review can only append, so it can't clear what it has read. It keeps a
 // fingerprint of each thought instead — a hash of the text, never the text —
 // so nothing the user wrote is copied into the agent folder, and an edited
 // line reads as a new thought.
-const THOUGHTS_HEADING = /^(#{1,3})\s+(.*?)\s*$/;
-
-// A test of ideas as a state of a task rather than a section (THOUGHTS_SPEC.md,
-// "Idea as a task state"): a line tagged #idea, anywhere in the notebook, is
-// read like a thought. Done ones are dealt with. Each says where it sits, so
-// the review reads a subtask's idea with the task it's about — and so moving
-// one reads as a new thought, as editing one does.
+const HEADING = /^(#{1,3})\s+(.*?)\s*$/;
 const IDEA_TAG = /(^|\s)#idea(?!\w)/i;
 const IDEA_TAG_ALL = /(^|\s)#idea(?!\w)/gi;
 const DONE_TAG = /\[Done\]\s*$/i;
+
+const withoutIdeaTag = t => t.replace(IDEA_TAG_ALL, ' ').replace(/\s+/g, ' ').trim();
 
 // Only a tagged line loses its tag, so a thought seen before keeps its
 // fingerprint exactly.
 const bareLine = l => {
   const bare = l.trim().replace(/^(•|-|\d+\.|>)\s+/, '').replace(PRIORITY_TAG, '').trim();
-  return IDEA_TAG.test(bare) ? bare.replace(IDEA_TAG_ALL, ' ').replace(/\s+/g, ' ').trim() : bare;
+  return IDEA_TAG.test(bare) ? withoutIdeaTag(bare) : bare;
 };
 
 function thoughtsIn(nb) {
-  const text = readFileSync(join(DIR, nb.file), 'utf8');
-  const lines = text.split('\n');
-  const title = l => {
-    const h = THOUGHTS_HEADING.exec(l);
-    return h ? { level: h[1].length, name: h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim().toLowerCase() } : null;
-  };
-  const start = lines.findIndex(l => title(l)?.name === 'thoughts');
-  let end = start;
+  const lines = readFileSync(join(DIR, nb.file), 'utf8').split('\n');
   const thoughts = [];
-  if (start >= 0) {
-    const level = title(lines[start]).level;
-    for (end = start + 1; end < lines.length; end++) {
-      const line = lines[end];
-      const h = title(line);
-      if (h && h.level <= level) break;
-      if (!line.trim() || h) continue;
-      if (line.startsWith('\t') && thoughts.length) {
-        thoughts[thoughts.length - 1].subs.push(line.trim());
-        continue;
-      }
-      const bare = bareLine(line);
-      if (bare) thoughts.push({ main: bare, subs: [] });
-    }
-  }
   let section = null, parent = null;
   for (let i = 0; i < lines.length; i++) {
-    if (start >= 0 && i >= start && i < end) continue;
     const line = lines[i];
-    const h = THOUGHTS_HEADING.exec(line);
+    const h = HEADING.exec(line);
     if (h) { section = h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim(); parent = null; continue; }
     if (!line.trim()) continue;
     const nested = line.startsWith('\t');
@@ -711,8 +688,8 @@ function thoughtsIn(nb) {
     const where = nested && parent ? `under: ${parent}` : section ? `in: ${section}` : 'at the top';
     thoughts.push({ main, subs, where });
   }
-  if (start < 0 && !thoughts.length) return null;
-  return thoughts.map(t => (t.subs.length ? `${t.main} — ${t.subs.join('; ')}` : t.main) + (t.where ? ` · ${t.where}` : ''));
+  if (!thoughts.length) return null;
+  return thoughts.map(t => (t.subs.length ? `${t.main} — ${t.subs.join('; ')}` : t.main) + ` · ${t.where}`);
 }
 
 function fingerprint(text) {
@@ -724,7 +701,7 @@ function thoughtsStore(nb) {
 }
 
 // What the review did with each thought it has seen, by fingerprint:
-// { date, became }. A thought stays open while it's in the section — the
+// { date, became }. A thought stays open while it's in the notebook — the
 // user deletes it when it's dealt with (2026-10-18) — so a seen one comes
 // back each visit beside what became of it, for the review to follow up.
 // The store from before kept bare fingerprints under `handled`.
@@ -742,21 +719,24 @@ function seenThoughts(nb) {
 function newThoughts({ notebook }) {
   const nb = findNotebook(manifest(), notebook);
   const thoughts = thoughtsIn(nb);
-  if (thoughts === null) return `"${nb.name}" has no Thoughts section and no #idea lines — nothing to read.`;
+  if (thoughts === null) return `"${nb.name}" has no #idea lines — nothing to read.`;
   const seen = seenThoughts(nb);
+  // The review's own suggestions are #idea tasks too: the journal says which.
+  const own = openSuggestionsIn(journalText(nb));
+  const mine = t => own.some(o => sameText(t.split(' — ')[0].split(' · ')[0], o)) ? ' (your own open suggestion, from the journal)' : '';
   const fresh = thoughts.filter(t => !seen[fingerprint(t)]);
   const open = thoughts.filter(t => seen[fingerprint(t)]);
   const parts = [];
   if (fresh.length) parts.push(
-    `New thoughts in "${nb.name}" — the user's own words; handle each, then mark_thoughts_seen:\n` +
-    fresh.map((t, i) => `${i + 1}. ${t}`).join('\n'));
+    `New thoughts in "${nb.name}" — the user's own words, unless marked as yours; handle each, then mark_thoughts_seen:\n` +
+    fresh.map((t, i) => `${i + 1}. ${t}${mine(t)}`).join('\n'));
   else parts.push(`No new thoughts in "${nb.name}".`);
   if (open.length) parts.push(
     `Seen before and still open — the user deletes a thought once it's dealt with:\n` +
     open.map((t, i) => {
       const { date, became } = seen[fingerprint(t)];
       const note = [date && `seen ${date}`, became && `became: ${became}`].filter(Boolean).join(', ');
-      return `${i + 1}. ${t} (${note || 'marked under the old rule, which closed it once filed: take it as new, once'})`;
+      return `${i + 1}. ${t} (${note || 'marked under the old rule, which closed it once filed: take it as new, once'})${mine(t)}`;
     }).join('\n'));
   return parts.join('\n\n');
 }
@@ -768,7 +748,7 @@ function newThoughts({ notebook }) {
 function markThoughtsSeen({ notebook, thoughts }) {
   const nb = findNotebook(manifest(), notebook);
   const current = thoughtsIn(nb);
-  if (current === null) throw new UserError(`"${nb.name}" has no Thoughts section and no #idea lines.`);
+  if (current === null) throw new UserError(`"${nb.name}" has no #idea lines.`);
   if (!Array.isArray(thoughts) || !thoughts.length) throw new UserError('No thoughts given.');
   const given = thoughts.map(t => (typeof t === 'string' ? { text: t } : t ?? {}))
     .map(t => ({ text: String(t.text ?? '').trim(), became: t.became ? String(t.became).trim() : undefined }));
@@ -794,7 +774,7 @@ function markThoughtsSeen({ notebook, thoughts }) {
 // snapshot of each notebook as it last saw it, and review_context shows only
 // what differs from it.
 //
-// Fingerprints again, as for Thoughts: a hash per line, never the line, so
+// Fingerprints again, as for thoughts: a hash per line, never the line, so
 // nothing the user wrote is copied into the agent folder. Section names are
 // kept as text — they're already in the manifest — and so is each task's
 // priority, which is what lets a changed line say "was Next".
@@ -919,47 +899,64 @@ function sharedEntryLines(kind) {
   return lines.length ? lines.join('\n') : '(none)';
 }
 
+// The suggestions the journal lists as open: a journal line is
+// "- date — the suggestion's text — why: …", the text as it was written to
+// the notebook, without its #idea tag.
+function openSuggestionsIn(journal) {
+  const block = /^## Open suggestions\s*$([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(journal);
+  if (!block) return [];
+  return block[1].split('\n').filter(l => /^\s*-\s/.test(l)).map(l => {
+    const body = l.replace(/^\s*-\s*/, '').replace(/^\d{4}-\d{2}-\d{2}\s*[—-]\s*/, '');
+    return withoutIdeaTag(body.split(/\s+—\s+/)[0]);
+  }).filter(Boolean);
+}
+
+// Case, punctuation and a parenthetical aside don't count.
+const normText = t => t.toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/[^\p{L}\p{N}\s]/gu, '').replace(/\s+/g, ' ').trim();
+function sameText(a, b) {
+  const x = normText(a), y = normText(b);
+  if (x === y) return true;
+  const n = Math.min(x.length, y.length, 40);
+  return n >= 15 && x.slice(0, n) === y.slice(0, n);
+}
+
+function journalText(nb) {
+  const journal = journalPath(nb);
+  return existsSync(journal) ? readFileSync(journal, 'utf8').trim() : '';
+}
+
 // What became of each suggestion the journal lists as open, read from the
 // notebook as it stands rather than left to the journal: the journal is the
 // review's own notes and goes stale, the notebook doesn't (2026-10-18). A
-// journal line is "- date — the suggestion's text — why: …", the text as it
-// was written to Suggestions.
+// suggestion is an #idea task until the user schedules it, marks it Done or
+// takes the tag off; the Suggestions section it used to go to still counts,
+// for the ones written there before.
 function openSuggestionStatus(nb, text, journal) {
-  const block = /^## Open suggestions\s*$([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(journal);
-  if (!block) return [];
-  const wanted = block[1].split('\n').filter(l => /^\s*-\s/.test(l)).map(l => {
-    const body = l.replace(/^\s*-\s*/, '').replace(/^\d{4}-\d{2}-\d{2}\s*[—-]\s*/, '');
-    return body.split(/\s+—\s+/)[0].trim();
-  }).filter(Boolean);
+  const wanted = openSuggestionsIn(journal);
   if (!wanted.length) return [];
-  // Case, punctuation and a parenthetical aside don't count.
-  const norm = t => t.toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/[^\p{L}\p{N}\s]/gu, '').replace(/\s+/g, ' ').trim();
-  const same = (a, b) => {
-    const x = norm(a), y = norm(b);
-    if (x === y) return true;
-    const n = Math.min(x.length, y.length, 40);
-    return n >= 15 && x.slice(0, n) === y.slice(0, n);
-  };
   const tasks = [];
   let section = '';
   for (const line of text.split('\n')) {
-    const h = /^(#{1,3})\s+(.*?)\s*$/.exec(line);
+    const h = HEADING.exec(line);
     if (h) { section = h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim(); continue; }
     const t = TASK_LINE.exec(line);
     if (!t) continue;
     const tag = /\s*\[([^\]]+)\]\s*$/.exec(t[1]);
-    tasks.push({ text: (tag ? t[1].slice(0, tag.index) : t[1]).trim(), tag: tag?.[1], section });
+    const body = (tag ? t[1].slice(0, tag.index) : t[1]).trim();
+    tasks.push({ text: withoutIdeaTag(body), idea: IDEA_TAG.test(body), tag: tag?.[1], section });
   }
   const queued = queuedTasks(nb);
   return wanted.map(w => {
-    const found = tasks.find(t => same(t.text, w));
+    const found = tasks.find(t => sameText(t.text, w));
     let status;
     if (found) {
-      const where = found.section.toLowerCase() === 'suggestions' ? '' : ` in ${found.section || 'the top of the notebook'}`;
+      const where = ` in ${found.section || 'the top of the notebook'}`;
       if (found.tag?.toLowerCase() === 'done') status = `done${where} — accepted`;
       else if (found.tag) status = `scheduled [${found.tag}]${where} — accepted`;
-      else status = where ? `moved${where} — accepted` : 'still in Suggestions, unscheduled — waiting';
-    } else if (queued.some(q => same(q.text, w))) status = 'queued, not in the notebook yet — waiting';
+      else if (found.idea) status = `still an #idea, unscheduled,${where} — waiting`;
+      else if (found.section.toLowerCase() === 'suggestions') status = 'still in Suggestions, unscheduled — waiting';
+      else status = `#idea taken off${where} — accepted`;
+    } else if (queued.some(q => sameText(withoutIdeaTag(q.text), w))) status = 'queued, not in the notebook yet — waiting';
     else status = 'not in the notebook — declined, cleared after Done, or the journal words it differently';
     return `- ${w}: ${status}`;
   });
@@ -971,7 +968,6 @@ function contextFor(nb) {
     const lines = (readEntryFile(agentFile(kind, nb)) ?? '').split('\n').filter(l => ENTRY.test(l));
     return lines.length ? lines.join('\n') : '(none)';
   };
-  const journal = journalPath(nb);
   const old = readSnapshot(snapshotPath(nb));
   const changes = old ? changesSince(old, text) : null;
 
@@ -985,14 +981,14 @@ function contextFor(nb) {
   writeEntryFile(snapshotPath(nb, true), JSON.stringify(snapshotOf(text)) + '\n');
 
   const notes = connectorNotes(nb);
-  const journalText = existsSync(journal) ? readFileSync(journal, 'utf8').trim() : '';
-  const status = openSuggestionStatus(nb, text, journalText);
+  const journal = journalText(nb);
+  const status = openSuggestionStatus(nb, text, journal);
   return [
     `# ${nb.name}`,
     ...(nb.purpose ? [`Purpose: ${nb.purpose}`] : []),
     '',
     '## Journal',
-    journalText || 'No journal yet — this is the first review of it.',
+    journal || 'No journal yet — this is the first review of it.',
     ...(status.length ? ['', '## Your open suggestions, as the notebook has them now', ...status] : []),
     '',
     '## Learnings about this notebook',
@@ -1001,7 +997,7 @@ function contextFor(nb) {
     '## Open questions about this notebook',
     entries('questions'),
     '',
-    '## Thoughts',
+    '## Ideas (#idea lines)',
     newThoughts({ notebook: nb.name }),
     '',
     '## What changed',
@@ -1148,7 +1144,7 @@ const TOOLS = [
   },
   {
     name: 'new_thoughts',
-    description: "The thoughts in a notebook's Thoughts section, and its lines tagged #idea anywhere, each with where it sits — what the user wrote about what's on their mind: the new ones, then those seen before and still open, with what became of them. Says so when there are none of either.",
+    description: "A notebook's lines tagged #idea, anywhere, each with where it sits — what the user wrote about what's on their mind: the new ones, then those seen before and still open, with what became of them. Says so when there are none of either.",
     inputSchema: { type: 'object', properties: { notebook: { type: 'string' } }, required: ['notebook'] },
     run: newThoughts,
   },

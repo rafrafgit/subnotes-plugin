@@ -132,13 +132,14 @@ unconnected notebook contains.
 One notebook may be marked "Role: Goals" in `list_notebooks`: what the user is
 working toward across notebooks, and how they rank. Read it before answering
 what to pick up next, or before judging any notebook's work. It is the user's
-writing like any other notebook — append only to its Suggestions, and only
-when asked.
+writing like any other notebook — append to it only when asked.
 
 ## Thoughts and open questions
 
-A section called Thoughts is the user's own writing about what's on their
-mind; only the review processes it (`new_thoughts`, `mark_thoughts_seen`).
+A line tagged `#idea` is an idea: a task not decided yet, the user's or a
+skill's suggestion. Only the review processes them (`new_thoughts`,
+`mark_thoughts_seen`). Don't do or schedule one — the user accepts an idea by
+scheduling it or taking the tag off.
 `read_questions` gives what's still unsettled — read it alongside the
 learnings before judging a notebook's next step, and close a question
 (`close_question`) when the user answers it.
