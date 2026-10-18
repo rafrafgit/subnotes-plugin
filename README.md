@@ -48,7 +48,8 @@ notebook and section, or use `/subnotes:add <thing>` to be explicit.
 `/subnotes:review` reads each notebook that has a purpose and a section called
 Suggestions, remembers earlier visits in a journal, and proposes a next step or
 two when one is worth it: run by hand, you keep, drop or change each one in
-Claude Code before it lands in Suggestions; the daily run adds them directly.
+Claude Code, and a kept one goes straight to the section it belongs in; the
+daily run adds them to Suggestions.
 `/subnotes:schedule` turns on a daily run:
 your first prompt to Claude Code each day, while Subnotes is open, starts it
 in the background with only this plugin's tools allowed (a `UserPromptSubmit`

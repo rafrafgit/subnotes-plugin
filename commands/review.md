@@ -18,7 +18,7 @@ Call `list_notebooks`. Review a notebook only when it has both:
   infer or rephrase one. A notebook without a purpose is skipped: there is
   nothing to work toward.
 - a section called **Suggestions** (any case) — the user's opt-in, and the only
-  place you write.
+  place you write unasked.
 
 A notebook that doesn't qualify but has a section called **Thoughts** still
 has its new thoughts read (step 3) — Thoughts is an opt-in of its own — and
@@ -359,8 +359,12 @@ lines.
    and hold three: the suggestions, `mark_thoughts_seen`, and the journal.
    Show the suggestions in the report (see Then report) and wait. Then, in
    one turn:
-   - **kept:** `add_task` as above; **changed:** `add_task` with the user's
-     version
+   - **kept:** the user has accepted it, so it doesn't go to Suggestions to
+     be accepted again: `add_task` it as the task itself, to the section it
+     belongs in — an existing one from `list_notebooks`, Backlog when none
+     fits better — with no priority and its subnotes and `Why:`. Never a task
+     about adding a task. **changed:** the same, with the user's version
+     (2026-10-18)
    - **dropped:** nothing in the notebook. Add a learning when the drop, or
      a reason the user gives, teaches something that will still hold; name
      it in the journal's Observations ("dropped at review: …") so it is
@@ -368,8 +372,9 @@ lines.
    - `mark_thoughts_seen`, `became` saying what happened ("suggestion kept:
      …", "suggestion dropped: …") — a dropped one counts as declined next
      visit, so the thought gets a different idea
-   - `write_journal`: only kept suggestions are open, and only they count
-     toward the twenty
+   - `write_journal`: kept suggestions are accepted, not open — name them
+     in Observations ("kept at review: … → Backlog"); only they count toward
+     the twenty
 
    A visit with no suggestions makes all its writes at once. On a
    `--scheduled` run, nobody is there to answer: write the suggestions to
@@ -434,11 +439,12 @@ for a line at the end of the report, add it last. No other commentary.
 
 On a run by hand, the report names suggestions as proposed, not written
 ("Subnotes — 1 suggestion proposed"), and ends with them, numbered across
-notebooks, each with its subnotes and `Why:` as they would be written:
+notebooks, each with the section a kept one goes to, and its subnotes and
+`Why:` as they would be written:
 
 ```
 Proposed — keep, drop or change each (or "keep all"):
-1. Subnotes — Pick one of these three outputs for the morning review
+1. Subnotes → Review — Pick one of these three outputs for the morning review
    - A one-line next step per notebook
    - ...
    Why: the AI section has no next step
@@ -454,14 +460,16 @@ say how many others wait. Say what you take it to be about, in your words,
 then two or three ways it could go, each with what it costs and what it
 gains, and which you'd lean toward and why. Ask the one question that
 decides it. Talk it through with the user: nothing is written while you do.
-When you've agreed, write what follows — suggestions with the agreed answer
-in them, a learning for the decision, `close_question` for its question —
-then `mark_thoughts_seen` for the thought, `became` "talked through: …", and
+When you've agreed, write what follows — a learning for the decision,
+`close_question` for its question — then `mark_thoughts_seen` for the
+thought, `became` "talked through: …". A task the agreement calls for is
+proposed like any suggestion, and kept goes to its section (step 6). Then
 offer the next one.
 
 ## Limits
 
-- Only `Suggestions` gets written to. Nothing else in a notebook is yours.
+- Only `Suggestions` gets written to, and on a run by hand the section of a
+  suggestion the user kept. Nothing else in a notebook is yours.
 - Writes only ever add: you can't edit, complete, move or delete anything, so
   never claim to have.
 - Never write or change a purpose.
