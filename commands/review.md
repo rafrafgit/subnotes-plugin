@@ -20,9 +20,9 @@ Call `list_notebooks`. Review a notebook only when it has both:
 - a section called **Suggestions** (any case) — the user's opt-in, and the only
   place you write unasked.
 
-A notebook that doesn't qualify but has a section called **Thoughts** still
-has its new thoughts read (step 3) — Thoughts is an opt-in of its own — and
-nothing else done in it.
+A notebook that doesn't qualify but has a section called **Thoughts**, or
+lines tagged `#idea`, still has its new thoughts read (step 3) — Thoughts is
+an opt-in of its own — and nothing else done in it.
 
 If a notebook was named above, review just that one, and if it lacks either,
 say which and stop. Otherwise review every notebook that qualifies, one at a
@@ -200,8 +200,19 @@ lines.
    reason. You keep the learnings tidy for every skill: if a file runs past
    40 entries, merge or drop the weakest.
 
-3. **Read new thoughts,** if the notebook has a section called Thoughts
-   (under Thoughts in `review_context`). This is the user telling the brain what's on their mind
+3. **Read new thoughts,** if the notebook has a section called Thoughts or
+   lines tagged `#idea` (under Thoughts in `review_context`).
+
+   **`#idea` is a test** (2026-10-18) of ideas as a state of a task rather
+   than a section (THOUGHTS_SPEC.md, "Idea as a task state"). A line tagged
+   `#idea` anywhere is a thought, read with where it sits: "· under: <task>"
+   is a subtask or subnote of that task, so it's input on that task, and
+   "· in: <section>" is about that section. One the journal lists as your
+   own kept idea is yours, not the user's: mark it seen ("own idea") and
+   follow it as an open suggestion instead — but comment on it when the
+   notebook shows it changed or sitting unmoved.
+
+   This is the user telling the brain what's on their mind
    about this notebook — doubts, hunches, intentions — and the most direct
    signal you get. Each thought is one of six kinds, with one place to go:
 
@@ -367,7 +378,10 @@ lines.
      belongs in — an existing one from `list_notebooks`, Backlog when none
      fits better — with no priority and its subnotes and `Why:`. Never a task
      about adding a task. **changed:** the same, with the user's version
-     (2026-10-18)
+     (2026-10-18). A reply to an `#idea` goes to the end of the section the
+     idea sits in — its task's section for one under a task, since you can
+     only append — tagged `#idea` itself, so the user accepts it by
+     scheduling it and removing the tag (test, 2026-10-18)
    - **dropped:** nothing in the notebook. Add a learning when the drop, or
      a reason the user gives, teaches something that will still hold; name
      it in the journal's Observations ("dropped at review: …") so it is

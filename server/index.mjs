@@ -653,6 +653,22 @@ function closeQuestion({ notebook, match, answer, source }) {
 // line reads as a new thought.
 const THOUGHTS_HEADING = /^(#{1,3})\s+(.*?)\s*$/;
 
+// A test of ideas as a state of a task rather than a section (THOUGHTS_SPEC.md,
+// "Idea as a task state"): a line tagged #idea, anywhere in the notebook, is
+// read like a thought. Done ones are dealt with. Each says where it sits, so
+// the review reads a subtask's idea with the task it's about — and so moving
+// one reads as a new thought, as editing one does.
+const IDEA_TAG = /(^|\s)#idea(?!\w)/i;
+const IDEA_TAG_ALL = /(^|\s)#idea(?!\w)/gi;
+const DONE_TAG = /\[Done\]\s*$/i;
+
+// Only a tagged line loses its tag, so a thought seen before keeps its
+// fingerprint exactly.
+const bareLine = l => {
+  const bare = l.trim().replace(/^(•|-|\d+\.|>)\s+/, '').replace(PRIORITY_TAG, '').trim();
+  return IDEA_TAG.test(bare) ? bare.replace(IDEA_TAG_ALL, ' ').replace(/\s+/g, ' ').trim() : bare;
+};
+
 function thoughtsIn(nb) {
   const text = readFileSync(join(DIR, nb.file), 'utf8');
   const lines = text.split('\n');
@@ -661,21 +677,42 @@ function thoughtsIn(nb) {
     return h ? { level: h[1].length, name: h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim().toLowerCase() } : null;
   };
   const start = lines.findIndex(l => title(l)?.name === 'thoughts');
-  if (start < 0) return null;
-  const level = title(lines[start]).level;
+  let end = start;
   const thoughts = [];
-  for (const line of lines.slice(start + 1)) {
-    const h = title(line);
-    if (h && h.level <= level) break;
-    if (!line.trim() || h) continue;
-    if (line.startsWith('\t') && thoughts.length) {
-      thoughts[thoughts.length - 1].subs.push(line.trim());
-      continue;
+  if (start >= 0) {
+    const level = title(lines[start]).level;
+    for (end = start + 1; end < lines.length; end++) {
+      const line = lines[end];
+      const h = title(line);
+      if (h && h.level <= level) break;
+      if (!line.trim() || h) continue;
+      if (line.startsWith('\t') && thoughts.length) {
+        thoughts[thoughts.length - 1].subs.push(line.trim());
+        continue;
+      }
+      const bare = bareLine(line);
+      if (bare) thoughts.push({ main: bare, subs: [] });
     }
-    const bare = line.trim().replace(/^(•|-|\d+\.|>)\s+/, '').replace(PRIORITY_TAG, '').trim();
-    if (bare) thoughts.push({ main: bare, subs: [] });
   }
-  return thoughts.map(t => (t.subs.length ? `${t.main} — ${t.subs.join('; ')}` : t.main));
+  let section = null, parent = null;
+  for (let i = 0; i < lines.length; i++) {
+    if (start >= 0 && i >= start && i < end) continue;
+    const line = lines[i];
+    const h = THOUGHTS_HEADING.exec(line);
+    if (h) { section = h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim(); parent = null; continue; }
+    if (!line.trim()) continue;
+    const nested = line.startsWith('\t');
+    if (!nested) parent = bareLine(line);
+    if (!IDEA_TAG.test(line) || DONE_TAG.test(line)) continue;
+    const main = bareLine(line);
+    if (!main) continue;
+    const subs = [];
+    if (!nested) for (let k = i + 1; k < lines.length && lines[k].startsWith('\t'); k++) subs.push(lines[k].trim());
+    const where = nested && parent ? `under: ${parent}` : section ? `in: ${section}` : 'at the top';
+    thoughts.push({ main, subs, where });
+  }
+  if (start < 0 && !thoughts.length) return null;
+  return thoughts.map(t => (t.subs.length ? `${t.main} — ${t.subs.join('; ')}` : t.main) + (t.where ? ` · ${t.where}` : ''));
 }
 
 function fingerprint(text) {
@@ -705,7 +742,7 @@ function seenThoughts(nb) {
 function newThoughts({ notebook }) {
   const nb = findNotebook(manifest(), notebook);
   const thoughts = thoughtsIn(nb);
-  if (thoughts === null) return `"${nb.name}" has no Thoughts section — nothing to read.`;
+  if (thoughts === null) return `"${nb.name}" has no Thoughts section and no #idea lines — nothing to read.`;
   const seen = seenThoughts(nb);
   const fresh = thoughts.filter(t => !seen[fingerprint(t)]);
   const open = thoughts.filter(t => seen[fingerprint(t)]);
@@ -731,7 +768,7 @@ function newThoughts({ notebook }) {
 function markThoughtsSeen({ notebook, thoughts }) {
   const nb = findNotebook(manifest(), notebook);
   const current = thoughtsIn(nb);
-  if (current === null) throw new UserError(`"${nb.name}" has no Thoughts section.`);
+  if (current === null) throw new UserError(`"${nb.name}" has no Thoughts section and no #idea lines.`);
   if (!Array.isArray(thoughts) || !thoughts.length) throw new UserError('No thoughts given.');
   const given = thoughts.map(t => (typeof t === 'string' ? { text: t } : t ?? {}))
     .map(t => ({ text: String(t.text ?? '').trim(), became: t.became ? String(t.became).trim() : undefined }));
@@ -1111,7 +1148,7 @@ const TOOLS = [
   },
   {
     name: 'new_thoughts',
-    description: "The thoughts in a notebook's Thoughts section — what the user wrote about what's on their mind: the new ones, then those seen before and still open, with what became of them. Says so when there is no such section.",
+    description: "The thoughts in a notebook's Thoughts section, and its lines tagged #idea anywhere, each with where it sits — what the user wrote about what's on their mind: the new ones, then those seen before and still open, with what became of them. Says so when there are none of either.",
     inputSchema: { type: 'object', properties: { notebook: { type: 'string' } }, required: ['notebook'] },
     run: newThoughts,
   },

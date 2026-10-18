@@ -204,6 +204,14 @@ if (process.env.SUBNOTES_DIR) {
   writeFileSync(file, bare + '\n## Thoughts\n• A task-like thought [Next]\n');
   await call('mark_thoughts_seen', { notebook: first, thoughts: ['A task-like thought'] });
   check('a thought the user deleted leaves the store', !readFileSync(store, 'utf8').includes('Pick one of three'));
+  writeFileSync(file, bare + '\n## Ideas test\n• Make the brain visible [Someday]\n\t• What is the use case? #idea\n• A top idea #idea\n\twith a detail\n• An idea dealt with #idea [Done]\n');
+  const ideas = await call('new_thoughts', { notebook: first });
+  check('#idea lines anywhere read as thoughts, with where they sit, Done ones left out',
+        ideas.text.includes('What is the use case? · under: Make the brain visible')
+        && ideas.text.includes('A top idea — with a detail · in: Ideas test')
+        && !ideas.text.includes('dealt with') && !ideas.text.includes('#idea'), ideas.text);
+  const markedIdea = await call('mark_thoughts_seen', { notebook: first, thoughts: ['What is the use case? · under: Make the brain visible'] });
+  check('an #idea can be marked seen', !markedIdea.isError, markedIdea.text);
   writeFileSync(file, bare);
   const none = await call('new_thoughts', { notebook: first });
   check('no Thoughts section says so', none.text.includes('no Thoughts section'));
