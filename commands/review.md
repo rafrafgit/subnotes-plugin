@@ -31,8 +31,9 @@ time, and list the ones skipped and why at the end, in one line each.
 ## Read everything at once
 
 Every read a run needs fits in one turn after `list_notebooks`, and every
-write in one more — each extra turn is time the user waits. In a single
-turn, call together:
+write in one more — each extra turn is time the user waits. A run by hand
+has one more write turn after the user has kept or dropped your suggestions
+(step 6). In a single turn, call together:
 
 - `review_context` once, with every notebook you'll visit, Goals included.
   It gives the shared learnings and open questions once, then for each
@@ -350,6 +351,30 @@ lines.
    Make the writes for every notebook together, in one turn, once you've
    decided them all.
 
+   **On a run by hand, the user keeps or drops each suggestion before it is
+   written** (2026-10-18). Having to check suggestions in every notebook
+   means they aren't good enough yet, and an answer here teaches you sooner
+   than a deletion found days later. So in that write turn, make every write
+   that doesn't hang on the answer — learnings, questions, closed questions —
+   and hold three: the suggestions, `mark_thoughts_seen`, and the journal.
+   Show the suggestions in the report (see Then report) and wait. Then, in
+   one turn:
+   - **kept:** `add_task` as above; **changed:** `add_task` with the user's
+     version
+   - **dropped:** nothing in the notebook. Add a learning when the drop, or
+     a reason the user gives, teaches something that will still hold; name
+     it in the journal's Observations ("dropped at review: …") so it is
+     never suggested again
+   - `mark_thoughts_seen`, `became` saying what happened ("suggestion kept:
+     …", "suggestion dropped: …") — a dropped one counts as declined next
+     visit, so the thought gets a different idea
+   - `write_journal`: only kept suggestions are open, and only they count
+     toward the twenty
+
+   A visit with no suggestions makes all its writes at once. On a
+   `--scheduled` run, nobody is there to answer: write the suggestions to
+   Suggestions as above, unasked.
+
 7. **Rewrite the journal** (`write_journal`) — the whole journal, kept short.
    Writing it also marks the notebook as seen: the next visit's change list
    starts from what `review_context` showed you this time.
@@ -407,7 +432,23 @@ Say what each thought became, not what it said.
 Then the skipped notebooks, one line each. If a `write_journal` reply asked
 for a line at the end of the report, add it last. No other commentary.
 
-**Then a conversation,** on a run by hand, when a thought is waiting for one
+On a run by hand, the report names suggestions as proposed, not written
+("Subnotes — 1 suggestion proposed"), and ends with them, numbered across
+notebooks, each with its subnotes and `Why:` as they would be written:
+
+```
+Proposed — keep, drop or change each (or "keep all"):
+1. Subnotes — Pick one of these three outputs for the morning review
+   - A one-line next step per notebook
+   - ...
+   Why: the AI section has no next step
+```
+
+Then wait for the answer and finish the writes (step 6). A reason for a drop
+is welcome but never asked for.
+
+**Then a conversation,** on a run by hand, once the suggestions are
+answered, when a thought is waiting for one
 (step 3): raise one — the one that matters most for the purpose now — and
 say how many others wait. Say what you take it to be about, in your words,
 then two or three ways it could go, each with what it costs and what it

@@ -46,8 +46,10 @@ Say "put that on the backlog" mid-conversation and it lands in the right
 notebook and section, or use `/subnotes:add <thing>` to be explicit.
 
 `/subnotes:review` reads each notebook that has a purpose and a section called
-Suggestions, remembers earlier visits in a journal, and adds a next step or two
-to Suggestions when one is worth it. `/subnotes:schedule` turns on a daily run:
+Suggestions, remembers earlier visits in a journal, and proposes a next step or
+two when one is worth it: run by hand, you keep, drop or change each one in
+Claude Code before it lands in Suggestions; the daily run adds them directly.
+`/subnotes:schedule` turns on a daily run:
 your first prompt to Claude Code each day, while Subnotes is open, starts it
 in the background with only this plugin's tools allowed (a `UserPromptSubmit`
 hook, which does nothing until it's turned on). `/subnotes:unschedule` stops it.
