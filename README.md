@@ -34,8 +34,8 @@ from there instead, without adding this marketplace first.
   have learned, about one notebook or about you, shared by all of them
 - `read_questions` / `add_question` / `close_question` — open questions that
   decisions depend on; an answered one becomes a learning
-- `new_thoughts` / `mark_thoughts_handled` — what's new in a notebook's
-  Thoughts section (fingerprints only, never a copy of the text)
+- `new_thoughts` / `mark_thoughts_seen` — a notebook's new and still-open
+  thoughts, with what became of each (fingerprints only, never a copy of the text)
 - `read_journal` / `write_journal` — the review's working memory per notebook
 - `review_context` — everything a review visit needs, for several notebooks in
   one call, with only what changed since the last visit (kept as line

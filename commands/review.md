@@ -134,6 +134,16 @@ lines.
    every notebook; other skills add to these too, so an entry may not be
    yours — weigh it the same.
 
+   **The notebook outranks the journal.** The journal is your own notes, and
+   they go stale fast; the notebook is what the user means now. Before you
+   act on any journal line — an open suggestion, an observation, something
+   for next time — check it against the notebook as it stands: what changed,
+   or the notebook itself. Whatever the journal names that the notebook no
+   longer has — an idea removed, a task gone, a plan rewritten — is gone for
+   you too: drop it from the journal and suggest nothing from it. The same
+   holds for a learning or open question another run just added: check the
+   notebook before adding one like it.
+
    **What changed** lists each changed section with its new or changed lines
    marked `+` and the rest as context; a task line says what it was before
    ("was Next", "moved from Backlog"), and lines removed are counted, not
@@ -155,8 +165,11 @@ lines.
    yet, because it hasn't been open since they were written. Those queued
    tasks are yours, still on their way.
 
-2. **See what became of your open suggestions.** For each one the journal
-   lists as open:
+2. **See what became of your open suggestions.** "Your open suggestions, as
+   the notebook has them now" gives each one the journal lists as open with
+   what the notebook shows of it — read from the notebook, not your memory.
+   When it says the journal words one differently, find it yourself. Each
+   one is:
    - scheduled, moved out of Suggestions, or done — **accepted**
    - done with a `Why dropped:` subnote — **declined**, for that reason
    - queued, not yet in the notebook — **waiting**: it hasn't arrived, so
@@ -217,8 +230,9 @@ lines.
    kind: the user wrote it because it's on their mind, and they want it moved,
    not only filed. When there's one physical step that would move it toward the
    purpose, suggest it, besides recording the thought where it goes. For an open
-   question, a step toward settling it ("How do we get Claude to suggest the
-   work?" → "Sketch what a Today skill would hand you each morning"). For a
+   question, a step toward settling it, with your own answer in it (step 6):
+   "Should this notebook be called something else?" → "Pick a name for Goals:
+   Compass, Home or North Star", the three as subnotes. For a
    fact, a step it calls for, when there is one ("Typing is slow again" →
    "Record a trace while typing in the big notebook on iPhone"). For a change of
    direction, the Goals suggestion is the action. These go ahead of your own
@@ -232,8 +246,39 @@ lines.
    Never quote a thought anywhere: say what it means for the work ("Talk to
    Mattias about his commitment to Strategy"), not what the user wrote. A
    thought that answers an open question closes it (`close_question`), and
-   the answer becomes a learning. Then `mark_thoughts_handled` with every
-   thought you were given, whatever became of it, exactly as given.
+   the answer becomes a learning.
+
+   **A thought stays open until the user deletes it** — that is how they
+   say it's dealt with, not your suggestion. Thoughts seen on an earlier
+   visit come back under "Seen before and still open", with what became of
+   them. Their learnings and questions are already recorded; what's left is
+   their suggestion:
+   - still in Suggestions, or accepted — nothing: it's the user's now
+   - declined (gone, not done) while the thought stays — the idea wasn't
+     good, and the thought still matters: suggest a different one, with
+     options (step 6), never the same again. Keep trying on later visits
+     while the thought is there.
+   - nothing noted — marked under the old rule, which closed a thought once
+     filed. Take it as new, once: check what's already recorded from it
+     (learnings, questions, suggestions) so nothing repeats, and give it
+     what it still lacks — a next action, or a conversation
+
+   **Some thoughts need a conversation, not a suggestion** (2026-10-18): a
+   design question with real trade-offs, a direction to choose, something
+   that spans notebooks — where any options you'd write are guesses, because
+   there is no obvious answer. Record its question (`add_question`) as for
+   any open question, but write no suggestion from it, and leave it unmarked,
+   so it stays new until you've talked it through:
+   - run by hand: raise it after the report (see Then report)
+   - `--scheduled`, with nobody there: leave it for the next run by hand
+   Not every question is one of these — a choice between a few plain options
+   is still a suggestion with options (step 6).
+
+   Then `mark_thoughts_seen` with every new thought, and every seen one you
+   suggested something for again, exactly as given, each with `became` —
+   what came of it in a few words, never quoting it ("suggestion: Pick a
+   name for Goals", "a learning", "nothing"). Not the ones waiting for a
+   conversation.
 
 4. **Notice what changed** since the last visit — what changed in
    `review_context` shows it: tasks added, done or rescheduled, sections
@@ -260,7 +305,8 @@ lines.
      question, never judged.
    - **Missing context:** something you would need to judge the purpose
      well that neither the notebook, the journal nor the learnings give. Ask for it as a
-     task the user does in the notebook, for example:
+     task the user does in the notebook, with your best guess to confirm or
+     correct where you have one (step 6), for example:
      - the purpose is too vague to tell a good next step from a bad one —
        "Sharpen the purpose: what will be true when this notebook has done
        its job?"
@@ -291,6 +337,16 @@ lines.
    - one subnote starting `Why:` — one sentence linking it to the purpose or
      to what you noticed
 
+   **Bring your answer, not homework.** When a suggestion would have the user
+   come up with something — options, a list, a sketch, wording, a first draft
+   — do that thinking yourself and put it in the suggestion, so their task is
+   to pick, correct or replace it: "Pick one of these three names" with three
+   names as subnotes above the `Why:`, never "List three names". Up to three
+   options, or a draft of a few lines, each as a subnote. Ask the user for
+   something outright only when only they can know it — a date, how an
+   interview went, what they want — and even then offer your best guess when
+   the notebook gives you one.
+
    Make the writes for every notebook together, in one turn, once you've
    decided them all.
 
@@ -307,20 +363,28 @@ lines.
    - 2026-10-12 — both there; weak: nothing leads to the 5k before Aug 2027; asked for /subnotes:plan
 
    ## Open suggestions
-   - 2026-10-12 — Sketch the morning review's output — why: the AI section has no next step
+   - 2026-10-12 — Pick one of these three outputs for the morning review — why: the AI section has no next step
 
    Suggestions this week: 1
 
    ## Observations
    - 2026-10-12 — Kanban Board marked Next, unchanged since 2026-09-28
 
-   ## Next time
-   - Check whether the Kanban heading has moved
+   ## Dates
+   - 2026-10-21 — interview (Interview section): look for how it went
    ```
 
    This is your working state, not what you've learned — that went to
-   `add_learning` above, where other skills can use it. Summarise or drop old
-   observations. Under 60 lines. Use today's date.
+   `add_learning` above, where other skills can use it. **Facts, not plans:**
+   - each open suggestion's text exactly as you wrote it to Suggestions, so
+     the next visit can find it in the notebook
+   - observations are what the notebook showed, dated — never what you mean
+     to suggest next time. That is decided fresh each visit, from the
+     notebook, and a plan written down ahead goes stale the moment the user
+     changes their mind.
+   - dates are ones the notebook states, with what to look for then
+
+   Summarise or drop old observations. Under 60 lines. Use today's date.
 
 ## Then report
 
@@ -342,6 +406,17 @@ Say what each thought became, not what it said.
 
 Then the skipped notebooks, one line each. If a `write_journal` reply asked
 for a line at the end of the report, add it last. No other commentary.
+
+**Then a conversation,** on a run by hand, when a thought is waiting for one
+(step 3): raise one — the one that matters most for the purpose now — and
+say how many others wait. Say what you take it to be about, in your words,
+then two or three ways it could go, each with what it costs and what it
+gains, and which you'd lean toward and why. Ask the one question that
+decides it. Talk it through with the user: nothing is written while you do.
+When you've agreed, write what follows — suggestions with the agreed answer
+in them, a learning for the decision, `close_question` for its question —
+then `mark_thoughts_seen` for the thought, `became` "talked through: …", and
+offer the next one.
 
 ## Limits
 

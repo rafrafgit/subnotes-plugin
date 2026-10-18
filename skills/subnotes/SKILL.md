@@ -135,7 +135,7 @@ when asked.
 ## Thoughts and open questions
 
 A section called Thoughts is the user's own writing about what's on their
-mind; only the review processes it (`new_thoughts`, `mark_thoughts_handled`).
+mind; only the review processes it (`new_thoughts`, `mark_thoughts_seen`).
 `read_questions` gives what's still unsettled — read it alongside the
 learnings before judging a notebook's next step, and close a question
 (`close_question`) when the user answers it.

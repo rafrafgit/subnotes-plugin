@@ -190,12 +190,20 @@ if (process.env.SUBNOTES_DIR) {
   check('new_thoughts lists the section, subnotes joined, tags dropped',
         fresh.text.includes('1. I wonder about one thing — with a detail') && fresh.text.includes('2. A task-like thought')
         && !fresh.text.includes('not a thought'), fresh.text);
-  const wrong = await call('mark_thoughts_handled', { notebook: first, thoughts: ['made up'] });
+  const wrong = await call('mark_thoughts_seen', { notebook: first, thoughts: ['made up'] });
   check('marking a thought the notebook lacks refuses', wrong.isError);
-  await call('mark_thoughts_handled', { notebook: first, thoughts: ['I wonder about one thing — with a detail'] });
+  await call('mark_thoughts_seen', { notebook: first, thoughts: [{ text: 'I wonder about one thing — with a detail', became: 'suggestion: Pick one of three' }] });
   const after = await call('new_thoughts', { notebook: first });
-  check('a handled thought is not new again', !after.text.includes('I wonder') && after.text.includes('A task-like thought'), after.text);
-  check('the store holds fingerprints, not text', !readFileSync(store, 'utf8').includes('wonder'));
+  check('a seen thought is not new again, but still open with what it became',
+        after.text.includes('1. A task-like thought') && after.text.includes('still open')
+        && after.text.includes('I wonder about one thing — with a detail (seen ') && after.text.includes('became: suggestion: Pick one of three'), after.text);
+  await call('mark_thoughts_seen', { notebook: first, thoughts: ['I wonder about one thing — with a detail'] });
+  const kept = await call('new_thoughts', { notebook: first });
+  check('marking it again without a note keeps what it became', kept.text.includes('became: suggestion: Pick one of three'), kept.text);
+  check('the store holds fingerprints and notes, not the text', !readFileSync(store, 'utf8').includes('wonder'));
+  writeFileSync(file, bare + '\n## Thoughts\n• A task-like thought [Next]\n');
+  await call('mark_thoughts_seen', { notebook: first, thoughts: ['A task-like thought'] });
+  check('a thought the user deleted leaves the store', !readFileSync(store, 'utf8').includes('Pick one of three'));
   writeFileSync(file, bare);
   const none = await call('new_thoughts', { notebook: first });
   check('no Thoughts section says so', none.text.includes('no Thoughts section'));
@@ -230,6 +238,12 @@ if (process.env.SUBNOTES_DIR) {
         diff.text.includes('### Smoke section (new section)') && diff.text.includes('+ • Smoke diff task [Next]   ← new task')
         && !diff.text.includes('No snapshot'), diff.text.split('## What changed')[1]);
   check('a snapshot holds fingerprints, not text', !readFileSync(pending, 'utf8').includes('Smoke diff'));
+  await call('write_journal', { notebook: first, content:
+    '## Open suggestions\n- 2026-10-18 — Smoke diff task — why: it is there\n- 2026-10-18 — Smoke task the user deleted — why: gone\n\n## Observations\n' });
+  const status = await call('review_context', { notebooks: [first] });
+  check('open suggestions come with what the notebook shows of them',
+        status.text.includes('- Smoke diff task: scheduled [Next] in Smoke section — accepted')
+        && status.text.includes('- Smoke task the user deleted: not in the notebook'), status.text.split('## Learnings')[0].slice(-400));
   const stray = await call('review_context', { notebooks: ['Definitely Not Connected'] });
   check('review_context refuses an unconnected notebook', stray.isError);
 

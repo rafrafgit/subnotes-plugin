@@ -379,7 +379,7 @@ function addTasks({ notebook, tasks, allowDuplicate = false }) {
 //   agent/learnings/shared.md      what any skill has learned that isn't
 //                                  about one notebook — the user, mostly
 //   agent/questions/…              open questions, the same shape
-//   agent/thoughts/<notebook>.json fingerprints of the Thoughts handled
+//   agent/thoughts/<notebook>.json fingerprints of the Thoughts seen, and what became of each
 //
 // Working state is one skill's own and is rewritten freely. Learnings are
 // every skill's, so they are only ever added to or corrected one entry at a
@@ -686,11 +686,19 @@ function thoughtsStore(nb) {
   return agentFile('thoughts', nb).replace(/\.md$/, '.json');
 }
 
-function handledFingerprints(nb) {
+// What the review did with each thought it has seen, by fingerprint:
+// { date, became }. A thought stays open while it's in the section — the
+// user deletes it when it's dealt with (2026-10-18) — so a seen one comes
+// back each visit beside what became of it, for the review to follow up.
+// The store from before kept bare fingerprints under `handled`.
+function seenThoughts(nb) {
   try {
-    return new Set(JSON.parse(readFileSync(thoughtsStore(nb), 'utf8')).handled ?? []);
+    const stored = JSON.parse(readFileSync(thoughtsStore(nb), 'utf8'));
+    const seen = { ...(stored.seen ?? {}) };
+    for (const f of stored.handled ?? []) seen[f] ??= {};
+    return seen;
   } catch {
-    return new Set();
+    return {};
   }
 }
 
@@ -698,32 +706,48 @@ function newThoughts({ notebook }) {
   const nb = findNotebook(manifest(), notebook);
   const thoughts = thoughtsIn(nb);
   if (thoughts === null) return `"${nb.name}" has no Thoughts section — nothing to read.`;
-  const handled = handledFingerprints(nb);
-  const fresh = thoughts.filter(t => !handled.has(fingerprint(t)));
-  if (!fresh.length) return `No new thoughts in "${nb.name}" (${thoughts.length} handled before).`;
-  return `New thoughts in "${nb.name}" — the user's own words; handle each, then mark_thoughts_handled:\n` +
-    fresh.map((t, i) => `${i + 1}. ${t}`).join('\n');
+  const seen = seenThoughts(nb);
+  const fresh = thoughts.filter(t => !seen[fingerprint(t)]);
+  const open = thoughts.filter(t => seen[fingerprint(t)]);
+  const parts = [];
+  if (fresh.length) parts.push(
+    `New thoughts in "${nb.name}" — the user's own words; handle each, then mark_thoughts_seen:\n` +
+    fresh.map((t, i) => `${i + 1}. ${t}`).join('\n'));
+  else parts.push(`No new thoughts in "${nb.name}".`);
+  if (open.length) parts.push(
+    `Seen before and still open — the user deletes a thought once it's dealt with:\n` +
+    open.map((t, i) => {
+      const { date, became } = seen[fingerprint(t)];
+      const note = [date && `seen ${date}`, became && `became: ${became}`].filter(Boolean).join(', ');
+      return `${i + 1}. ${t} (${note || 'marked under the old rule, which closed it once filed: take it as new, once'})`;
+    }).join('\n'));
+  return parts.join('\n\n');
 }
 
-// Records the given thoughts as handled. Each must be a thought the notebook
-// has now, exactly as new_thoughts gave it. Fingerprints of thoughts no longer
-// in the notebook are dropped, so the store only ever holds what's there.
-function markThoughtsHandled({ notebook, thoughts }) {
+// Records what the review did with each thought: a thought the notebook has
+// now, exactly as new_thoughts gave it, with an optional `became` — what came
+// of it, in the review's own words. Thoughts no longer in the notebook are
+// dropped, so the store only ever holds what's there.
+function markThoughtsSeen({ notebook, thoughts }) {
   const nb = findNotebook(manifest(), notebook);
   const current = thoughtsIn(nb);
   if (current === null) throw new UserError(`"${nb.name}" has no Thoughts section.`);
   if (!Array.isArray(thoughts) || !thoughts.length) throw new UserError('No thoughts given.');
+  const given = thoughts.map(t => (typeof t === 'string' ? { text: t } : t ?? {}))
+    .map(t => ({ text: String(t.text ?? '').trim(), became: t.became ? String(t.became).trim() : undefined }));
   const now = new Map(current.map(t => [t.trim(), fingerprint(t)]));
-  const missing = thoughts.map(t => String(t).trim()).filter(t => !now.has(t));
+  const missing = given.filter(t => !now.has(t.text)).map(t => t.text);
   if (missing.length) throw new UserError(
     `Not a thought in "${nb.name}" as it stands — pass each exactly as new_thoughts gave it:\n` +
     missing.map(t => `- ${t}`).join('\n'));
   const keep = new Set(now.values());
-  const handled = new Set([...handledFingerprints(nb)].filter(f => keep.has(f)));
-  for (const t of thoughts) handled.add(now.get(String(t).trim()));
-  const path = thoughtsStore(nb);
-  writeEntryFile(path, JSON.stringify({ handled: [...handled] }, null, 2) + '\n');
-  return `Marked ${thoughts.length} thought${thoughts.length === 1 ? '' : 's'} handled in "${nb.name}".`;
+  const seen = Object.fromEntries(Object.entries(seenThoughts(nb)).filter(([f]) => keep.has(f)));
+  for (const t of given) {
+    const f = now.get(t.text);
+    seen[f] = { date: today(), became: t.became ?? seen[f]?.became };
+  }
+  writeEntryFile(thoughtsStore(nb), JSON.stringify({ seen }, null, 2) + '\n');
+  return `Marked ${given.length} thought${given.length === 1 ? '' : 's'} seen in "${nb.name}".`;
 }
 
 // MARK: - What changed since the last visit
@@ -858,6 +882,52 @@ function sharedEntryLines(kind) {
   return lines.length ? lines.join('\n') : '(none)';
 }
 
+// What became of each suggestion the journal lists as open, read from the
+// notebook as it stands rather than left to the journal: the journal is the
+// review's own notes and goes stale, the notebook doesn't (2026-10-18). A
+// journal line is "- date — the suggestion's text — why: …", the text as it
+// was written to Suggestions.
+function openSuggestionStatus(nb, text, journal) {
+  const block = /^## Open suggestions\s*$([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(journal);
+  if (!block) return [];
+  const wanted = block[1].split('\n').filter(l => /^\s*-\s/.test(l)).map(l => {
+    const body = l.replace(/^\s*-\s*/, '').replace(/^\d{4}-\d{2}-\d{2}\s*[—-]\s*/, '');
+    return body.split(/\s+—\s+/)[0].trim();
+  }).filter(Boolean);
+  if (!wanted.length) return [];
+  // Case, punctuation and a parenthetical aside don't count.
+  const norm = t => t.toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/[^\p{L}\p{N}\s]/gu, '').replace(/\s+/g, ' ').trim();
+  const same = (a, b) => {
+    const x = norm(a), y = norm(b);
+    if (x === y) return true;
+    const n = Math.min(x.length, y.length, 40);
+    return n >= 15 && x.slice(0, n) === y.slice(0, n);
+  };
+  const tasks = [];
+  let section = '';
+  for (const line of text.split('\n')) {
+    const h = /^(#{1,3})\s+(.*?)\s*$/.exec(line);
+    if (h) { section = h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim(); continue; }
+    const t = TASK_LINE.exec(line);
+    if (!t) continue;
+    const tag = /\s*\[([^\]]+)\]\s*$/.exec(t[1]);
+    tasks.push({ text: (tag ? t[1].slice(0, tag.index) : t[1]).trim(), tag: tag?.[1], section });
+  }
+  const queued = queuedTasks(nb);
+  return wanted.map(w => {
+    const found = tasks.find(t => same(t.text, w));
+    let status;
+    if (found) {
+      const where = found.section.toLowerCase() === 'suggestions' ? '' : ` in ${found.section || 'the top of the notebook'}`;
+      if (found.tag?.toLowerCase() === 'done') status = `done${where} — accepted`;
+      else if (found.tag) status = `scheduled [${found.tag}]${where} — accepted`;
+      else status = where ? `moved${where} — accepted` : 'still in Suggestions, unscheduled — waiting';
+    } else if (queued.some(q => same(q.text, w))) status = 'queued, not in the notebook yet — waiting';
+    else status = 'not in the notebook — declined, cleared after Done, or the journal words it differently';
+    return `- ${w}: ${status}`;
+  });
+}
+
 function contextFor(nb) {
   const text = readFileSync(join(DIR, nb.file), 'utf8');
   const entries = kind => {
@@ -878,12 +948,15 @@ function contextFor(nb) {
   writeEntryFile(snapshotPath(nb, true), JSON.stringify(snapshotOf(text)) + '\n');
 
   const notes = connectorNotes(nb);
+  const journalText = existsSync(journal) ? readFileSync(journal, 'utf8').trim() : '';
+  const status = openSuggestionStatus(nb, text, journalText);
   return [
     `# ${nb.name}`,
     ...(nb.purpose ? [`Purpose: ${nb.purpose}`] : []),
     '',
     '## Journal',
-    existsSync(journal) ? readFileSync(journal, 'utf8').trim() : 'No journal yet — this is the first review of it.',
+    journalText || 'No journal yet — this is the first review of it.',
+    ...(status.length ? ['', '## Your open suggestions, as the notebook has them now', ...status] : []),
     '',
     '## Learnings about this notebook',
     entries('learnings'),
@@ -1038,22 +1111,28 @@ const TOOLS = [
   },
   {
     name: 'new_thoughts',
-    description: "The thoughts in a notebook's Thoughts section not handled yet — what the user wrote about what's on their mind. Says so when there is no such section.",
+    description: "The thoughts in a notebook's Thoughts section — what the user wrote about what's on their mind: the new ones, then those seen before and still open, with what became of them. Says so when there is no such section.",
     inputSchema: { type: 'object', properties: { notebook: { type: 'string' } }, required: ['notebook'] },
     run: newThoughts,
   },
   {
-    name: 'mark_thoughts_handled',
-    description: 'Record thoughts as handled, each exactly as new_thoughts gave it, so they are not read again. Keeps a fingerprint, never the text.',
+    name: 'mark_thoughts_seen',
+    description: 'Record what you did with each thought, exactly as new_thoughts gave it, with what it became. A thought stays open until the user deletes it: it comes back each visit as seen, beside what became of it. Keeps a fingerprint and your note, never the text.',
     inputSchema: { type: 'object', properties: {
       notebook: { type: 'string' },
-      thoughts: { type: 'array', items: { type: 'string' } },
+      thoughts: { type: 'array', items: { anyOf: [
+        { type: 'string' },
+        { type: 'object', properties: {
+          text: { type: 'string', description: 'The thought, exactly as new_thoughts gave it.' },
+          became: { type: 'string', description: 'What came of it, in your words, never quoting it: "suggestion: Pick a name for Goals", "a learning", "nothing".' },
+        }, required: ['text'] },
+      ] } },
     }, required: ['notebook', 'thoughts'] },
-    run: markThoughtsHandled,
+    run: markThoughtsSeen,
   },
   {
     name: 'review_context',
-    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its journal, learnings, open questions, new thoughts, and only what changed since the review last wrote that notebook's journal (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_journal, read_notebook, read_learnings, read_questions and new_thoughts for each.",
+    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its journal, what the notebook shows now of each suggestion the journal lists as open, learnings, open questions, thoughts, and only what changed since the review last wrote that notebook's journal (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_journal, read_notebook, read_learnings, read_questions and new_thoughts for each.",
     inputSchema: { type: 'object', properties: {
       notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks to visit.' },
     }, required: ['notebooks'] },
