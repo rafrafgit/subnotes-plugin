@@ -334,7 +334,10 @@ lines.
    notebook (count them in the journal). Each one:
    - with `add_task`, section `Suggestions`, **no priority** — the user
      schedules what they accept
-   - text: one physical, visible action, in the user's language and voice
+   - text: one physical, visible action, in the user's language and voice —
+     first person, as they'd write it themselves: "Connect my Personal
+     notebook", never "Connect your Personal notebook". The `Why:` is you
+     talking to them, so "you" is right there
    - one subnote starting `Why:` — one sentence linking it to the purpose or
      to what you noticed
 

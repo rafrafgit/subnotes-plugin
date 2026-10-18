@@ -69,6 +69,9 @@ someone else wrote is why this matters.
 
 One task per line, in the user's own words where they gave them.
 
+Write it in the first person, as the user would in their own notebook:
+"Send my CV to Anna", not "Send your CV to Anna".
+
 A task names a physical, visible action — something you could watch a person
 do. "Email Sara the invoice", not "Invoices". If the user's phrasing already
 does that, keep it exactly.

@@ -86,7 +86,8 @@ a last subnote "Why: agreed in /subnotes:plan, <today>", so the review knows
 it isn't its own. Not when they say they've already written it in. A
 notebook without Suggestions keeps the lines in the chat only.
 
-Then the next steps that follow from it, as tasks. Show them, with the section
+Then the next steps that follow from it, as tasks, in the first person ("Ask
+my manager…", not "Ask your manager…"). Show them, with the section
 each goes in, and add them (`add_tasks`) only when they say yes, into a
 section that exists — the one the work belongs in, not Suggestions: they've
 already accepted them. Scheduled as they agree; leave priority out if they
