@@ -1,9 +1,10 @@
 ---
-description: Pick the tasks in a notebook that Claude can do here, and do the one you choose
+description: Do the tasks in a notebook that Claude can do here, and line up the ones that need you
 ---
 
 Work through the user's prioritized tasks with them: find the ones you can do
-in this session, let them pick, and do it. Notebook, if one was named:
+in this session and do them, and line up the ones that need the user.
+Notebook, if one was named:
 $ARGUMENTS
 
 This command needs someone at the keyboard. If it was started with
@@ -53,8 +54,11 @@ Put each task in one of three groups, with one short reason each:
 A task too big to finish in one sitting goes in the second group, with its
 first step as the thing you'd do.
 
-Show the groups, most useful first within each, and ask which one to do. Do
-nothing else until they choose. One task at a time.
+Show the groups, most useful first within each. Then start on the first task
+in "I can do this here" without asking: the user doesn't want to give
+permission for work you can do on your own (2026-10-18). One task at a time,
+in that order, each reported before the next. When that group is done, ask
+which of "with your input" to take, with its question.
 
 ## Do it
 
@@ -65,7 +69,8 @@ different from what the code shows, say so before acting.
 Work the way this project works: its CLAUDE.md and conventions apply, and so do
 the user's normal permission prompts. Don't commit, push or publish unless they
 ask. If the task turns out bigger than it looked, stop, say what you found, and
-propose the first step rather than carrying on.
+propose the first step rather than carrying on. The same when you find you
+need their input after all: ask, and leave the task until they answer.
 
 ## Then report
 
@@ -80,9 +85,9 @@ Say what changed, how you checked it, and what's left. You can't mark the task
 Done — writes only ever add — so the user does that, after they've looked at
 the work. That review is theirs on purpose.
 
-If the work turned up follow-ups, offer to add them to the notebook with
-`add_tasks`, and add them only if they say yes. Then offer the next task from
-the list.
+Then go on to the next task in "I can do this here". When there is none left,
+offer the follow-ups the work turned up, all together, and add them with
+`add_tasks` only if they say yes; and offer the tasks that need their input.
 
 Before you report, look back over the work for what the user told you that
 will hold next time, and add each one (`add_learning`, source `do`): with the
