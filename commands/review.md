@@ -26,6 +26,10 @@ section that still has one of those names is just a section.
 A notebook without a purpose still has its `#idea` lines read (step 3) — the
 user tagging one is an opt-in of its own — and nothing else done in it.
 
+The `#idea` lines are read by a sub-skill of yours, `review-ideas`: it files
+each one where it holds and returns the replies and questions for you to
+raise. You read the rest of the notebook against its purpose.
+
 If a notebook was named above, review just that one, and if it has no
 purpose, say so and stop. Otherwise review every notebook that qualifies, one
 at a time, and list the ones skipped and why at the end, in one line each.
@@ -43,7 +47,10 @@ has one more write turn after the user has kept or dropped your suggestions
   changed** since your last visit — not the whole notebook, which you get
   only on a first visit or when most of it is new.
 - `read_notebook` for the Goals notebook, which you read whole every time.
-- `new_thoughts` for each notebook that is only there for its `#idea` lines.
+- the `review-ideas` skill (Skill tool, `subnotes:review-ideas`), with every
+  notebook you'll visit and every one that is only there for its `#idea`
+  lines, comma-separated, as its arguments. It runs on its own and returns
+  when done (step 3).
 
 Read the whole of another notebook (`read_notebook`) only when what changed
 isn't enough to judge it — a first step for a task the change list doesn't
@@ -206,107 +213,43 @@ lines.
    reason. You keep the learnings tidy for every skill: if a file runs past
    40 entries, merge or drop the weakest.
 
-3. **Read new thoughts:** the notebook's lines tagged `#idea`, under "Ideas"
-   in `review_context`. Each is read with where it sits: "· under: <task>"
-   is a subtask or subnote of that task, so it's input on that task, and
-   "· in: <section>" is about that section.
+3. **Take what `review-ideas` returned** for this notebook. It has already
+   written what doesn't wait on the user — learnings and questions from the
+   ideas, questions they answer closed, the settled ideas marked seen — and
+   says so in its Recorded line. The "Ideas" in `review_context` are its
+   job, not yours: use them only to follow your own suggestions (step 2).
+   - **Replies** are suggestions (step 6), ahead of your own ideas within
+     the two a visit, written exactly as returned — notebook, section, text,
+     subnotes and `Why:`. The user asked for them by tagging the idea, so
+     they go ahead in a notebook without a purpose too, and past the goal
+     and plan gate.
+   - **Questions** are asked (Asking, not suggesting, below), with the
+     options and lean it gave.
+   - Its `Idea:` lines are the ideas exactly as `new_thoughts` gave them:
+     mark them seen with those (step 6, Then report), never reworded.
 
-   One marked "your own open suggestion" — or seen before with a `became`
-   that says it's yours — is yours, not the user's: mark it seen ("own
-   suggestion") and follow it in step 2 instead. When the user has added a
-   subnote or subtask to it, that is their reply: read it as a thought on
-   that suggestion.
-
-   This is the user telling the brain what's on their mind
-   about this notebook — doubts, hunches, intentions — and the most direct
-   signal you get. Each thought is one of six kinds, with one place to go:
-
-   - **An open question** — something unsettled that decisions depend on
-     ("I wonder if Mattias is as committed as I am"): `add_question`, source
-     `thoughts`, for the notebook it's about, phrased as the question.
-   - **A fact, as said by the user** ("I'm drained after interviews"):
-     `add_learning`, source `thoughts`, for this notebook — never the shared
-     learnings, unless this notebook is Goals.
-   - **An intention** ("I should call the recruiter"): a suggestion (step
-     6), ahead of your own ideas — in a notebook without a purpose too,
-     since the user asked by tagging it.
-   - **A problem** with the notebook's work — something broken, slow or
-     wrong ("typing in the big notebook is slow again"): the user wants it
-     fixed, so it goes where an intention does — a suggestion to fix it,
-     ahead of your own ideas. Not a learning: a problem that only sits in
-     the learnings never becomes work. (A lasting fact it reveals, such as
-     which notebook is the largest, can be a learning as well.)
-   - **A change of direction** ("making money from this matters less now"):
-     a suggestion in the Goals notebook to update it, in the section it
-     touches — Goals stays in the user's own words.
-   - **Just thinking aloud:** nothing.
-
-   Then look for a **next action** in every thought you were given, whatever its
-   kind: the user wrote it because it's on their mind, and they want it moved,
-   not only filed. When there's one physical step that would move it toward the
-   purpose, suggest it, besides recording the thought where it goes. For a
-   fact, a step it calls for, when there is one ("Typing is slow again" →
-   "Record a trace while typing in the big notebook on iPhone"). For a change of
-   direction, the Goals suggestion is the action. These go ahead of your own
-   ideas, within the two a visit. With more than two, the ones that matter most
-   for the purpose now; the open questions keep the rest. When no step would
-   change anything, don't invent one.
-
-   **An open question is never a suggestion:** it's asked (see Asking, not
-   suggesting, below). "Should this notebook be called something else?" is
-   asked in Claude Code with Compass, Home and North Star as the options,
-   never written as "Pick a name for Goals".
-
-   Anything you record from a thought takes source `thoughts`, never
-   `review`, so the user can tell what they raised from what you noticed.
-
-   Never quote a thought anywhere: say what it means for the work ("Talk to
-   Mattias about his commitment to Strategy"), not what the user wrote. A
-   thought that answers an open question closes it (`close_question`), and
-   the answer becomes a learning.
-
-   **A thought stays open until the user deletes it, marks it Done or takes
-   the tag off** — that is how they say it's dealt with, not your
-   suggestion. Thoughts seen on an earlier visit come back under "Seen
-   before and still open", with what became of them. Their learnings and
-   questions are already recorded; what's left is their suggestion:
-   - still waiting as an `#idea`, or accepted — nothing: it's the user's now
-   - declined (gone, not done) while the thought stays — the idea wasn't
-     good, and the thought still matters: suggest a different one (step 6),
-     never the same again. Keep trying on later visits while the thought is
-     there.
-   - talked through, and still there — nothing more unless the notebook
-     shows something new about it: the user keeps it as a reminder.
-   - nothing noted — marked under the old rule, which closed a thought once
-     filed. Take it as new, once: check what's already recorded from it
-     (learnings, questions, suggestions) so nothing repeats, and give it
-     what it still lacks — a next action, or a question to ask
+   When it returned nothing for a notebook it was given, or failed, say so in
+   the report ("Subnotes — ideas not read") and leave that notebook's ideas
+   for next visit: never read them yourself instead.
 
    **Asking, not suggesting** (2026-10-19). There is always someone to
    answer, so anything that asks the user something is asked in Claude
-   Code, never written into a notebook as a task: a thought that's an open
-   question or a direction to choose, and your own questions from step 5 —
-   missing context, whether a stall is still wanted, drift, an open question
-   that work waits on. A suggestion is only for something to *do*: a
-   physical step, for the user or for `/subnotes:do`. A "Pick one of…" task
-   is a question in disguise.
+   Code, never written into a notebook as a task: the questions
+   `review-ideas` returned, and your own from step 5 — missing context,
+   whether a stall is still wanted, drift, an open question that work waits
+   on. A suggestion is only for something to *do*: a physical step, for the
+   user or for `/subnotes:do`. A "Pick one of…" task is a question in
+   disguise.
    - **Bring your answer** to a question as you would to a suggestion: two
      or three options, what each costs and gains, and which you'd lean
      toward (see Then report).
-   - **Record it first:** a thought's question with `add_question`, as for
-     any open question; your own with `add_question` too, source `review`.
-     Leave a question's thought unmarked, so it stays new until it's been
-     talked through.
+   - **Record it first:** your own with `add_question`, source `review`;
+     `review-ideas` has recorded its own. Leave a question's idea unmarked,
+     so it stays new until it's been talked through.
    - **Run by hand:** ask after the suggestions are answered (Then report).
    - **`--scheduled`:** the run is a background process and can't ask. Name
      each question under **Waiting to ask** in the journal, and the next run
      by hand asks them first.
-
-   Then `mark_thoughts_seen` with every new thought, and every seen one you
-   suggested something for again, exactly as given, each with `became` —
-   what came of it in a few words, never quoting it ("suggestion: Record a
-   trace while typing", "a learning", "nothing"). Not the ones waiting to
-   be asked.
 
 4. **Notice what changed** since the last visit — what changed in
    `review_context` shows it: tasks added, done or rescheduled, sections
@@ -405,17 +348,19 @@ lines.
      a reason the user gives, teaches something that will still hold; name
      it in the journal's Observations ("dropped at review: …") so it is
      never suggested again
-   - `mark_thoughts_seen`, `became` saying what happened ("suggestion kept:
-     …", "suggestion dropped: …") — a dropped one counts as declined next
-     visit, so the thought gets a different idea
+   - `mark_thoughts_seen` for each reply's idea, by its `Idea:` line,
+     `became` saying what happened ("suggestion kept: …", "suggestion
+     dropped: …") — a dropped one counts as declined next visit, so the
+     idea gets a different reply
    - `write_journal`: kept suggestions are accepted, not open — name them
      in Observations ("kept at review: … → Backlog"); only they count toward
      the twenty
 
    A visit with no suggestions makes all its writes at once. On a
    `--scheduled` run, nobody is there to answer: write the suggestions as
-   `#idea` tasks as above, unasked, and name its questions under Waiting to
-   ask in the journal (step 7) — never in the notebook.
+   `#idea` tasks as above, unasked, mark each reply's idea seen ("suggestion:
+   …"), and name its questions under Waiting to ask in the journal (step 7)
+   — never in the notebook.
 
 7. **Rewrite the journal** (`write_journal`) — the whole journal, kept short.
    Writing it also marks the notebook as seen: the next visit's change list
@@ -469,14 +414,14 @@ a write can't be taken back:
 Subnotes — 1 suggestion:
  * Sketch the morning review's output
 Friends of AI — nothing to add (last change 2 days ago, next step clear)
-AI Native — 2 thoughts read: a question to ask, a suggestion
+AI Native — 2 ideas read: a question to ask, a suggestion
 Work — paused: no plan yet (asked 2026-10-10; /subnotes:plan)
 ```
 
 When the Goals gate stopped the run, that is the whole report: "Goals — no
 goal yet, so nothing else was reviewed. Run /subnotes:plan."
 
-Say what each thought became, not what it said.
+Say what each idea became, not what it said.
 
 Then the skipped notebooks, one line each. If a `write_journal` reply asked
 for a line at the end of the report, add it last. No other commentary.
@@ -508,15 +453,15 @@ which you'd lean toward and why. Ask the one question that decides it. A
 plain one ("Is the agency still wanted?") needs only your best guess, not
 options. Talk it through with the user: nothing is written while you do.
 When you've agreed, write what follows — a learning for the decision,
-`close_question` for its question — then, for a thought,
-`mark_thoughts_seen`, `became` "talked through: …", and drop it from
+`close_question` for its question — then, for an idea, `mark_thoughts_seen`
+with its `Idea:` line, `became` "talked through: …", and drop it from
 Waiting to ask in the journal. Write the decision under the `#idea` line it
 settles too, with `add_subnotes`, without asking — the user just agreed to it
 (2026-10-19): one or a few subnotes, the first starting "Decided <today>:",
 in the user's voice, saying what was decided and anything ruled out. Show the
 lines as you write them ("Writing under '…': Decided 2026-10-19: …"). The
 idea itself stays as it is: scheduling it or taking the tag off is the
-user's. A thought that sits as a subtask can't take subnotes; say what to
+user's. An idea that sits as a subtask can't take subnotes; say what to
 add there instead. A task the agreement calls for is proposed
 like any suggestion, and kept goes to its section (step 6). Then offer the
 next one; the user can stop any time, and the rest keep for next time.

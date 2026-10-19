@@ -29,6 +29,6 @@ log="$HOME/Library/Logs/Subnotes/review.log"
 mkdir -p "$(dirname "$log")"
 echo "=== $(date '+%Y-%m-%d %H:%M')" >> "$log"
 SUBNOTES_REVIEW_RUN=1 nohup "$claude" -p "/subnotes:review --scheduled" \
-  --allowedTools "mcp__plugin_subnotes_subnotes__*" \
+  --allowedTools "mcp__plugin_subnotes_subnotes__*" "Skill(subnotes:review-ideas)" \
   >> "$log" 2>&1 < /dev/null &
 exit 0
