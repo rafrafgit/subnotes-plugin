@@ -31,6 +31,7 @@ from there instead, without adding this marketplace first.
 - `read_notebook` — one notebook as plain text
 - `add_task` / `add_tasks` — append tasks to a notebook
 - `add_subnotes` — add detail lines under an existing task (needs a Subnotes that knows it; an older one sets the write aside)
+- `set_schedule` — reschedule an existing task: Today, Next, Soon, Someday, Done or a date (needs a Subnotes that knows it; an older one sets the write aside)
 - `read_learnings` / `add_learning` / `correct_learning` — what the skills
   have learned, about one notebook or about you, shared by all of them
 - `read_questions` / `add_question` / `close_question` — open questions that

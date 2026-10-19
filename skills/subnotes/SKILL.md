@@ -114,9 +114,11 @@ Report a refused write the same way: what was not added, and why.
 
 ## What this cannot do
 
-Writes only ever add. There is no way to mark a task done, edit or delete a
-line, reorganise a notebook, rename anything, or create a notebook. If asked,
-say so plainly and offer to add a task instead — or, for detail on a task
+Writes add, with one exception: `set_schedule` reschedules an existing task —
+Today, Next, Soon, Someday, Done or a date — named by its text, when the user
+asks for it ("mark that done", "move it to Soon"). There is no way to edit or
+delete a line, reorganise a notebook, rename anything, or create a notebook. If
+asked, say so plainly and offer to add a task instead — or, for detail on a task
 that's already there, to add subnotes under it with `add_subnotes`, named by
 the task's text. That works on a top-level task only, not a subtask.
 

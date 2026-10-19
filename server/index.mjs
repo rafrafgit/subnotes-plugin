@@ -4,7 +4,7 @@
 // writing to a CloudKit-mirrored store is the failure mode this project has
 // already spent five rounds on.
 //
-// No dependencies, deliberately. The whole surface is sixteen tools over
+// No dependencies, deliberately. The whole surface is seventeen tools over
 // newline-delimited JSON-RPC on stdio, which is less code than the wiring to
 // use an SDK, and it removes the install step entirely: no package-lock, no
 // 60-second dependency fetch on first cache, nothing to go stale. Revisit if
@@ -386,29 +386,10 @@ function addSubnotes({ notebook, match, subnotes }) {
   if (!lines.length) throw new UserError('No subnotes given.');
   if (lines.some(l => l.includes('\n'))) throw new UserError('A subnote is one line. Send several lines as several subnotes.');
 
-  // Sent without a schedule tag Claude may have copied along, since the app
-  // matches the task's words alone. The #idea tag is optional too: the review
-  // reads an idea's text without it, and the user may take it off meanwhile.
-  let words = taskWords(`• ${wanted}`)?.text || wanted;
-  const key = withoutIdeaTag(words).toLowerCase();
-  const sameTask = t => withoutIdeaTag(String(t ?? '')).toLowerCase() === key;
-  let text = null;
-  try {
-    text = readFileSync(join(DIR, nb.file), 'utf8');
-  } catch {}
-  if (text !== null) {
-    const hits = text.split('\n').map(taskWords).filter(t => t && sameTask(t.text));
-    const queued = queuedTasks(nb).some(t => sameTask(t.text));
-    if (!hits.length && !queued) throw new UserError(
-      `"${nb.name}" has no task "${wanted}". Pass the task's text as read_notebook shows it, without its schedule tag.`);
-    if (hits.length > 1) throw new UserError(
-      `"${nb.name}" has ${hits.length} tasks "${wanted}". A write goes under exactly one, so this can't be placed — tell the user instead.`);
-    if (hits[0]?.subtask) throw new UserError(
-      `"${wanted}" is a subtask, which can't have subnotes of its own. Tell the user what to add instead.`);
-    // The line's own words, tag and all, so an app that matches them exactly
-    // still finds it.
-    if (hits[0]) words = hits[0].text;
-  }
+  const task = findTask(nb, wanted);
+  if (task.subtask) throw new UserError(
+    `"${wanted}" is a subtask, which can't have subnotes of its own. Tell the user what to add instead.`);
+  const words = task.text;
 
   const payload = {
     connectorVersion: CONNECTOR_VERSION,
@@ -422,6 +403,67 @@ function addSubnotes({ notebook, match, subnotes }) {
   writeInbox(payload);
   return `Queued ${lines.length} subnote${lines.length === 1 ? '' : 's'} under "${words}" in "${nb.name}":\n` +
     lines.map(l => `    ${l}`).join('\n') +
+    `\n\nSubnotes applies it when it is running, or at next launch if it is closed. ` +
+    `A Subnotes older than this plugin can't apply it and sets it aside.`;
+}
+
+// The one task, at either level, that a write naming `wanted` means, checked
+// against the export so a wrong match fails in the conversation; the app checks
+// again when it applies the write. Sent without a schedule tag Claude may have
+// copied along, since the app matches the task's words alone. The #idea tag is
+// optional too: the review reads an idea's text without it, and the user may
+// take it off meanwhile. Returns the line's own words, tag and all, so an app
+// that matches them exactly still finds it — or the words as given when the
+// notebook can't be read, or the task is only queued.
+function findTask(nb, wanted) {
+  const words = taskWords(`• ${wanted}`)?.text || wanted;
+  const key = withoutIdeaTag(words).toLowerCase();
+  const sameTask = t => withoutIdeaTag(String(t ?? '')).toLowerCase() === key;
+  let text = null;
+  try {
+    text = readFileSync(join(DIR, nb.file), 'utf8');
+  } catch {}
+  if (text === null) return { text: words, subtask: false };
+  const hits = text.split('\n').map(taskWords).filter(t => t && sameTask(t.text));
+  const queued = queuedTasks(nb).some(t => sameTask(t.text));
+  if (!hits.length && !queued) throw new UserError(
+    `"${nb.name}" has no task "${wanted}". Pass the task's text as read_notebook shows it, without its schedule tag.`);
+  if (hits.length > 1) throw new UserError(
+    `"${nb.name}" has ${hits.length} tasks "${wanted}". A write changes exactly one, so this can't be placed — tell the user instead.`);
+  return hits[0] ?? { text: words, subtask: false };
+}
+
+const SCHEDULES = [...PRIORITIES, 'Done'];
+
+// Reschedules one existing task — the first write that changes a line rather
+// than adding one, so the do skill can mark a task done and the review can move
+// an idea on once the user agrees. Named by text, like add_subnotes. The app
+// applies it through its own When menu's writers: a bucket clears any date,
+// Done on a repeating task moves it to its next date, and any schedule but Done
+// takes an #idea tag off.
+function setSchedule({ notebook, match, schedule }) {
+  const m = manifest();
+  const nb = findNotebook(m, notebook);
+  const wanted = String(match ?? '').trim();
+  if (!wanted) throw new UserError('Name the task to reschedule: its text, as read_notebook shows it.');
+  const raw = String(schedule ?? '').trim();
+  const bucket = SCHEDULES.find(p => p.toLowerCase() === raw.toLowerCase());
+  const date = !bucket && /^\d{4}-\d{2}-\d{2}$/.test(raw) && !isNaN(Date.parse(raw)) ? raw : null;
+  if (!bucket && !date) throw new UserError(
+    `Schedule must be one of ${SCHEDULES.join(', ')}, or a date as yyyy-MM-dd — got "${raw}".`);
+
+  const words = findTask(nb, wanted).text;
+  const payload = {
+    connectorVersion: CONNECTOR_VERSION,
+    ...(PLUGIN_VERSION ? { pluginVersion: PLUGIN_VERSION } : {}),
+    id: randomUUID().slice(0, 8),
+    op: 'set_schedule',
+    notebook: nb.name,
+    match: words,
+    schedule: bucket ?? date,
+  };
+  writeInbox(payload);
+  return `Queued: "${words}" in "${nb.name}" → ${bucket ?? date}.` +
     `\n\nSubnotes applies it when it is running, or at next launch if it is closed. ` +
     `A Subnotes older than this plugin can't apply it and sets it aside.`;
 }
@@ -1165,6 +1207,16 @@ const TOOLS = [
       subnotes: { type: 'array', items: { type: 'string' }, description: 'The lines to add, one subnote each.' },
     }, required: ['notebook', 'match', 'subnotes'] },
     run: addSubnotes,
+  },
+  {
+    name: 'set_schedule',
+    description: "Reschedule one existing task: Today, Next, Soon, Someday, Done, or a date. Only when the user has asked for it or agreed to it — such as marking a task done that was just finished, or accepting an idea. Scheduling an #idea takes its tag off; Done leaves it. Done on a repeating task moves it to its next date. The task is named by its text and must be exactly one task in the notebook; a subtask is fine.",
+    inputSchema: { type: 'object', properties: {
+      notebook: { type: 'string' },
+      match: { type: 'string', description: "The task's text, as read_notebook shows it, without its schedule tag; its #idea tag may be left out." },
+      schedule: { type: 'string', description: 'Today, Next, Soon, Someday or Done, or a date as yyyy-MM-dd.' },
+    }, required: ['notebook', 'match', 'schedule'] },
+    run: setSchedule,
   },
   {
     name: 'read_learnings',
