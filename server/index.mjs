@@ -591,7 +591,7 @@ function writeJournal({ notebook, content }) {
   writeFileSync(tmp, text.endsWith('\n') ? text : text + '\n');
   renameSync(tmp, path);
   keepSnapshot(nb);
-  return `Journal for "${nb.name}" saved (${text.length} characters).` + scheduleHint();
+  return `Journal for "${nb.name}" saved (${text.length} characters).`;
 }
 
 // MARK: - Learnings and open questions
@@ -1310,28 +1310,6 @@ function ideasContext({ notebooks }) {
       newThoughts({ notebook: nb.name }),
     ]),
   ].join('\n');
-}
-
-// Offers /subnotes:schedule once, at the end of a review run by hand — the
-// moment someone has just seen what a review does. Here rather than in the
-// prompt, which would need a shell command (and a permission prompt) to look
-// at these files; write_journal is only ever called by the review. Never on
-// the daily run itself, never once it's on, and never twice: the marker is
-// written as the hint is given.
-const SCHEDULE_DIR = join(homedir(), '.claude', 'subnotes');
-
-function scheduleHint() {
-  if (process.env.SUBNOTES_REVIEW_RUN) return '';
-  const marker = join(SCHEDULE_DIR, 'schedule-hint-shown');
-  try {
-    if (existsSync(join(SCHEDULE_DIR, 'daily-review')) || existsSync(marker)) return '';
-    mkdirSync(SCHEDULE_DIR, { recursive: true });
-    writeFileSync(marker, new Date().toISOString() + '\n');
-  } catch {
-    return '';
-  }
-  return '\n\nThe daily review is off. End your report with this line: ' +
-    '"Run this by itself once a day: /subnotes:schedule"';
 }
 
 const ALLOW_DUPLICATE = {

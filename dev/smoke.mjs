@@ -52,7 +52,7 @@ const init = await send('initialize', {});
 check('initialize', init.result?.serverInfo?.name === 'subnotes');
 
 const tools = await send('tools/list', {});
-check('eighteen tools', tools.result.tools.length === 18,
+check('nineteen tools', tools.result.tools.length === 19,
       tools.result.tools.map(t => t.name).join(', '));
 
 const list = await call('list_notebooks');

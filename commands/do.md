@@ -7,10 +7,9 @@ in this session and do them, and line up the ones that need the user.
 Notebook, if one was named:
 $ARGUMENTS
 
-This command needs someone at the keyboard. If it was started with
-`--scheduled`, or by anything other than the user typing it, stop and do
-nothing: it changes files and runs commands, which the daily review is never
-allowed to do.
+This command needs someone at the keyboard. If it was started by anything
+other than the user typing it, stop and do nothing: it changes files and
+runs commands.
 
 ## Which notebook
 

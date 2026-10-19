@@ -9,8 +9,7 @@ the next steps. Notebook to check, if one was named:
 $ARGUMENTS
 
 This command needs someone at the keyboard: it is a conversation. If it was
-started with `--scheduled`, or by anything other than the user typing it,
-stop and do nothing.
+started by anything other than the user typing it, stop and do nothing.
 
 ## Read
 
