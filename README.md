@@ -42,6 +42,8 @@ from there instead, without adding this marketplace first.
 - `review_context` — everything a review visit needs, for several notebooks in
   one call, with only what changed since the last visit (kept as line
   fingerprints, never a copy of the text)
+- `ideas_context` — everything the review's ideas sub-skill reads, for several
+  notebooks in one read-only call
 
 Ask what is on a notebook, or what to pick up next — reading is half the point.
 Say "put that on the backlog" mid-conversation and it lands in the right

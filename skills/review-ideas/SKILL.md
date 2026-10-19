@@ -17,19 +17,20 @@ the most direct signal the skills get. Your job is to file each one where it
 holds and find what would move it. You write only what doesn't wait on the
 user; the review raises the rest with them and writes it.
 
-## Read, in one turn
+## Read, in one call
 
-- `list_notebooks`, for each notebook's purpose and sections, and which one
-  is Goals
-- `new_thoughts` for each notebook named
-- `read_learnings` and `read_questions` for each, so nothing you record is
-  already there
-- `read_notebook` for the Goals notebook, if one is marked "Role: Goals": a
-  next action is judged against Goals as well as the purpose, and never one
-  Goals parks
+The review is waiting for you, so be quick: one read, one write turn, then
+return. Call `ideas_context` once with every notebook named. It gives the
+shared learnings and questions, the Goals notebook whole — a next action is
+judged against Goals as well as the purpose, and never one Goals parks — and
+for each notebook its purpose, sections, learnings, open questions and
+`#idea` lines. That is everything; don't call `list_notebooks`,
+`new_thoughts`, `read_learnings` or `read_questions` as well.
 
 Read a whole notebook only when an idea can't be judged without it — what
-it's about isn't in its section name or the idea itself.
+it's about isn't in its section name or the idea itself. Nothing else: not
+the plugin's or the project's files, and no shell commands. The ideas are
+about the user's work, and the notebook is where that is.
 
 Each idea comes with where it sits: "· under: <task>" is a subtask or subnote
 of that task, so it's input on that task; "· in: <section>" is about that

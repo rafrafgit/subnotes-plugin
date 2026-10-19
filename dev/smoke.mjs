@@ -52,7 +52,7 @@ const init = await send('initialize', {});
 check('initialize', init.result?.serverInfo?.name === 'subnotes');
 
 const tools = await send('tools/list', {});
-check('fifteen tools', tools.result.tools.length === 15,
+check('eighteen tools', tools.result.tools.length === 18,
       tools.result.tools.map(t => t.name).join(', '));
 
 const list = await call('list_notebooks');
@@ -60,6 +60,12 @@ check('list_notebooks', !list.isError && list.text.includes('Open tasks'));
 const first = list.text.match(/^## (.+)$/m)?.[1];
 check('a notebook is connected', !!first, first ?? '');
 console.log(`\n${list.text}\n`);
+
+const ideasCtx = await call('ideas_context', { notebooks: [first] });
+check('ideas_context: shared learnings once, then the notebook with its ideas',
+      !ideasCtx.isError && ideasCtx.text.split('# Shared learnings').length === 2
+      && ideasCtx.text.includes(`\n# ${first}\n`) && ideasCtx.text.includes('## Ideas (#idea lines)'), ideasCtx.text.slice(0, 200));
+check('ideas_context refuses an unconnected notebook', (await call('ideas_context', { notebooks: ['Definitely Not Connected'] })).isError);
 
 const read = await call('read_notebook', { name: first.toLowerCase() });
 check('read_notebook matches case-insensitively', !read.isError, `${read.text.length} chars`);
@@ -210,6 +216,8 @@ if (process.env.SUBNOTES_DIR) {
         ideas.text.includes('What is the use case? · under: Make the brain visible')
         && ideas.text.includes('A top idea — with a detail · in: Ideas test')
         && !ideas.text.includes('dealt with') && !ideas.text.includes('#idea'), ideas.text);
+  const ctxIdeas = await call('ideas_context', { notebooks: [first] });
+  check('ideas_context gives the same ideas as new_thoughts', ctxIdeas.text.includes(ideas.text), ctxIdeas.text);
   const markedIdea = await call('mark_thoughts_seen', { notebook: first, thoughts: ['What is the use case? · under: Make the brain visible'] });
   check('an #idea can be marked seen', !markedIdea.isError, markedIdea.text);
   writeFileSync(file, bare);

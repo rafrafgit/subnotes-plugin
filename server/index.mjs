@@ -1135,6 +1135,46 @@ function reviewContext({ notebooks }) {
   ].join('\n');
 }
 
+// Everything review-ideas reads, in one call: it used to take thirteen reads
+// over two turns, while the review waited (2026-10-19). Read-only, unlike
+// review_context, which also leaves the review's snapshot pending. The Goals
+// notebook comes whole, named or not: every idea is judged against it.
+function ideasContext({ notebooks }) {
+  const m = manifest();
+  const names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
+  if (!names.length) throw new UserError('Name at least one notebook.');
+  const nbs = names.map(n => findNotebook(m, n));
+  const goals = m.notebooks.find(n => n.role === 'goals');
+  const entries = (kind, nb) => {
+    const lines = (readEntryFile(agentFile(kind, nb)) ?? '').split('\n').filter(l => ENTRY.test(l));
+    return lines.length ? lines.join('\n') : '(none)';
+  };
+  return [
+    '# Shared learnings — hold in every notebook',
+    sharedEntryLines('learnings'),
+    '',
+    '# Shared open questions',
+    sharedEntryLines('questions'),
+    ...(goals ? ['', `# Goals notebook: ${goals.name}, whole`, readFileSync(join(DIR, goals.file), 'utf8').replace(/\n*$/, '')] : []),
+    ...nbs.flatMap(nb => [
+      '',
+      `# ${nb.name}`,
+      ...(nb.role === 'goals' ? ['Role: Goals'] : []),
+      nb.purpose ? `Purpose: ${nb.purpose}` : 'Purpose: (none)',
+      nb.sections?.length ? `Sections:\n${sectionOutline(nb)}` : 'Sections: (none)',
+      '',
+      '## Learnings about this notebook',
+      entries('learnings', nb),
+      '',
+      '## Open questions about this notebook',
+      entries('questions', nb),
+      '',
+      '## Ideas (#idea lines)',
+      newThoughts({ notebook: nb.name }),
+    ]),
+  ].join('\n');
+}
+
 // Offers /subnotes:schedule once, at the end of a review run by hand — the
 // moment someone has just seen what a review does. Here rather than in the
 // prompt, which would need a shell command (and a permission prompt) to look
@@ -1301,6 +1341,14 @@ const TOOLS = [
       notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks to visit.' },
     }, required: ['notebooks'] },
     run: reviewContext,
+  },
+  {
+    name: 'ideas_context',
+    description: "For review-ideas: everything it reads, for every notebook named, in one read-only call — the shared learnings and questions and the Goals notebook whole, then per notebook its purpose, sections, learnings, open questions and #idea lines (as new_thoughts gives them). Call it once instead of list_notebooks, read_notebook, read_learnings, read_questions and new_thoughts.",
+    inputSchema: { type: 'object', properties: {
+      notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks whose ideas to read.' },
+    }, required: ['notebooks'] },
+    run: ideasContext,
   },
   {
     name: 'read_journal',

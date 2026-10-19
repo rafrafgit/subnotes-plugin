@@ -428,12 +428,14 @@ for a line at the end of the report, add it last. No other commentary.
 
 On a run by hand, the report names suggestions as proposed, not written
 ("Subnotes — 1 suggestion proposed"), and ends with them, numbered across
-notebooks, each with the section it goes to, and its subnotes and `Why:` as
-they would be written:
+notebooks. Each leads with the task's text in bold, so the user sees at a
+glance what it is (asked 2026-10-19); where it goes follows on its own line,
+plain, then its subnotes and `Why:` as they would be written:
 
 ```
 Proposed — keep, drop or change each (or "keep all"):
-1. Subnotes → Review — Sketch the morning review's output as three lines
+1. **Sketch the morning review's output as three lines**
+   → Subnotes › Review
    - One line per notebook: what changed
    - ...
    Why: the AI section has no next step

@@ -91,6 +91,8 @@ when you stopped short, or the work failed its check: it isn't done.
 Then go on to the next task in "I can do this here". When there is none left,
 offer the follow-ups the work turned up, all together, and add them with
 `add_tasks` only if they say yes; and offer the tasks that need their input.
+Lead each follow-up with its task text in bold and put where it would go
+after it, plain — the user reads what it is first (asked 2026-10-19).
 
 Before you report, look back over the work for what the user told you that
 will hold next time, and add each one (`add_learning`, source `do`): with the
