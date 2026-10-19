@@ -387,22 +387,27 @@ function addSubnotes({ notebook, match, subnotes }) {
   if (lines.some(l => l.includes('\n'))) throw new UserError('A subnote is one line. Send several lines as several subnotes.');
 
   // Sent without a schedule tag Claude may have copied along, since the app
-  // matches the task's words alone.
-  const words = taskWords(`• ${wanted}`)?.text || wanted;
-  const key = words.toLowerCase();
+  // matches the task's words alone. The #idea tag is optional too: the review
+  // reads an idea's text without it, and the user may take it off meanwhile.
+  let words = taskWords(`• ${wanted}`)?.text || wanted;
+  const key = withoutIdeaTag(words).toLowerCase();
+  const sameTask = t => withoutIdeaTag(String(t ?? '')).toLowerCase() === key;
   let text = null;
   try {
     text = readFileSync(join(DIR, nb.file), 'utf8');
   } catch {}
   if (text !== null) {
-    const hits = text.split('\n').map(taskWords).filter(t => t && t.text.toLowerCase() === key);
-    const queued = queuedTasks(nb).some(t => String(t.text ?? '').trim().toLowerCase() === key);
+    const hits = text.split('\n').map(taskWords).filter(t => t && sameTask(t.text));
+    const queued = queuedTasks(nb).some(t => sameTask(t.text));
     if (!hits.length && !queued) throw new UserError(
       `"${nb.name}" has no task "${wanted}". Pass the task's text as read_notebook shows it, without its schedule tag.`);
     if (hits.length > 1) throw new UserError(
       `"${nb.name}" has ${hits.length} tasks "${wanted}". A write goes under exactly one, so this can't be placed — tell the user instead.`);
     if (hits[0]?.subtask) throw new UserError(
       `"${wanted}" is a subtask, which can't have subnotes of its own. Tell the user what to add instead.`);
+    // The line's own words, tag and all, so an app that matches them exactly
+    // still finds it.
+    if (hits[0]) words = hits[0].text;
   }
 
   const payload = {
@@ -1156,7 +1161,7 @@ const TOOLS = [
     description: 'Write detail lines under one existing task, after the subnotes it already has — such as a decision talked through in Claude Code, under the idea it settles. Adds only: it cannot change or remove the task or its subnotes. The task is named by its text and must be exactly one top-level task in the notebook.',
     inputSchema: { type: 'object', properties: {
       notebook: { type: 'string' },
-      match: { type: 'string', description: "The task's text, as read_notebook shows it, without its schedule tag." },
+      match: { type: 'string', description: "The task's text, as read_notebook shows it, without its schedule tag; its #idea tag may be left out." },
       subnotes: { type: 'array', items: { type: 'string' }, description: 'The lines to add, one subnote each.' },
     }, required: ['notebook', 'match', 'subnotes'] },
     run: addSubnotes,
