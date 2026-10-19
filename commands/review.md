@@ -264,9 +264,22 @@ lines.
      each question under **Waiting to ask** in the journal, and the next run
      by hand asks them first.
 
-4. **Look for what's worth discussing in priority order** (2026-10-19):
-   **Today and overdue, then Next, then Soon, then the `#idea` lines, then
-   Someday and unscheduled text** — a section with no schedule counts as
+4. **Start from the plan, then look for what's worth discussing in
+   priority order** (2026-10-19).
+
+   **First, the plan's next step.** For each goal this notebook serves (the
+   Goal and plan gate above), what does its plan need next, and is there a
+   task for it that's scheduled — Today, Next, Soon, or a date? None, or
+   only one sitting unscheduled or in Someday: that is the visit's first
+   suggestion, the step itself, before anything below. The user's schedule
+   says what they chose to work on; this says whether that includes what the
+   goal needs. Accepted suggestions that never move the plan are the failure
+   this guards against (2026-10-19). A step the user has dropped or skipped
+   at review isn't raised again until the goal, the plan or the step's text
+   changes.
+
+   Then, **Today and overdue, then Next, then Soon, then the `#idea` lines,
+   then Someday and unscheduled text** — a section with no schedule counts as
    Someday. A line is a task or a heading — an ongoing project is a
    scheduled heading, and the notes under it are where the user thinks. Of
    each line `review_context` gives whole — every Today and Next line, and a
@@ -354,8 +367,11 @@ lines.
      first person, as they'd write it themselves: "Connect my Personal
      notebook", never "Connect your Personal notebook". The `Why:` is you
      talking to them, so "you" is right there
-   - one subnote starting `Why:` — one sentence linking it to the purpose or
-     to what you noticed
+   - one subnote starting `Why:` — one sentence that names the goal it moves
+     and how ("Why: the 5k by August 2027 — the interview is in two days and
+     the 90-day page is the step before it"). A suggestion that moves no goal
+     in Goals says what it serves instead ("Why: the notebook's purpose —
+     …"); that's allowed, and the score counts it apart
 
    **Bring your answer, not homework.** When a suggestion would have the user
    come up with something — a list, a sketch, wording, a first draft — do
@@ -413,6 +429,7 @@ lines.
    - Goal: 5k/month net by Aug 2027 (Goals › Goals), served through the education job
    - Plan: Goals › Strategy, the Work line; the Interview section
    - Signal: interviews a month, pace about 1 (plan check 2026-10-19); last 2026-10-21
+   - Next step: the 90-day page for the interview (Interview section, due 2026-10-20) — scheduled
    - 2026-10-12 — both there; weak: nothing leads to the 5k before Aug 2027; asked for /subnotes:plan
 
    ## Open suggestions
@@ -493,10 +510,12 @@ Once the suggestions are answered and written, end with one line, before
 any questions:
 
 ```
-Kept 2 of 3 suggestions (67%) · took 1 min 50 s
+Kept 2 of 3 suggestions (67%) · 2 aimed at a goal · took 1 min 50 s
 ```
 
-A changed suggestion counts as kept. With no suggestions it's "No
+"Aimed at a goal" counts the suggestions whose `Why:` names a goal in
+Goals, kept or not: a high kept rate with nothing aimed at a goal is
+pleasant work that doesn't move the plan (2026-10-19). A changed suggestion counts as kept. With no suggestions it's "No
 suggestions · took 1 min 10 s", straight after the report. The user tracks
 it against "What good looks like": within 90 seconds, and at least half
 kept (2026-10-19).
