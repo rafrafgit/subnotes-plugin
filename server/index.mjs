@@ -1016,9 +1016,13 @@ function changesSince(old, text) {
 // lines up to the next heading. A date on or before today counts as Today, and
 // one in the coming week as Soon.
 //
-// Only what needs a look comes whole: a line new or changed since the last
-// visit, or a Today or Next line unmoved for a week (STALL_DAYS) — the "too
-// big for a day" case. The rest are named, one per line, as context.
+// Today and Next lines always come whole: they're the user's ongoing work,
+// few of them, and the notes under them are where open points wait. Showing
+// them only when changed let a point seen once but never talked through drop
+// out of every later visit (2026-10-19). Each says whether it's new, changed,
+// unchanged, or unmoved for a week (STALL_DAYS) — the "too big for a day"
+// case. Soon lines come whole only when new or changed; the rest are named,
+// one per line, as context.
 //
 // The snapshot keeps, per scheduled line, a fingerprint of its block and the
 // date it last changed, so "unmoved" survives across visits. A snapshot from
@@ -1104,7 +1108,7 @@ function scheduledReport(text, old) {
         const was = t && old.tasks?.[fingerprint(t.text.toLowerCase())];
         status = before && !before.has(lineFingerprint(s.line)) && !was ? 'new'
           : was && was.priority.toLowerCase() !== t.priority.toLowerCase() ? `was ${was.priority}` : 'changed';
-      } else if (group !== 'Soon' && days >= STALL_DAYS) status = `unmoved since ${since} (${days} days)`;
+      } else if (group !== 'Soon') status = days >= STALL_DAYS ? `unmoved since ${since} (${days} days)` : `unchanged since ${since}`;
       const label = `${s.heading ? 'heading' : 'task'}${s.due ? `, due ${s.due}` : ''}`;
       if (!status || inside) { rest.push(`- ${s.name} (${label}${inside ? ', shown above' : since ? `, unchanged since ${since}` : ''})`); continue; }
       shownBlocks.push(s);
@@ -1452,7 +1456,7 @@ const TOOLS = [
   },
   {
     name: 'review_context',
-    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its journal, what the notebook shows now of each suggestion the journal lists as open, learnings, open questions, the lines scheduled Today, Next and Soon (each whole when new, changed or unmoved for a week, else named), thoughts, and only what changed since the review last wrote that notebook's journal (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_journal, read_notebook, read_learnings, read_questions and new_thoughts for each.",
+    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its journal, what the notebook shows now of each suggestion the journal lists as open, learnings, open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), thoughts, and only what changed since the review last wrote that notebook's journal (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_journal, read_notebook, read_learnings, read_questions and new_thoughts for each.",
     inputSchema: { type: 'object', properties: {
       notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks to visit.' },
     }, required: ['notebooks'] },

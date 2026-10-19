@@ -17,11 +17,14 @@ Call `list_notebooks`. Review every connected notebook that has a
 infer or rephrase one. Connecting a notebook and giving it a purpose is the
 opt-in.
 
-**Ideas are tasks tagged `#idea`** (2026-10-18), not sections: an idea is a
-task that isn't decided yet (THOUGHTS_SPEC.md, "Idea as a task state"). The
-user's ideas and yours look the same — you know yours from the journal. There
-is no Thoughts section to read and no Suggestions section to write to; a
-section that still has one of those names is just a section.
+**Ideas need no marking** (2026-10-19): anything the user wrote that is
+worth discussing is one — a subnote on a task, the text under a heading, a
+Good/Bad list, a question in a paragraph. You find them in priority order
+(step 4). A line tagged `#idea` is the user asking outright, and your own
+suggestions are still written with the tag; the user's ideas and yours look
+the same — you know yours from the journal. There is no Thoughts section to
+read and no Suggestions section to write to; a section that still has one of
+those names is just a section.
 
 A notebook without a purpose still has its `#idea` lines read (step 3) — the
 user tagging one is an opt-in of its own — and nothing else done in it.
@@ -252,25 +255,37 @@ lines.
      each question under **Waiting to ask** in the journal, and the next run
      by hand asks them first.
 
-4. **Go through the scheduled lines,** in the order the user works
-   (2026-10-19): **Today, then Next, then Soon, then the `#idea` lines
-   last.** A line is a task or a heading — an ongoing project is a
+4. **Look for what's worth discussing in priority order** (2026-10-19):
+   **Today and overdue, then Next, then Soon, then the `#idea` lines, then
+   Someday and unscheduled text** — a section with no schedule counts as
+   Someday. A line is a task or a heading — an ongoing project is a
    scheduled heading, and the notes under it are where the user thinks. Of
-   each line `review_context` gives whole — new, changed, or a Today or Next
-   line unmoved for a week — ask: **is it clear, and is anything here worth
+   each line `review_context` gives whole — every Today and Next line, and a
+   Soon line new or changed — ask: **is it clear, and is anything here worth
    discussing?** A Good/Bad list, a problem written down, a "blocked by", a
    question in the notes: that is the user thinking in the open, and worth a
    question (Asking, not suggesting) or a suggestion even with no `#idea`
-   tag. The lines it only names are context; leave them be.
+   tag. Seen on an earlier visit isn't talked through: a point stays open
+   until the journal or the learnings say it was talked through, or the
+   notes show it settled (2026-10-19). Check a "blocked by" against what
+   the learnings say has been built or decided since. The lines it only
+   names are context; leave them be.
+
+   Last, only when the groups above leave room, **what changed** in
+   Someday and unscheduled text: the `+` lines are the only ones to judge
+   there — never trawl the rest of the notebook for ideas. Most of it is
+   notes the user doesn't want raised: pick only what reads as the user
+   thinking something through and not settled, and let the rest be.
 
    Fill the visit in that order: two suggestions and about three questions
-   at most, the earlier groups first, so an idea gets a turn only when
-   Today, Next and Soon leave room. What doesn't fit waits for the next
-   visit.
+   at most, the earlier groups first, so a later group gets a turn only
+   when the ones before leave room. What doesn't fit waits for the next
+   visit. A point you raised that the user skipped or waved off goes in the
+   journal's Observations, and isn't raised again until its text changes.
 
-   Then **what changed** elsewhere: tasks added, done or rescheduled,
-   sections written; the journal says how long since anything moved. On a
-   first visit, take the notebook as it stands.
+   **What changed** also says what moved: tasks added, done or
+   rescheduled, sections written; the journal says how long since anything
+   moved. On a first visit, take the notebook as it stands.
 
 5. **Decide whether anything is worth saying,** after the goal and plan gate
    above, and against the purpose. Most
@@ -464,7 +479,7 @@ questions, one at a time"). Then wait for the answer and finish the writes
 **Then the questions,** on a run by hand, once the suggestions are
 answered — straight after the report when there were none: those under
 Waiting to ask first, then this visit's in step 4's order — Today, Next,
-Soon, ideas last (Asking, not suggesting). Raise one — the first in that
+Soon, `#idea` lines, Someday and unscheduled last (Asking, not suggesting). Raise one — the first in that
 order, or one that matters more for the purpose now — and say how many
 others wait. Say what you take it to be about, in your words, then two or
 three ways it could go, each with what it costs and what it gains, and
