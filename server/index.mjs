@@ -4,7 +4,7 @@
 // writing to a CloudKit-mirrored store is the failure mode this project has
 // already spent five rounds on.
 //
-// No dependencies, deliberately. The whole surface is fifteen tools over
+// No dependencies, deliberately. The whole surface is sixteen tools over
 // newline-delimited JSON-RPC on stdio, which is less code than the wiring to
 // use an SDK, and it removes the install step entirely: no package-lock, no
 // 60-second dependency fetch on first cache, nothing to go stale. Revisit if
@@ -341,6 +341,14 @@ function addTasks({ notebook, tasks, allowDuplicate = false }) {
     tasks: validated,
   };
 
+  writeInbox(payload);
+  const where = t => t.section ? ` → ${t.section}` : '';
+  return `Queued ${validated.length} task${validated.length === 1 ? '' : 's'} for "${nb.name}":\n` +
+    validated.map(t => `  • ${t.text}${t.priority ? ` [${t.priority}]` : ''}${where(t)}`).join('\n') +
+    `\n\nSubnotes applies queued tasks when it is running, or at next launch if it is closed.`;
+}
+
+function writeInbox(payload) {
   const inbox = join(DIR, 'inbox');
   mkdirSync(inbox, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
@@ -350,11 +358,67 @@ function addTasks({ notebook, tasks, allowDuplicate = false }) {
   const tmp = `${file}.tmp`;
   writeFileSync(tmp, JSON.stringify(payload, null, 2) + '\n');
   renameSync(tmp, file);
+}
 
-  const where = t => t.section ? ` → ${t.section}` : '';
-  return `Queued ${validated.length} task${validated.length === 1 ? '' : 's'} for "${nb.name}":\n` +
-    validated.map(t => `  • ${t.text}${t.priority ? ` [${t.priority}]` : ''}${where(t)}`).join('\n') +
-    `\n\nSubnotes applies queued tasks when it is running, or at next launch if it is closed.`;
+// A task's own words: its marker and every trailing [tag] — schedule, date,
+// repeat — taken off, since the user may have rescheduled it since it was read.
+// Subtasks are included so one can be refused by name rather than not found.
+const ANY_TASK_LINE = /^(\t?)•\s*(.+?)\s*$/;
+
+function taskWords(line) {
+  const task = ANY_TASK_LINE.exec(line);
+  if (!task) return null;
+  return { text: task[2].replace(/(\s*\[[^\]]*\])+$/, '').trim(), subtask: task[1] === '\t' };
+}
+
+// Writes lines under an existing task, after its subnotes — the one write
+// that lands inside a notebook rather than at the top of a section. It still
+// only adds. The task is named by its text and must be exactly one line, checked
+// here against the export so a wrong match fails in the conversation, and again
+// by the app when it applies the write, since the user may have changed the
+// line in between (the match precondition in the app's CLAUDE_CODE_PLUGIN_SPEC.md).
+function addSubnotes({ notebook, match, subnotes }) {
+  const m = manifest();
+  const nb = findNotebook(m, notebook);
+  const wanted = String(match ?? '').trim();
+  if (!wanted) throw new UserError('Name the task to write under: its text, as read_notebook shows it.');
+  const lines = (Array.isArray(subnotes) ? subnotes : [subnotes]).map(s => String(s ?? '').trim()).filter(Boolean);
+  if (!lines.length) throw new UserError('No subnotes given.');
+  if (lines.some(l => l.includes('\n'))) throw new UserError('A subnote is one line. Send several lines as several subnotes.');
+
+  // Sent without a schedule tag Claude may have copied along, since the app
+  // matches the task's words alone.
+  const words = taskWords(`• ${wanted}`)?.text || wanted;
+  const key = words.toLowerCase();
+  let text = null;
+  try {
+    text = readFileSync(join(DIR, nb.file), 'utf8');
+  } catch {}
+  if (text !== null) {
+    const hits = text.split('\n').map(taskWords).filter(t => t && t.text.toLowerCase() === key);
+    const queued = queuedTasks(nb).some(t => String(t.text ?? '').trim().toLowerCase() === key);
+    if (!hits.length && !queued) throw new UserError(
+      `"${nb.name}" has no task "${wanted}". Pass the task's text as read_notebook shows it, without its schedule tag.`);
+    if (hits.length > 1) throw new UserError(
+      `"${nb.name}" has ${hits.length} tasks "${wanted}". A write goes under exactly one, so this can't be placed — tell the user instead.`);
+    if (hits[0]?.subtask) throw new UserError(
+      `"${wanted}" is a subtask, which can't have subnotes of its own. Tell the user what to add instead.`);
+  }
+
+  const payload = {
+    connectorVersion: CONNECTOR_VERSION,
+    ...(PLUGIN_VERSION ? { pluginVersion: PLUGIN_VERSION } : {}),
+    id: randomUUID().slice(0, 8),
+    op: 'add_subnotes',
+    notebook: nb.name,
+    match: words,
+    subnotes: lines,
+  };
+  writeInbox(payload);
+  return `Queued ${lines.length} subnote${lines.length === 1 ? '' : 's'} under "${words}" in "${nb.name}":\n` +
+    lines.map(l => `    ${l}`).join('\n') +
+    `\n\nSubnotes applies it when it is running, or at next launch if it is closed. ` +
+    `A Subnotes older than this plugin can't apply it and sets it aside.`;
 }
 
 // MARK: - Journals
@@ -1086,6 +1150,16 @@ const TOOLS = [
     description: 'Append several tasks to one connected notebook in a single write. Prefer this over repeated add_task calls: one file, one save, one sync cycle. Refuses a task the notebook already has, unless allowDuplicate is true.',
     inputSchema: { type: 'object', properties: { notebook: { type: 'string' }, tasks: { type: 'array', items: taskShape }, allowDuplicate: ALLOW_DUPLICATE }, required: ['notebook', 'tasks'] },
     run: addTasks,
+  },
+  {
+    name: 'add_subnotes',
+    description: 'Write detail lines under one existing task, after the subnotes it already has — such as a decision talked through in Claude Code, under the idea it settles. Adds only: it cannot change or remove the task or its subnotes. The task is named by its text and must be exactly one top-level task in the notebook.',
+    inputSchema: { type: 'object', properties: {
+      notebook: { type: 'string' },
+      match: { type: 'string', description: "The task's text, as read_notebook shows it, without its schedule tag." },
+      subnotes: { type: 'array', items: { type: 'string' }, description: 'The lines to add, one subnote each.' },
+    }, required: ['notebook', 'match', 'subnotes'] },
+    run: addSubnotes,
   },
   {
     name: 'read_learnings',

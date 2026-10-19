@@ -116,7 +116,9 @@ Report a refused write the same way: what was not added, and why.
 
 Writes only ever add. There is no way to mark a task done, edit or delete a
 line, reorganise a notebook, rename anything, or create a notebook. If asked,
-say so plainly and offer to add a task instead.
+say so plainly and offer to add a task instead — or, for detail on a task
+that's already there, to add subnotes under it with `add_subnotes`, named by
+the task's text. That works on a top-level task only, not a subtask.
 
 Because of that, a task whose text the notebook already has is refused rather
 than appended — a second identical line would have to be deleted by hand. The
