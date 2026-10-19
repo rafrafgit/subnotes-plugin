@@ -36,7 +36,9 @@ or in a line of a status section.
   to check.
 - A **plan** is how they mean to get there: a strategy, phases, months, a
   sequence of steps. A heap of unrelated tasks isn't one; scheduled steps that
-  lead to the goal are.
+  lead to the goal are. A direction isn't one either: "Claude suggests, I'm
+  the gatekeeper of quality" says what should change, not the work that
+  gets there (2026-10-19).
 
 There are two levels. The Goals notebook holds the goals and strategy across
 everything. Each notebook's goal is its purpose, any goal it states, and any
@@ -53,10 +55,18 @@ the user before going on; say that the rest waits on it.
 2. **A well-defined goal.** It has a measure and a date. Only check what can
    be checked: whether it's achievable comes out of step 4, and whether it's
    the right goal is theirs to say.
-3. **A plan** for each goal: how it will get there. None: work one out.
+3. **A plan** for each goal: how it will get there. None, or only a
+   direction: work one out, starting from the substance — "Given where this
+   is today, what's needed to reach the goal?" Bring your own answer for
+   them to correct: the things to build, or the use cases that would show
+   the goal is met, each with where it stands today. Never fill a plan
+   that lacks substance with dates or phases; dates come once the work is
+   named (2026-10-19).
 4. **A plan that can reach the goal.**
-   - Something in it leads to the measure. A plan of learning and testing is
-     fine, but some line has to say where the measure comes from.
+   - Something in it leads to the measure, and enough of it. A plan of
+     learning and testing is fine, but some line has to say where the
+     measure comes from. Check the assumption the measure rests on: does
+     the job it aims at pay 5k net?
    - It fits before the date. Rough arithmetic, stated: weeks left, hours a
      week, the size of what's open. If the hours aren't written anywhere and
      the answer depends on them, ask.
@@ -79,6 +89,12 @@ the user before going on; say that the rest waits on it.
 
 Name what you find plainly, with the numbers ("10 months to August 2027, and
 no line of the strategy produces income before then"). One gap at a time.
+
+Give every plan you check a verdict, gap or not, in a line each
+(2026-10-19):
+- good, or vague — and what's vague about it
+- will it reach the goal, and why or why not
+- what an alternative plan would look like, in a line or two
 
 ## Work it out with them
 

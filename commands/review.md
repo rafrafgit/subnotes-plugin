@@ -92,10 +92,12 @@ to get there. Find both by meaning, never by heading:
   knowing, but isn't one.
 - A **plan** is how they mean to get there: a strategy, phases, months, a
   sequence of steps. A heap of unrelated tasks isn't one; scheduled steps that
-  lead to the goal are.
+  lead to the goal are. A direction isn't one either: it says what should
+  change, not the work that gets there.
 
 This gate is for what is **absent**, not what is imperfect. When in doubt, it
-exists.
+exists — but a direction is not a doubt: it is the weak plan below
+(2026-10-19).
 
 **In the Goals notebook,** first, before any other notebook:
 - No goal anywhere in it: suggest `/subnotes:plan` to write one (below), and stop
@@ -121,6 +123,9 @@ first point to raise, and the visit goes on:
 - a goal without a measure or a date, where one would change what you raise
 - a plan that can't reach its goal as written: nothing in it leads to the
   measure, or it can't fit before the date
+- a plan that names no work — a direction, like "Claude suggests, I'm the
+  gatekeeper" — so no next step can follow from it, and any you'd raise
+  would be a guess (2026-10-19)
 
 Suggest `/subnotes:plan` for it, with the gap in the `Why:` ("Why: nothing in
 the strategy produces income before August 2027"). Don't when a learning from
