@@ -139,6 +139,7 @@ const GOALS_ROLE = 'Role: Goals — what the user is working toward and how thei
   'Read it before working in any notebook, and judge each notebook against it as well as its own purpose.';
 
 function listNotebooks() {
+  listedAt = Date.now();
   const m = manifest();
   if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,), which lists every notebook with a switch.";
   return m.notebooks.map(n => {
@@ -1237,6 +1238,20 @@ function contextFor(nb) {
   ].join('\n');
 }
 
+// How long a review run by hand keeps the user waiting, against the 90
+// seconds in "What good looks like" (2026-10-19). It starts at the
+// list_notebooks just before review_context, the review's first call, and
+// ends when review_elapsed is called, just before the report: the time the
+// user then takes to keep or drop suggestions isn't the skill's.
+let listedAt = 0;
+let reviewStartedAt = 0;
+
+function reviewElapsed() {
+  if (!reviewStartedAt) return 'No review has started in this session.';
+  const secs = Math.round((Date.now() - reviewStartedAt) / 1000);
+  return `${secs >= 60 ? `${Math.floor(secs / 60)} min ${secs % 60} s` : `${secs} s`} since the review started.`;
+}
+
 // Everything one visit needs, for every notebook the review is visiting, in
 // one call: the shared learnings and questions once, then per notebook its
 // journal, learnings, questions, scheduled lines, new thoughts and what changed.
@@ -1245,6 +1260,8 @@ function reviewContext({ notebooks }) {
   const names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
   if (!names.length) throw new UserError('Name at least one notebook.');
   const nbs = names.map(n => findNotebook(m, n));
+  const now = Date.now();
+  reviewStartedAt = now - listedAt < 120_000 ? listedAt : now;
   return [
     '# Shared learnings — hold in every notebook',
     sharedEntryLines('learnings'),
@@ -1461,6 +1478,12 @@ const TOOLS = [
       notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks to visit.' },
     }, required: ['notebooks'] },
     run: reviewContext,
+  },
+  {
+    name: 'review_elapsed',
+    description: "For /subnotes:review run by hand: how long since the review started (its list_notebooks, or review_context). Call it last before showing the report, so the time leaves out the user's answer.",
+    inputSchema: { type: 'object', properties: {} },
+    run: reviewElapsed,
   },
   {
     name: 'ideas_context',

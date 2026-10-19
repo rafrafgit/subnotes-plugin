@@ -486,6 +486,21 @@ and, after them, one line saying how many questions wait ("Then 3
 questions, one at a time"). Then wait for the answer and finish the writes
 (step 6). A reason for a drop is welcome but never asked for.
 
+**The score,** on a run by hand: call `review_elapsed` last before showing
+the report, in the same turn as the writes that don't wait on the answer, so
+the time is how long the user waited, not how long they took to answer.
+Once the suggestions are answered and written, end with one line, before
+any questions:
+
+```
+Kept 2 of 3 suggestions (67%) · took 1 min 50 s
+```
+
+A changed suggestion counts as kept. With no suggestions it's "No
+suggestions · took 1 min 10 s", straight after the report. The user tracks
+it against "What good looks like": within 90 seconds, and at least half
+kept (2026-10-19).
+
 **Then the questions,** on a run by hand, once the suggestions are
 answered — straight after the report when there were none: those under
 Waiting to ask first, then this visit's in step 4's order — Today, Next,
