@@ -50,20 +50,15 @@ Ask what is on a notebook, or what to pick up next — reading is half the point
 Say "put that on the backlog" mid-conversation and it lands in the right
 notebook and section, or name them yourself: "… in Work, under Backlog".
 
-`/subnotes:review` reads each notebook that has a purpose, remembers earlier visits in a journal, and proposes a next step or
-two when one is worth it: run by hand, you keep, drop or change each one in
-Claude Code, and a kept one goes straight to the section it belongs in; the
-daily run adds them as tasks tagged `#idea` in the section they're about.
-`/subnotes:schedule` turns on a daily run:
-your first prompt to Claude Code each day, while Subnotes is open, starts it
-in the background with only this plugin's tools allowed (a `UserPromptSubmit`
-hook, which does nothing until it's turned on). `/subnotes:unschedule` stops it.
+`/subnotes:review` reads each notebook that has a purpose, remembers earlier
+visits in a journal, and talks through what it finds with you in Claude Code,
+one question at a time. When the talk shows a next step is worth doing, it
+proposes the task, and adds it to the section it belongs in only on your yes.
 
 Tag any line `#idea` for the other direction: write what's on your mind,
 where it belongs — "I wonder if Mattias is as committed as I am #idea" — and
 the review turns each new one into an open question, a learning, or a
-suggestion, without ever quoting it. Its own suggestions are `#idea` tasks
-too: schedule one or take the tag off to accept it.
+something to talk about, without ever quoting it.
 
 `/subnotes:plan [notebook]` checks your goals and plans with you: that each
 goal has a measure and a date, that there's a plan for it, and that the plan
