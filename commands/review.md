@@ -135,6 +135,15 @@ When the goal or plan has changed since that check by more than its wording
 — a goal added, a date moved, a strategy line added or dropped — suggest
 `/subnotes:plan` once.
 
+**Watch the signal.** The plan learning names each goal's signal and the
+pace its date needs ("Signal: interviews a month, pace about 1"). When the
+notebook shows the signal off that pace — no interview in six weeks — or a
+month has passed since the last plan check, suggest `/subnotes:plan` once,
+with the numbers in the `Why:` ("Why: no interview since 2026-09-20; the
+plan needs about one a month"). Whether the strategy is still right is
+Plan's question, with the user: never judge it here. No signal in the plan
+learning: nothing to watch.
+
 Keep what you found in the journal's **Goal and plan** block (step 7), and
 start from it next visit: look again only when what changed touches those
 lines.
@@ -403,6 +412,7 @@ lines.
    ## Goal and plan
    - Goal: 5k/month net by Aug 2027 (Goals › Goals), served through the education job
    - Plan: Goals › Strategy, the Work line; the Interview section
+   - Signal: interviews a month, pace about 1 (plan check 2026-10-19); last 2026-10-21
    - 2026-10-12 — both there; weak: nothing leads to the 5k before Aug 2027; asked for /subnotes:plan
 
    ## Open suggestions

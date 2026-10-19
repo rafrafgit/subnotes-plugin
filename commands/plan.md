@@ -1,9 +1,10 @@
 ---
-description: Check that your goals are clear and your plan can reach them, and work out what's missing with you
+description: Check that your goals are clear, your plan can reach them and is working, and work out what's missing with you
 ---
 
 Check the user's goals and plans with them: is there something to work toward,
-a way to get there, and can that way actually get there in time? Then agree
+a way to get there, can that way actually get there in time, and is it
+working so far? Then agree
 the next steps. Notebook to check, if one was named:
 $ARGUMENTS
 
@@ -64,6 +65,18 @@ the user before going on; say that the rest waits on it.
    - Every notebook serves a goal, or Goals says it's parked. One that serves
      none is a question, never a judgment.
    - Its next step is a task in a notebook, scheduled or ready to be.
+5. **A plan that's working.** Step 4 asks whether the plan can work on
+   paper; this asks whether what's happening bears it out.
+   - The **signal**: for each goal, the one number that shows the plan is on
+     track — interviews a month, days the skills met the bar, signups per
+     webinar. Take it from what the notebooks say (a status line, done
+     tasks, counts the user wrote). None written: propose one and ask.
+   - The **pace** the date needs, and where the signal is now, stated:
+     "2 interviews in 10 weeks; landing a job by August needs about one a
+     month".
+   - On pace: no gap. Too early to tell: say when it will show. Behind: the
+     plan's assumption isn't holding — ask whether to change the plan, the
+     effort, or the goal. That's theirs to decide; never decide it for them.
 
 Name what you find plainly, with the numbers ("10 months to August 2027, and
 no line of the strategy produces income before then"). One gap at a time.
@@ -96,11 +109,13 @@ don't say.
 ## Record what you agreed
 
 For each notebook you checked, one learning (`add_learning`, source `plan`)
-saying where its goal and plan are and what you found:
+saying where its goal and plan are, its signal and pace, and what you found:
 "Goal: 5k/month net by Aug 2027 (Goals). Plan: Goals' strategy, the
-education job line. Checked with the user: no gap." Replace your earlier one
+education job line. Signal: interviews a month, pace about 1; 0.8 on
+2026-10-19. Checked with the user: no gap." Replace your earlier one
 (`correct_learning`) rather than adding a second. The review reads these, so
-it doesn't ask for what you've settled.
+it doesn't ask for what you've settled, and watches the signal against the
+pace to know when to send the user back here.
 
 What stays unsettled — "Is the webinar test meant to earn, or to learn?" —
 goes in as an open question (`add_question`, source `plan`). Something they
