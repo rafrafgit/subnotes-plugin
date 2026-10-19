@@ -40,8 +40,9 @@ from there instead, without adding this marketplace first.
   thoughts, with what became of each (fingerprints only, never a copy of the text)
 - `read_journal` / `write_journal` — the review's working memory per notebook
 - `review_context` — everything a review visit needs, for several notebooks in
-  one call, with only what changed since the last visit (kept as line
-  fingerprints, never a copy of the text)
+  one call, with the lines scheduled Today, Next and Soon and only what
+  changed since the last visit (kept as line fingerprints, never a copy of
+  the text)
 - `ideas_context` — everything the review's ideas sub-skill reads, for several
   notebooks in one read-only call
 

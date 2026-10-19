@@ -253,6 +253,9 @@ if (process.env.SUBNOTES_DIR) {
   check('a change shows only the changed section, its lines marked',
         diff.text.includes('### Smoke section (new section)') && diff.text.includes('+ • Smoke diff task [Next]   ← new task')
         && !diff.text.includes('No snapshot'), diff.text.split('## What changed')[1]);
+  check('a new scheduled line comes whole under its group',
+        diff.text.split('## Scheduled lines')[1]?.split('## Ideas')[0].includes('### Next\n• Smoke diff task [Next]   ← task, new'),
+        diff.text.split('## Scheduled lines')[1]?.split('## Ideas')[0]);
   check('a snapshot holds fingerprints, not text', !readFileSync(pending, 'utf8').includes('Smoke diff'));
   await call('write_journal', { notebook: first, content:
     '## Open suggestions\n- 2026-10-18 — Smoke diff task — why: it is there\n- 2026-10-18 — Smoke task the user deleted — why: gone\n- 2026-10-18 — Smoke idea still waiting — why: an idea\n\n## Observations\n' });

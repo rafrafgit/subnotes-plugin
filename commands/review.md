@@ -43,9 +43,10 @@ has one more write turn after the user has kept or dropped your suggestions
 
 - `review_context` once, with every notebook you'll visit, Goals included.
   It gives the shared learnings and open questions once, then for each
-  notebook its journal, learnings, open questions, `#idea` lines and **what
-  changed** since your last visit — not the whole notebook, which you get
-  only on a first visit or when most of it is new.
+  notebook its journal, learnings, open questions, **scheduled lines**
+  (step 4), `#idea` lines and **what changed** since your last visit — not
+  the whole notebook, which you get only on a first visit or when most of it
+  is new.
 - `read_notebook` for the Goals notebook, which you read whole every time.
 - the `review-ideas` skill (Skill tool, `subnotes:review-ideas`), with every
   notebook you'll visit and every one that is only there for its `#idea`
@@ -218,8 +219,8 @@ lines.
    ideas, questions they answer closed, the settled ideas marked seen — and
    says so in its Recorded line. The "Ideas" in `review_context` are its
    job, not yours: use them only to follow your own suggestions (step 2).
-   - **Replies** are suggestions (step 6), ahead of your own ideas within
-     the two a visit, written exactly as returned — notebook, section, text,
+   - **Replies** are suggestions (step 6), after what the scheduled lines
+     gave (step 4) within the two a visit, written exactly as returned — notebook, section, text,
      subnotes and `Why:`. The user asked for them by tagging the idea, so
      they go ahead in a notebook without a purpose too, and past the goal
      and plan gate.
@@ -251,10 +252,25 @@ lines.
      each question under **Waiting to ask** in the journal, and the next run
      by hand asks them first.
 
-4. **Notice what changed** since the last visit — what changed in
-   `review_context` shows it: tasks added, done or rescheduled, sections
-   written; the journal says how long since anything moved. On a first
-   visit, take the notebook as it stands.
+4. **Go through the scheduled lines,** in the order the user works
+   (2026-10-19): **Today, then Next, then Soon, then the `#idea` lines
+   last.** A line is a task or a heading — an ongoing project is a
+   scheduled heading, and the notes under it are where the user thinks. Of
+   each line `review_context` gives whole — new, changed, or a Today or Next
+   line unmoved for a week — ask: **is it clear, and is anything here worth
+   discussing?** A Good/Bad list, a problem written down, a "blocked by", a
+   question in the notes: that is the user thinking in the open, and worth a
+   question (Asking, not suggesting) or a suggestion even with no `#idea`
+   tag. The lines it only names are context; leave them be.
+
+   Fill the visit in that order: two suggestions and about three questions
+   at most, the earlier groups first, so an idea gets a turn only when
+   Today, Next and Soon leave room. What doesn't fit waits for the next
+   visit.
+
+   Then **what changed** elsewhere: tasks added, done or rescheduled,
+   sections written; the journal says how long since anything moved. On a
+   first visit, take the notebook as it stands.
 
 5. **Decide whether anything is worth saying,** after the goal and plan gate
    above, and against the purpose. Most
@@ -447,8 +463,9 @@ questions, one at a time"). Then wait for the answer and finish the writes
 
 **Then the questions,** on a run by hand, once the suggestions are
 answered — straight after the report when there were none: those under
-Waiting to ask first, then this visit's (Asking, not suggesting). Raise
-one — the one that matters most for the purpose now — and say how many
+Waiting to ask first, then this visit's in step 4's order — Today, Next,
+Soon, ideas last (Asking, not suggesting). Raise one — the first in that
+order, or one that matters more for the purpose now — and say how many
 others wait. Say what you take it to be about, in your words, then two or
 three ways it could go, each with what it costs and what it gains, and
 which you'd lean toward and why. Ask the one question that decides it. A

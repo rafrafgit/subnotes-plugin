@@ -922,7 +922,7 @@ function sectionsOf(text) {
 
 const lineFingerprint = line => createHash('sha256').update(line.replace(/\s+$/, '')).digest('hex').slice(0, 16);
 
-function snapshotOf(text) {
+function snapshotOf(text, old = null) {
   const sections = sectionsOf(text);
   const tasks = {};
   for (const s of sections) for (const line of s.lines) {
@@ -934,6 +934,7 @@ function snapshotOf(text) {
     taken: localTime(new Date()),
     sections: sections.map(s => ({ name: s.name, lines: s.lines.filter(l => l.trim()).map(lineFingerprint) })),
     tasks,
+    scheduled: scheduledSnapshot(text, old),
   };
 }
 
@@ -953,7 +954,7 @@ function keepSnapshot(nb) {
   const pending = snapshotPath(nb, true);
   if (existsSync(pending)) return renameSync(pending, snapshotPath(nb));
   try {
-    writeEntryFile(snapshotPath(nb), JSON.stringify(snapshotOf(readFileSync(join(DIR, nb.file), 'utf8'))) + '\n');
+    writeEntryFile(snapshotPath(nb), JSON.stringify(snapshotOf(readFileSync(join(DIR, nb.file), 'utf8'), readSnapshot(snapshotPath(nb)))) + '\n');
   } catch {}
 }
 
@@ -1003,6 +1004,118 @@ function changesSince(old, text) {
   if (total && fresh / total > MOSTLY_NEW) return null;
   for (const [name, s] of before) out.push(`### ${name} — section gone (${s.lines.length} lines)`);
   return out;
+}
+
+// MARK: - Scheduled lines
+
+// The review reads what the user is working on in order — Today, Next, Soon,
+// then ideas — and asks of each line whether it's clear and whether anything
+// wants discussing (2026-10-19). A line is a task or a heading, whatever
+// carries the schedule. This hands it those lines, grouped and in that order,
+// each with what sits under it: a task's deeper-indented lines, a heading's
+// lines up to the next heading. A date on or before today counts as Today, and
+// one in the coming week as Soon.
+//
+// Only what needs a look comes whole: a line new or changed since the last
+// visit, or a Today or Next line unmoved for a week (STALL_DAYS) — the "too
+// big for a day" case. The rest are named, one per line, as context.
+//
+// The snapshot keeps, per scheduled line, a fingerprint of its block and the
+// date it last changed, so "unmoved" survives across visits. A snapshot from
+// before this has no such dates: a block it already had is taken as unmoved
+// since that snapshot was taken.
+const SCHEDULED_GROUPS = ['Today', 'Next', 'Soon'];
+const STALL_DAYS = 7;
+const BLOCK_SHOWN = 15;      // lines shown under a scheduled line, then counted
+const DATE_TAG = /\s*\[(\d{4}-\d{2}-\d{2})\]\s*$/;
+const indentOf = line => /^\t*/.exec(line)[0].length;
+
+function scheduledLines(text) {
+  const lines = text.split('\n');
+  const now = today();
+  const found = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const h = HEADING.exec(line);
+    const task = !h && TASK_LINE.exec(line);
+    if (!h && !task) continue;
+    const body = h ? h[2] : task[1];
+    let group = null, due = null;
+    const tag = PRIORITY_TAG.exec(body);
+    const date = DATE_TAG.exec(body);
+    if (tag) group = SCHEDULED_GROUPS.find(g => g.toLowerCase() === tag[1].toLowerCase()) ?? null;
+    else if (date && date[1] <= now) { group = 'Today'; due = date[1]; }
+    else if (date && daysSince(date[1]) >= -STALL_DAYS) { group = 'Soon'; due = date[1]; }
+    if (!group) continue;
+    const name = body.slice(0, (tag ?? date).index).trim();
+    if (!name) continue;
+    const block = [];
+    for (let k = i + 1; k < lines.length; k++) {
+      const next = lines[k];
+      if (h ? HEADING.test(next) : (next.trim() && indentOf(next) <= indentOf(line))) break;
+      if (next.trim()) block.push(next);
+    }
+    found.push({ group, due, name, line, block, at: i, end: i + block.length, heading: !!h,
+      key: fingerprint(`${h ? '#' : '•'} ${name.toLowerCase()}`) });
+  }
+  return found;
+}
+
+const blockHash = s => fingerprint([s.line.replace(/\s+$/, ''), ...s.block.map(l => l.replace(/\s+$/, ''))].join('\n'));
+
+function scheduledSnapshot(text, old) {
+  const known = old?.scheduled;
+  const before = old && new Set(old.sections.flatMap(s => s.lines));
+  const out = {};
+  for (const s of scheduledLines(text)) {
+    if (s.key in out) continue;
+    const hash = blockHash(s);
+    let since = today();
+    if (known?.[s.key]?.hash === hash) since = known[s.key].since ?? since;
+    else if (!known && before && [s.line, ...s.block].every(l => before.has(lineFingerprint(l)))) since = old.taken.slice(0, 10);
+    out[s.key] = { hash, since };
+  }
+  return out;
+}
+
+const daysSince = date => Math.round((Date.parse(today()) - Date.parse(date)) / 86_400_000);
+
+function scheduledReport(text, old) {
+  const all = scheduledLines(text);
+  if (!all.length) return 'No line is scheduled Today, Next or Soon.';
+  const marks = scheduledSnapshot(text, old);
+  const before = old && new Set(old.sections.flatMap(s => s.lines));
+  const out = [];
+  const shownBlocks = [];
+  for (const group of SCHEDULED_GROUPS) {
+    const look = [], rest = [];
+    for (const s of all.filter(x => x.group === group)) {
+      // A task already shown inside a heading's block is only named again.
+      const inside = shownBlocks.some(b => s.at > b.at && s.at <= b.end);
+      const since = marks[s.key]?.since;
+      const days = since ? daysSince(since) : 0;
+      const prev = old?.scheduled?.[s.key];
+      const changed = prev ? prev.hash !== blockHash(s)
+        : !(old && !old.scheduled && [s.line, ...s.block].every(l => before.has(lineFingerprint(l))));
+      let status;
+      if (!old) status = 'first visit';
+      else if (changed) {
+        const t = !s.heading && taskOf(s.line);
+        const was = t && old.tasks?.[fingerprint(t.text.toLowerCase())];
+        status = before && !before.has(lineFingerprint(s.line)) && !was ? 'new'
+          : was && was.priority.toLowerCase() !== t.priority.toLowerCase() ? `was ${was.priority}` : 'changed';
+      } else if (group !== 'Soon' && days >= STALL_DAYS) status = `unmoved since ${since} (${days} days)`;
+      const label = `${s.heading ? 'heading' : 'task'}${s.due ? `, due ${s.due}` : ''}`;
+      if (!status || inside) { rest.push(`- ${s.name} (${label}${inside ? ', shown above' : since ? `, unchanged since ${since}` : ''})`); continue; }
+      shownBlocks.push(s);
+      const shown = s.block.slice(0, BLOCK_SHOWN);
+      look.push([`${s.line.trim()}   ← ${label}, ${status}`, ...shown.map(l => `  ${l}`),
+        ...(s.block.length > shown.length ? [`  (${s.block.length - shown.length} more lines)`] : [])].join('\n'));
+    }
+    if (!look.length && !rest.length) continue;
+    out.push([`### ${group}`, ...look, ...(rest.length ? [`Unchanged, for context:`, ...rest] : [])].join('\n'));
+  }
+  return out.join('\n\n');
 }
 
 function sharedEntryLines(kind) {
@@ -1089,7 +1202,7 @@ function contextFor(nb) {
   else changed = `Since the last visit (${old.taken}) — "+" is a new or changed line, the rest is unchanged context:\n\n` + changes.join('\n\n');
 
   // Pending until write_journal keeps it: see the top of this section.
-  writeEntryFile(snapshotPath(nb, true), JSON.stringify(snapshotOf(text)) + '\n');
+  writeEntryFile(snapshotPath(nb, true), JSON.stringify(snapshotOf(text, old)) + '\n');
 
   const notes = connectorNotes(nb);
   const journal = journalText(nb);
@@ -1108,6 +1221,9 @@ function contextFor(nb) {
     '## Open questions about this notebook',
     entries('questions'),
     '',
+    '## Scheduled lines — Today, Next, Soon, in that order',
+    scheduledReport(text, old),
+    '',
     '## Ideas (#idea lines)',
     newThoughts({ notebook: nb.name }),
     '',
@@ -1119,7 +1235,7 @@ function contextFor(nb) {
 
 // Everything one visit needs, for every notebook the review is visiting, in
 // one call: the shared learnings and questions once, then per notebook its
-// journal, learnings, questions, new thoughts and what changed.
+// journal, learnings, questions, scheduled lines, new thoughts and what changed.
 function reviewContext({ notebooks }) {
   const m = manifest();
   const names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
@@ -1336,7 +1452,7 @@ const TOOLS = [
   },
   {
     name: 'review_context',
-    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its journal, what the notebook shows now of each suggestion the journal lists as open, learnings, open questions, thoughts, and only what changed since the review last wrote that notebook's journal (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_journal, read_notebook, read_learnings, read_questions and new_thoughts for each.",
+    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its journal, what the notebook shows now of each suggestion the journal lists as open, learnings, open questions, the lines scheduled Today, Next and Soon (each whole when new, changed or unmoved for a week, else named), thoughts, and only what changed since the review last wrote that notebook's journal (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_journal, read_notebook, read_learnings, read_questions and new_thoughts for each.",
     inputSchema: { type: 'object', properties: {
       notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks to visit.' },
     }, required: ['notebooks'] },
