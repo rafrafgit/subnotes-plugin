@@ -91,7 +91,7 @@ This gate is for what is **absent**, not what is imperfect. When in doubt, it
 exists.
 
 **In the Goals notebook,** first, before any other notebook:
-- No goal anywhere in it: ask for one, as an idea in it (step 6), and stop
+- No goal anywhere in it: suggest `/subnotes:plan` to write one (below), and stop
   the whole review there. No other notebook is visited; their journals stay as they are.
 - Goals but no plan for them, in Goals or in a notebook it names: the same,
   asking for the plan.
@@ -244,16 +244,18 @@ lines.
    Then look for a **next action** in every thought you were given, whatever its
    kind: the user wrote it because it's on their mind, and they want it moved,
    not only filed. When there's one physical step that would move it toward the
-   purpose, suggest it, besides recording the thought where it goes. For an open
-   question, a step toward settling it, with your own answer in it (step 6):
-   "Should this notebook be called something else?" → "Pick a name for Goals:
-   Compass, Home or North Star", the three as subnotes. For a
+   purpose, suggest it, besides recording the thought where it goes. For a
    fact, a step it calls for, when there is one ("Typing is slow again" →
    "Record a trace while typing in the big notebook on iPhone"). For a change of
    direction, the Goals suggestion is the action. These go ahead of your own
    ideas, within the two a visit. With more than two, the ones that matter most
    for the purpose now; the open questions keep the rest. When no step would
    change anything, don't invent one.
+
+   **An open question is never a suggestion:** it's asked (see Asking, not
+   suggesting, below). "Should this notebook be called something else?" is
+   asked in Claude Code with Compass, Home and North Star as the options,
+   never written as "Pick a name for Goals".
 
    Anything you record from a thought takes source `thoughts`, never
    `review`, so the user can tell what they raised from what you noticed.
@@ -270,30 +272,41 @@ lines.
    questions are already recorded; what's left is their suggestion:
    - still waiting as an `#idea`, or accepted — nothing: it's the user's now
    - declined (gone, not done) while the thought stays — the idea wasn't
-     good, and the thought still matters: suggest a different one, with
-     options (step 6), never the same again. Keep trying on later visits
-     while the thought is there.
+     good, and the thought still matters: suggest a different one (step 6),
+     never the same again. Keep trying on later visits while the thought is
+     there.
+   - talked through, and still there — nothing more unless the notebook
+     shows something new about it: the user keeps it as a reminder.
    - nothing noted — marked under the old rule, which closed a thought once
      filed. Take it as new, once: check what's already recorded from it
      (learnings, questions, suggestions) so nothing repeats, and give it
-     what it still lacks — a next action, or a conversation
+     what it still lacks — a next action, or a question to ask
 
-   **Some thoughts need a conversation, not a suggestion** (2026-10-18): a
-   design question with real trade-offs, a direction to choose, something
-   that spans notebooks — where any options you'd write are guesses, because
-   there is no obvious answer. Record its question (`add_question`) as for
-   any open question, but write no suggestion from it, and leave it unmarked,
-   so it stays new until you've talked it through:
-   - run by hand: raise it after the report (see Then report)
-   - `--scheduled`, with nobody there: leave it for the next run by hand
-   Not every question is one of these — a choice between a few plain options
-   is still a suggestion with options (step 6).
+   **Asking, not suggesting** (2026-10-19). There is always someone to
+   answer, so anything that asks the user something is asked in Claude
+   Code, never written into a notebook as a task: a thought that's an open
+   question or a direction to choose, and your own questions from step 5 —
+   missing context, whether a stall is still wanted, drift, an open question
+   that work waits on. A suggestion is only for something to *do*: a
+   physical step, for the user or for `/subnotes:do`. A "Pick one of…" task
+   is a question in disguise.
+   - **Bring your answer** to a question as you would to a suggestion: two
+     or three options, what each costs and gains, and which you'd lean
+     toward (see Then report).
+   - **Record it first:** a thought's question with `add_question`, as for
+     any open question; your own with `add_question` too, source `review`.
+     Leave a question's thought unmarked, so it stays new until it's been
+     talked through.
+   - **Run by hand:** ask after the suggestions are answered (Then report).
+   - **`--scheduled`:** the run is a background process and can't ask. Name
+     each question under **Waiting to ask** in the journal, and the next run
+     by hand asks them first.
 
    Then `mark_thoughts_seen` with every new thought, and every seen one you
    suggested something for again, exactly as given, each with `became` —
-   what came of it in a few words, never quoting it ("suggestion: Pick a
-   name for Goals", "a learning", "nothing"). Not the ones waiting for a
-   conversation.
+   what came of it in a few words, never quoting it ("suggestion: Record a
+   trace while typing", "a learning", "nothing"). Not the ones waiting to
+   be asked.
 
 4. **Notice what changed** since the last visit — what changed in
    `review_context` shows it: tasks added, done or rescheduled, sections
@@ -311,33 +324,35 @@ lines.
      step, one that fits in a day, and name the task it starts in the `Why:`.
      You can't split the task itself, so the first step is the suggestion.
    - **A stall:** something that matters for the purpose hasn't moved in
-     weeks. Ask, as a task, whether it is still wanted — "Decide: … or move it
-     to Someday".
+     weeks. Ask whether it is still wanted, or should move to Someday — a
+     question (Asking, not suggesting), never a "Decide: …" task.
    - **A gap:** a section that matters for the purpose with nothing to do in
      it.
    - **A vague task** that could be a physical, visible action.
    - **Drift:** recent work that doesn't seem to serve the purpose. Asked as a
-     question, never judged.
+     question (Asking, not suggesting), never judged.
    - **Missing context:** something you would need to judge the purpose
-     well that neither the notebook, the journal nor the learnings give. Ask for it as a
-     task the user does in the notebook, with your best guess to confirm or
-     correct where you have one (step 6), for example:
+     well that neither the notebook, the journal nor the learnings give. Ask
+     for it (Asking, not suggesting), with your best guess to confirm or
+     correct where you have one, for example:
      - the purpose is too vague to tell a good next step from a bad one —
-       "Sharpen the purpose: what will be true when this notebook has done
-       its job?"
-     - nothing says where things stand — "Add a section Current status:
-       three lines on where this stands today"
+       "What will be true when this notebook has done its job?"
+     - nothing says where things stand — "Where does this stand today?"
      - one missing fact — a deadline, what "done" or "good" looks like, a
-       constraint, why something stalled — "Write down: …"
+       constraint, why something stalled
+
+     The answer goes where it holds next time: a learning, or — when it
+     belongs in the notebook, such as a status the user wants to keep there
+     — a suggestion to write it in, with the user's answer as its draft.
 
      Ask only when the answer would change what you suggest, about what
      matters now rather than plans months ahead, and never for what the
      notebook, journal or learnings already say. One such question open at a time.
 
    **Open questions** change what's worth saying. Before suggesting work
-   that hangs on one, suggest settling the question instead. A question open
-   over three weeks is a stall: "Decide: … or drop the question". When the
-   notebook shows a question answered, close it.
+   that hangs on one, ask the question instead. A question open over three
+   weeks is a stall: ask whether it's still worth settling, or should be
+   dropped. When the notebook shows a question answered, close it.
 
    Never suggest something already declined or ignored, or anything the
    learnings say this user doesn't want. Don't suggest reorganising what's
@@ -360,14 +375,12 @@ lines.
      to what you noticed
 
    **Bring your answer, not homework.** When a suggestion would have the user
-   come up with something — options, a list, a sketch, wording, a first draft
-   — do that thinking yourself and put it in the suggestion, so their task is
-   to pick, correct or replace it: "Pick one of these three names" with three
-   names as subnotes above the `Why:`, never "List three names". Up to three
-   options, or a draft of a few lines, each as a subnote. Ask the user for
-   something outright only when only they can know it — a date, how an
-   interview went, what they want — and even then offer your best guess when
-   the notebook gives you one.
+   come up with something — a list, a sketch, wording, a first draft — do
+   that thinking yourself and put it in the suggestion, so their task is to
+   use, correct or replace it: "Send Felix this follow-up" with the message
+   as subnotes above the `Why:`, never "Write a follow-up to Felix". A draft
+   of a few lines, each as a subnote. A choice between options isn't a
+   suggestion: it's a question (Asking, not suggesting).
 
    Make the writes for every notebook together, in one turn, once you've
    decided them all.
@@ -401,7 +414,8 @@ lines.
 
    A visit with no suggestions makes all its writes at once. On a
    `--scheduled` run, nobody is there to answer: write the suggestions as
-   `#idea` tasks as above, unasked.
+   `#idea` tasks as above, unasked, and name its questions under Waiting to
+   ask in the journal (step 7) — never in the notebook.
 
 7. **Rewrite the journal** (`write_journal`) — the whole journal, kept short.
    Writing it also marks the notebook as seen: the next visit's change list
@@ -416,9 +430,12 @@ lines.
    - 2026-10-12 — both there; weak: nothing leads to the 5k before Aug 2027; asked for /subnotes:plan
 
    ## Open suggestions
-   - 2026-10-12 — Pick one of these three outputs for the morning review — why: the AI section has no next step
+   - 2026-10-12 — Sketch the morning review's output as three lines — why: the AI section has no next step
 
    Suggestions this week: 1
+
+   ## Waiting to ask
+   - 2026-10-12 — Is the agency with Mattias still wanted? (Status, unmoved since 2026-09-20)
 
    ## Observations
    - 2026-10-12 — Kanban Board marked Next, unchanged since 2026-09-28
@@ -437,6 +454,9 @@ lines.
      notebook, and a plan written down ahead goes stale the moment the user
      changes their mind.
    - dates are ones the notebook states, with what to look for then
+   - Waiting to ask: your questions from a `--scheduled` run, each with
+     where it comes from. A run by hand asks them and drops each once
+     talked through; one the notebook has since answered is dropped too
 
    Summarise or drop old observations. Under 60 lines. Use today's date.
 
@@ -449,7 +469,7 @@ a write can't be taken back:
 Subnotes — 1 suggestion:
  * Sketch the morning review's output
 Friends of AI — nothing to add (last change 2 days ago, next step clear)
-AI Native — 2 thoughts read: an open question with a next step, a suggestion
+AI Native — 2 thoughts read: a question to ask, a suggestion
 Work — paused: no plan yet (asked 2026-10-10; /subnotes:plan)
 ```
 
@@ -468,32 +488,44 @@ they would be written:
 
 ```
 Proposed — keep, drop or change each (or "keep all"):
-1. Subnotes → Review — Pick one of these three outputs for the morning review
-   - A one-line next step per notebook
+1. Subnotes → Review — Sketch the morning review's output as three lines
+   - One line per notebook: what changed
    - ...
    Why: the AI section has no next step
 ```
 
-Then wait for the answer and finish the writes (step 6). A reason for a drop
-is welcome but never asked for.
+and, after them, one line saying how many questions wait ("Then 3
+questions, one at a time"). Then wait for the answer and finish the writes
+(step 6). A reason for a drop is welcome but never asked for.
 
-**Then a conversation,** on a run by hand, once the suggestions are
-answered, when a thought is waiting for one
-(step 3): raise one — the one that matters most for the purpose now — and
-say how many others wait. Say what you take it to be about, in your words,
-then two or three ways it could go, each with what it costs and what it
-gains, and which you'd lean toward and why. Ask the one question that
-decides it. Talk it through with the user: nothing is written while you do.
+**Then the questions,** on a run by hand, once the suggestions are
+answered — straight after the report when there were none: those under
+Waiting to ask first, then this visit's (Asking, not suggesting). Raise
+one — the one that matters most for the purpose now — and say how many
+others wait. Say what you take it to be about, in your words, then two or
+three ways it could go, each with what it costs and what it gains, and
+which you'd lean toward and why. Ask the one question that decides it. A
+plain one ("Is the agency still wanted?") needs only your best guess, not
+options. Talk it through with the user: nothing is written while you do.
 When you've agreed, write what follows — a learning for the decision,
-`close_question` for its question — then `mark_thoughts_seen` for the
-thought, `became` "talked through: …". A task the agreement calls for is
-proposed like any suggestion, and kept goes to its section (step 6). Then
-offer the next one.
+`close_question` for its question — then, for a thought,
+`mark_thoughts_seen`, `became` "talked through: …", and drop it from
+Waiting to ask in the journal. Write the decision under the `#idea` line it
+settles too, with `add_subnotes`, without asking — the user just agreed to it
+(2026-10-19): one or a few subnotes, the first starting "Decided <today>:",
+in the user's voice, saying what was decided and anything ruled out. Show the
+lines as you write them ("Writing under '…': Decided 2026-10-19: …"). The
+idea itself stays as it is: scheduling it or taking the tag off is the
+user's. A thought that sits as a subtask can't take subnotes; say what to
+add there instead. A task the agreement calls for is proposed
+like any suggestion, and kept goes to its section (step 6). Then offer the
+next one; the user can stop any time, and the rest keep for next time.
 
 ## Limits
 
 - You write only `#idea` tasks, at the end of an existing section, and on a
-  run by hand the task the user kept. Nothing else in a notebook is yours.
+  run by hand the task the user kept and the decision under an idea talked
+  through. Nothing else in a notebook is yours.
 - Writes only ever add: you can't edit, complete, move or delete anything, so
   never claim to have.
 - Never write or change a purpose.
