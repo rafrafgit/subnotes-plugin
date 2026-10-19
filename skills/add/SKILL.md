@@ -1,18 +1,13 @@
 ---
-description: Capture a task into one of your connected notebooks
+name: add
+description: "Capture one or more tasks the user asked for into the right connected Subnotes notebook and section, and say exactly what was added. Not offered to the user as a command: they ask in their own words."
+user-invocable: false
 ---
 
 Add this to the user's Subnotes: $ARGUMENTS
 
-If that is empty, the user ran the command bare to see what it does — which is
-how people explore a new plugin. Do not invent something to add and do not call
-any tool. Say what the command does, show the shape with and without a
-destination (`/subnotes:add buy milk`, `/subnotes:add buy milk in Groceries`),
-and point at `/subnotes:help` for orientation. Then ask what they want added.
-
-The second form is worth showing even when they did not ask: nothing else
-reveals that a notebook or section can be named in the text, and "subnotes:add"
-reads as if it only writes to a notebook called Subnotes.
+If that is empty, take what to add from the conversation: what the user just
+asked to capture. If it isn't clear what they meant, ask rather than guess.
 
 Call `list_notebooks` first. If the argument names a notebook or a section, use
 it — "… in Work", "… under UX bugs" — matching case-insensitively against what

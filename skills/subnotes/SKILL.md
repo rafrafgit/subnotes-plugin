@@ -19,8 +19,8 @@ release or an approval, needing a decision only the user can make, outside what
 they asked for, or needing their hands rather than yours. Do not re-capture
 work you just finished.
 
-When the user asks for a capture, capture. "Put this on the backlog", or
-`/subnotes:add`, is a decision they have already made — do not start
+When the user asks for a capture, capture. "Put this on the backlog" is a
+decision they have already made — do not start
 implementing instead, and do not argue it would be quicker to do now.
 
 Never add a task in place of saying you will not do something. Say that

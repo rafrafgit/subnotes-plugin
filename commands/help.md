@@ -21,8 +21,8 @@ they need.
 - Ask what is on a notebook, or what to pick up next — reading is the point,
   not just writing.
 - Say "put that on the backlog" mid-conversation and it lands in the right
-  notebook and section. No command needed; this is the common case.
-- `/subnotes:add <thing>` when they want to be explicit about it.
+  notebook and section. No command needed; they can name the notebook and
+  section in the same sentence to be explicit.
 - `/subnotes:review` — a review agent per notebook: it reads the notebook
   against its purpose, remembers earlier visits in a journal, keeps what it
   learns about the notebook and about them where every skill reads it, and

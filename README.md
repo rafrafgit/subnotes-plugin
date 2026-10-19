@@ -45,7 +45,7 @@ from there instead, without adding this marketplace first.
 
 Ask what is on a notebook, or what to pick up next — reading is half the point.
 Say "put that on the backlog" mid-conversation and it lands in the right
-notebook and section, or use `/subnotes:add <thing>` to be explicit.
+notebook and section, or name them yourself: "… in Work, under Backlog".
 
 `/subnotes:review` reads each notebook that has a purpose, remembers earlier visits in a journal, and proposes a next step or
 two when one is worth it: run by hand, you keep, drop or change each one in
