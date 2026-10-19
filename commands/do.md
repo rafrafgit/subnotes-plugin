@@ -77,12 +77,16 @@ need their input after all: ask, and leave the task until they answer.
 Done: Deleting a subtask prefix does not delete its [] tags
  Changed: TextParser.swift — the prefix delete now takes the tag with it
  Checked: build passes; new test testDeletePrefixRemovesTag
- Left for you: try it on the iPhone, then mark it Done in Subnotes
+ Marked Done in Subnotes
 ```
 
-Say what changed, how you checked it, and what's left. You can't mark the task
-Done — writes only ever add — so the user does that, after they've looked at
-the work. That review is theirs on purpose.
+Say what changed, how you checked it, and what's left. When the task is
+finished and checked and nothing is left that only the user can do, mark it
+Done (`set_schedule`, the task's text as `match`) and say so: the user asked
+for completed tasks to be marked (2026-10-19). If something is left for them
+— try it on the iPhone, look at it in the running app — leave the task as it
+is and end the report with "Left for you: …, then mark it Done". The same
+when you stopped short, or the work failed its check: it isn't done.
 
 Then go on to the next task in "I can do this here". When there is none left,
 offer the follow-ups the work turned up, all together, and add them with

@@ -71,14 +71,15 @@ goal and a plan before it suggests anything else, and sends you here.
 `/subnotes:do [notebook]` goes the other way: it reads a notebook's Today and
 Next tasks, sorts them into what Claude can do in this session, what needs
 your input first, and what only you can do, then does the one you pick, with
-your usual permission prompts. You mark it Done in Subnotes after looking at
-the work.
+your usual permission prompts. A task it finishes and checks is marked Done;
+one that still needs you to try it is left for you to mark.
 
 ## Two rules that shape everything
 
-**Writes are append-only.** Tasks can be added; nothing can be edited, deleted,
-completed, reordered or renamed, and notebooks cannot be created. A write that
-only ever adds cannot lose work.
+**Writes only add, or reschedule.** Tasks and lines under a task can be added,
+and a task can be rescheduled or marked Done; nothing can be edited, deleted,
+reordered or renamed, and notebooks cannot be created. A write that never
+removes text cannot lose work.
 
 **Reads are opt-in per notebook.** Only notebooks connected in Subnotes are
 exported to the connector folder at all. An unconnected notebook is never

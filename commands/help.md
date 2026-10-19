@@ -42,11 +42,11 @@ they need.
   suggest anything else in a notebook until it has a goal and a plan, and
   points here.
 - `/subnotes:do <notebook>` — finds the Today and Next tasks Claude can do in
-  this session, and does the one they pick. They mark it Done afterwards.
+  this session, and does them, marking each Done once it's finished and checked.
 
 Then state the two limits plainly, because both are surprising if discovered
-later: writes only ever add — nothing can be marked done, edited, deleted or
-reordered — and only connected notebooks are readable, so an unconnected one is
+later: writes only add or reschedule — a task can be marked done, but nothing
+can be edited, deleted or reordered — and only connected notebooks are readable, so an unconnected one is
 invisible rather than private-but-visible.
 
 Keep it short. This is an orientation, not a manual.
