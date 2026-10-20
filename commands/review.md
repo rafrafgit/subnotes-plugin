@@ -180,9 +180,12 @@ lines.
 
    Decide whether to visit at all:
    - **Nothing has changed:** don't read the notebook. Work from
-     the journal alone — a waiting suggestion past 7 days turns ignored, and
-     after 7 days unchanged a stall the journal names is worth a question.
-     If neither applies, stop here, "no change since last visit".
+     the journal and the scheduled lines alone — a waiting suggestion past
+     7 days turns ignored, after 7 days unchanged a stall the journal names
+     is worth a question, and time moves even when the notebook doesn't: a
+     task due today or overdue, or a date under the journal's Dates that
+     has come, is visited as Today (step 4) (2026-10-20). If none applies,
+     stop here, "no change since last visit".
 
    Leave the journal as it is when you stop: it keeps what changed showing
    until a visit that writes one.
