@@ -66,10 +66,12 @@ can get there in time — with the arithmetic shown. It works out what's
 missing with you and adds the next steps you agree to. The review asks for a
 goal and a plan before it suggests anything else, and sends you here.
 
-`/subnotes:do [notebook]` goes the other way: it reads a notebook's Today and
-Next tasks, sorts them into what Claude can do in this session, what needs
-your input first, and what only you can do, then does the one you pick, with
-your usual permission prompts. A task it finishes and checks is marked Done;
+`/subnotes:do [notebook]` goes the other way: it reads the Today, Next and
+soon-due tasks across your connected notebooks, or just the one you name,
+ranked by your Goals notebook. It sorts them into what Claude can do in this
+session — code in this folder, or a draft or write-up, which it writes under
+the task — what needs your input first, and what only you can do, then works
+through the first group, with your usual permission prompts. A task it finishes and checks is marked Done;
 one that still needs you to try it is left for you to mark.
 
 ## Two rules that shape everything
