@@ -31,13 +31,13 @@ By meaning, never by heading — a goal can sit under "About", in the purpose,
 or in a line of a status section.
 
 - A **goal** is what the user wants to be true. A good one has a measure and
-  a date: "Earn at least 5k a month net from August 2027". A direction or a
-  preference ("Be my own boss if possible") is worth knowing, but isn't a goal
+  a date: "Earn 4k a month from freelance work by June 2027". A direction or a
+  preference ("Spend more time outdoors if possible") is worth knowing, but isn't a goal
   to check.
 - A **plan** is how they mean to get there: a strategy, phases, months, a
   sequence of steps. A heap of unrelated tasks isn't one; scheduled steps that
-  lead to the goal are. A direction isn't one either: "Claude suggests, I'm
-  the gatekeeper of quality" says what should change, not the work that
+  lead to the goal are. A direction isn't one either: "Be more visible
+  online" says what should change, not the work that
   gets there (2026-10-19).
 
 There are two levels. The Goals notebook holds the goals and strategy across
@@ -66,7 +66,7 @@ the user before going on; say that the rest waits on it.
    - Something in it leads to the measure, and enough of it. A plan of
      learning and testing is fine, but some line has to say where the
      measure comes from. Check the assumption the measure rests on: does
-     the job it aims at pay 5k net?
+     the clients it aims at pay enough for the 4k?
    - It fits before the date. Rough arithmetic, stated: weeks left, hours a
      week, the size of what's open. If the hours aren't written anywhere and
      the answer depends on them, ask.
@@ -77,18 +77,18 @@ the user before going on; say that the rest waits on it.
 5. **A plan that's working.** Step 4 asks whether the plan can work on
    paper; this asks whether what's happening bears it out.
    - The **signal**: for each goal, the one number that shows the plan is on
-     track — interviews a month, days the skills met the bar, signups per
-     webinar. Take it from what the notebooks say (a status line, done
+     track — new clients a month, proposals sent a week, signups per
+     newsletter. Take it from what the notebooks say (a status line, done
      tasks, counts the user wrote). None written: propose one and ask.
    - The **pace** the date needs, and where the signal is now, stated:
-     "2 interviews in 10 weeks; landing a job by August needs about one a
+     "2 new clients in 10 weeks; the 4k by June needs about one a
      month".
    - On pace: no gap. Too early to tell: say when it will show. Behind: the
      plan's assumption isn't holding — ask whether to change the plan, the
      effort, or the goal. That's theirs to decide; never decide it for them.
 
-Name what you find plainly, with the numbers ("10 months to August 2027, and
-no line of the strategy produces income before then"). One gap at a time.
+Name what you find plainly, with the numbers ("8 months to June 2027, and
+no line of the strategy brings in a client before then"). One gap at a time.
 
 Give every plan you check a verdict, gap or not, in a line each
 (2026-10-19):
@@ -99,13 +99,13 @@ Give every plan you check a verdict, gap or not, in a line each
 ## Work it out with them
 
 Ask one question at a time, and propose wording rather than asking for it:
-"Would this be your goal: 5k a month net from August 2027, from the education
-job first?" You can't write goals or plans into a notebook — writes only add
+"Would this be your goal: 4k a month from freelance work by June 2027, from
+retainer clients first?" You can't write goals or plans into a notebook — writes only add
 tasks — so once they agree, show the lines and say where they go:
 
 ```
 Goals › Strategy, as a new first line:
-- Land an education role by March 2027: the income that carries the rest.
+- Sign two retainer clients by March 2027: the income that carries the rest.
 ```
 
 and put them where they'll see them: a task at the end of the section they
@@ -125,14 +125,14 @@ don't say.
 
 For each notebook you checked, one learning (`add_learning`, source `plan`)
 saying where its goal and plan are, its signal and pace, and what you found:
-"Goal: 5k/month net by Aug 2027 (Goals). Plan: Goals' strategy, the
-education job line. Signal: interviews a month, pace about 1; 0.8 on
+"Goal: 4k/month by June 2027 (Goals). Plan: Goals' strategy, the
+retainer line. Signal: new clients a month, pace about 1; 0.8 on
 2026-10-19. Checked with the user: no gap." Replace your earlier one
 (`correct_learning`) rather than adding a second. The review reads these, so
 it doesn't ask for what you've settled, and watches the signal against the
 pace to know when to send the user back here.
 
-What stays unsettled — "Is the webinar test meant to earn, or to learn?" —
+What stays unsettled — "Is the newsletter meant to earn, or to find clients?" —
 goes in as an open question (`add_question`, source `plan`). Something they
 said about how they plan that will hold next time is a learning without a
 notebook.
@@ -140,10 +140,10 @@ notebook.
 ## Then report
 
 ```
-Goals — goal clear; strategy has no route to the 5k by August 2027
- Agreed: education job first (lines for Strategy in Goals › Strategy, as an #idea)
- Added: 2 tasks to Work › Backlog
-Subnotes — serves learning, not income; Goals says so. No gap.
+Goals — goal clear; strategy has no route to the 4k by June 2027
+ Agreed: retainer clients first (lines for Strategy in Goals › Strategy, as an #idea)
+ Added: 2 tasks to Freelance › Backlog
+Portfolio site — serves finding clients, not income itself; Goals says so. No gap.
 ```
 
 What you found, what was agreed, what you added, and what's left for them.

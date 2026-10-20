@@ -56,7 +56,7 @@ one question at a time. When the talk shows a next step is worth doing, it
 proposes the task, and adds it to the section it belongs in only on your yes.
 
 Tag any line `#idea` for the other direction: write what's on your mind,
-where it belongs — "I wonder if Mattias is as committed as I am #idea" — and
+where it belongs — "I wonder if Sam is as committed as I am #idea" — and
 the review turns each new one into an open question, a learning, or a
 something to talk about, without ever quoting it.
 

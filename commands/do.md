@@ -15,7 +15,8 @@ runs commands.
 
 Call `list_notebooks`. If a notebook was named, use it, matching
 case-insensitively. Otherwise pick the notebook that is about the work in this
-folder — the Subnotes notebook in the Subnotes repo — and say which you chose.
+folder — its name, purpose or sections match the project here (its folder
+name, README or what the code does) — and say which you chose.
 If none clearly is, ask which one; don't settle for the least-bad one.
 
 ## Which tasks
@@ -96,9 +97,9 @@ after it, plain — the user reads what it is first (asked 2026-10-19).
 Before you report, look back over the work for what the user told you that
 will hold next time, and add each one (`add_learning`, source `do`): with the
 notebook when it's about that project, without when it's about them. That
-covers how they want work done ("don't run the tests while the app is open",
+covers how they want work done ("run the linter before every commit",
 "one commit per task"), and the decisions and principles they state along
-the way, whether or not they put them as rules ("a view nobody can see
-shouldn't be kept up to date", "don't ship a feature that's slow"). Say in
+the way, whether or not they put them as rules ("keep the public API
+stable", "don't ship a feature that's slow"). Say in
 one line what you added. Not what happened today, and not what's already
 there.

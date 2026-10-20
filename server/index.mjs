@@ -93,7 +93,7 @@ function manifest() {
 }
 
 // Rendered one per line rather than comma-joined. Headings routinely contain a
-// comma ("Subnotes 1.4, plugin 1.0") and a double quote ('Mattias "feedback"'),
+// comma ("Subnotes 1.4, plugin 1.0") and a double quote ('Sam "feedback"'),
 // so neither a comma nor quoting delimits them unambiguously — and a heading
 // that reads as two costs a failed write whose error then lists the very name
 // it called missing, which looks like a bug in this server. A heading is always
@@ -1412,7 +1412,7 @@ const TOOLS = [
   },
   {
     name: 'add_question',
-    description: "Record one open question, as one line: something unsettled that decisions depend on (\"Is Mattias as committed as I am to the Strategy idea?\"). Not a task, not a learning. Refuses one already open.",
+    description: "Record one open question, as one line: something unsettled that decisions depend on (\"Is Sam as committed as I am to the side project?\"). Not a task, not a learning. Refuses one already open.",
     inputSchema: { type: 'object', properties: {
       notebook: { type: 'string', description: 'The notebook it affects. Leave out when it spans notebooks.' },
       text: { type: 'string', description: 'The question, one line, never quoting the user at length.' },

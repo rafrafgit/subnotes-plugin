@@ -42,11 +42,11 @@ Goals outranks any learning that disagrees with it.
 way to get there.*
 
 - A **goal** is something the user wants to be true, best with a number and
-  a date ("5k a month net from August 2027"). "Be my own boss if possible"
+  a date ("4k a month from freelance work by June 2027"). "Spend more time outdoors"
   is a direction, not a goal.
 - A **plan** is how they'll get there: steps, phases, a strategy that names
   the work. A pile of unrelated tasks isn't a plan, and neither is a
-  direction like "Claude suggests, I'm the gatekeeper" — it says what should
+  direction like "Be more visible online" — it says what should
   change, not what to do.
 
 Find both by meaning, not by heading. If Goals has no goal, or goals but no
@@ -76,9 +76,9 @@ From `list_notebooks` and Goals, propose an order, one line each with the
 reason, and ask to start with the first:
 
 ```
-1. Work — interview tomorrow; Goals' most likely route to the 5k
-2. Subnotes — changed today; serves the AI-native goal (15 Nov)
-Skipping: Think AI Native — paused in Goals until AI-native is proven
+1. Freelance — proposal due tomorrow; Goals' main route to the 4k
+2. Portfolio site — changed today; serves finding clients
+Skipping: Newsletter — paused in Goals until March
 Skipping: Recipes — no purpose
 ```
 
@@ -158,7 +158,7 @@ The notebook's goal is its purpose, any goal it states, and any goal in
 Goals it serves. Its plan can be in the notebook, or in what Goals' strategy
 says about it.
 
-- **No plan:** raise only that ("There's no plan for Work yet — shall we
+- **No plan:** raise only that ("There's no plan for Freelance yet — shall we
   run /subnotes:plan?"), plus its `#idea` lines and any deadline in the next
   14 days. Ask once; if it's declined, don't ask again until the goal or
   plan changes.
@@ -170,7 +170,7 @@ says about it.
 - **The goal or plan changed** since that check (more than rewording):
   suggest /subnotes:plan once.
 - **The plan is behind pace.** The plan learning names a signal and pace,
-  like "interviews a month, about 1 needed". If the notebook shows it falling
+  like "new clients a month, about 1 needed". If the notebook shows it falling
   behind, or a month has passed since the plan check, suggest
   /subnotes:plan once, with the numbers. Don't judge the strategy yourself.
 
@@ -232,7 +232,7 @@ with the journal and with marking ideas seen until after the talk.
 Then one line — what there is to talk about, never a task:
 
 ```
-Work — 2 things to talk about: the 90-day page is due today; the plan check for the 5k
+Freelance — 2 things to talk about: the Acme proposal is due today; the plan check for the 4k
 ```
 
 If `review-ideas` failed, add "ideas not read" and leave them for next time.
@@ -248,7 +248,7 @@ Start with the journal's Waiting to ask, then this visit's points in step
 - Say what you noticed, short and plain.
 - Give two or three options, what each costs and gains, and which you'd pick
   and why. Bring your own answer — a draft, a list, wording — never
-  homework. A simple question ("Is the agency still wanted?") just needs
+  homework. A simple question ("Is the side project with Sam still wanted?") just needs
   your best guess.
 - Ask the one question that decides it, and say how many points are left.
 
@@ -262,12 +262,12 @@ user's job.
 
 **When the talk shows a task is worth doing,** propose it:
 
-- **The text in bold:** one visible action in the user's voice — "Connect my
-  Personal notebook", never "your".
+- **The text in bold:** one visible action in the user's voice — "Book my
+  flight to Lisbon", never "your".
 - **Where it goes:** the existing section the work is about, or Backlog.
   You can only add to the end of a section.
 - **Subnotes:** any draft the task needs (the message to send, the list),
-  then one line `Why:` naming the goal it moves ("Why: the 5k by August
+  then one line `Why:` naming the goal it moves ("Why: the 4k by June
   2027 — …"), or what it serves if no goal fits.
 - Ask "Shall I add it?" At most two per notebook per visit, and twenty per
   notebook a week (the journal keeps count).
@@ -290,24 +290,24 @@ where "what changed" starts.
 Last visit: 2026-10-12
 
 ## Goal and plan
-- Goal: 5k/month net by Aug 2027 (Goals), served through the education job
-- Plan: Goals › Strategy, the Work line; the Interview section
-- Signal: interviews a month, pace about 1; last 2026-10-21
-- Next step: the 90-day page (Interview section, due 2026-10-20) — scheduled
+- Goal: 4k/month by June 2027 (Goals), served through retainer clients
+- Plan: Goals › Strategy, the Freelance line; the Leads section
+- Signal: new clients a month, pace about 1; last 2026-10-08
+- Next step: the Acme proposal (Leads section, due 2026-10-20) — scheduled
 
 ## Open suggestions
-- 2026-10-12 — Sketch the morning review's output as three lines
+- 2026-10-12 — Send Anna this follow-up about the logo project
 
 Tasks proposed this week: 1
 
 ## Waiting to ask
-- 2026-10-12 — Is the agency with Mattias still wanted? (Status)
+- 2026-10-12 — Is the side project with Sam still wanted? (Status)
 
 ## Observations
-- 2026-10-12 — Kanban Board marked Next, unchanged since 2026-09-28
+- 2026-10-12 — Price list marked Next, unchanged since 2026-09-28
 
 ## Dates
-- 2026-10-21 — interview: look for how it went
+- 2026-10-21 — call with Acme: look for how it went
 ```
 
 Write facts, not plans: suggestions word for word (without `#idea`) so you
@@ -328,7 +328,7 @@ journal the same way, with what you saw of where the time went. Then the
 score for the whole review:
 
 ```
-Raised 3 · 1 task proposed, 1 kept · 1 aimed at a goal · first question in 1 min 2 s (Work), 48 s (Subnotes)
+Raised 3 · 1 task proposed, 1 kept · 1 aimed at a goal · first question in 1 min 2 s (Freelance), 48 s (Portfolio site)
 ```
 
 "Aimed at a goal" counts proposed tasks whose `Why:` names a goal in Goals.

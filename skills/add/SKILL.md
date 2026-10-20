@@ -10,7 +10,7 @@ If that is empty, take what to add from the conversation: what the user just
 asked to capture. If it isn't clear what they meant, ask rather than guess.
 
 Call `list_notebooks` first. If the argument names a notebook or a section, use
-it — "… in Work", "… under UX bugs" — matching case-insensitively against what
+it — "… in Freelance", "… under Bugs" — matching case-insensitively against what
 `list_notebooks` returned. Otherwise place it against the notebooks' purposes,
 and if none of them fits, ask where it belongs rather than settling for the
 least-bad one. Write it as a physical, visible action.
