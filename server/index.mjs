@@ -1242,7 +1242,9 @@ function contextFor(nb) {
 // seconds in "What good looks like" (2026-10-19). It starts at the
 // list_notebooks just before review_context, the review's first call, and
 // ends when review_elapsed is called, just before the report: the time the
-// user then takes to keep or drop suggestions isn't the skill's.
+// user then takes to keep or drop suggestions isn't the skill's. Each later
+// review_context restarts it, since the review reads one notebook at a time
+// and the user waits again for each one's first question (2026-10-20).
 let listedAt = 0;
 let reviewStartedAt = 0;
 
@@ -1262,6 +1264,7 @@ function reviewContext({ notebooks }) {
   const nbs = names.map(n => findNotebook(m, n));
   const now = Date.now();
   reviewStartedAt = now - listedAt < 120_000 ? listedAt : now;
+  listedAt = 0;
   return [
     '# Shared learnings — hold in every notebook',
     sharedEntryLines('learnings'),
