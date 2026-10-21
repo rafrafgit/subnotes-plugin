@@ -767,7 +767,7 @@ function closeQuestion({ notebook, match, answer, source }) {
 // fingerprint of each thought instead — a hash of the text, never the text —
 // so nothing the user wrote is copied into the agent folder, and an edited
 // line reads as a new thought.
-const HEADING = /^(#{1,3})\s+(.*?)\s*$/;
+const HEADING = /^(#{1,6})\s+(.*?)\s*$/;
 const IDEA_TAG = /(^|\s)#idea(?!\w)/i;
 const IDEA_TAG_ALL = /(^|\s)#idea(?!\w)/gi;
 const DONE_TAG = /\[Done\]\s*$/i;
@@ -895,7 +895,7 @@ function markThoughtsSeen({ notebook, thoughts }) {
 // journal is written: an edit made between the two would otherwise be counted
 // as seen. review_context leaves it pending; write_journal keeps it. A visit
 // that writes no journal keeps the old snapshot, so its changes show again.
-const SECTION_HEADING = /^(#{1,3})\s+(.*?)\s*$/;
+const SECTION_HEADING = /^(#{1,6})\s+(.*?)\s*$/;
 const TOP = '(above the first heading)';
 const SHOWN_WHOLE = 12;      // a changed section this short is shown whole
 const MOSTLY_NEW = 0.5;      // past this share of new lines, the whole notebook
