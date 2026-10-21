@@ -87,20 +87,26 @@ need their input after all: ask, and leave the task until they answer.
 ## Then report
 
 ```
-Done: Deleting a subtask prefix does not delete its [] tags
- Changed: TextParser.swift — the prefix delete now takes the tag with it
- Checked: build passes; new test testDeletePrefixRemovesTag
- Marked Done in Subnotes
+Done: The contact form drops attachments over 5 MB
+ Changed: upload.js — large files are sent in parts instead of at once
+ Checked: tests pass; new test for a 10 MB attachment
+ Marked Done in Portfolio site
 ```
 
-Say what changed, how you checked it, and what's left. When the task is
-finished and checked and nothing is left that only the user can do — a task
-to draft something is done once the draft is under it; one to send it isn't
-until they've sent it — mark it Done (`set_schedule`, the task's text as `match`) and say so: the user asked
-for completed tasks to be marked (2026-10-19). If something is left for them
-— try it on the iPhone, look at it in the running app — leave the task as it
-is and end the report with "Left for you: …, then mark it Done". The same
-when you stopped short, or the work failed its check: it isn't done.
+Say what changed, how you checked it, and what's left. Start with **Done:**
+when your part is finished — all of it built and checked as far as you can
+from here — even when the user still has to try it: "Partly done" reads as
+half of it built (2026-10-21). Say "Stopped:" only when you did part of the
+work, with what's missing.
+
+When nothing is left that only the user can do — a task to draft something
+is done once the draft is under it; one to send it isn't until they've sent
+it — mark it Done (`set_schedule`, the task's text as `match`) and say so:
+the user asked for completed tasks to be marked (2026-10-19). If something
+is left for them — try it on the iPhone, look at it in the running app —
+leave the task as it is and end the report with "Left for you: …, then mark
+it Done". When you stopped short, or the work failed its check, it isn't
+done: say "Stopped:" and leave it.
 
 Then go on to the next task in "I can do this here". When there is none left,
 offer the follow-ups the work turned up, all together, and add them with
@@ -117,3 +123,21 @@ the way, whether or not they put them as rules ("keep the public API
 stable", "don't ship a feature that's slow"). Say in
 one line what you added. Not what happened today, and not what's already
 there.
+
+## End with the session
+
+When the user stops, or there's nothing left to take, end with everything
+this run did, in one place, so nothing is lost in the scroll (2026-10-21):
+
+```
+This session
+Done: Fix the contact form's slow upload (Portfolio site) — left for you: try it on your phone
+Done: Draft the follow-up to Anna (Freelance) — the draft is under the task
+Stopped: Add the price list page (Portfolio site) — needs your prices
+Commits: a1b2c3d contact form upload (pushed)
+Learnings: 1 — run the linter before every commit
+Left for you: try the contact form, send Anna the follow-up, then mark them Done
+```
+
+One line per task taken, with its notebook; what's committed or not; the
+learnings added; and everything left for the user, together.
