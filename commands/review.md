@@ -51,8 +51,8 @@ way to get there.*
 
 Find both by meaning, not by heading. If Goals has no goal, or goals but no
 plan for them anywhere (in Goals or in the notebooks it links to), stop
-here: "Goals — no goal (or plan) yet, so nothing else was reviewed. Run
-/subnotes:plan."
+here: "Goals — no goal (or plan) yet, so nothing else was reviewed. Shall
+we run /subnotes:plan?" On a yes, hand over as in step 7.
 
 ## 3. Raise what's in Goals
 
@@ -165,14 +165,27 @@ says about it.
 - **The plan is weak** — it names no work, or nothing in it leads to the
   goal's number, or it can't fit before the date — or **the goal has no
   number or date**: make "shall we run /subnotes:plan?" the first point,
-  saying what's missing. Skip this if the user's last plan check (a learning
-  from source `plan`) is newer than the last change to the goal or plan.
+  saying what's missing. Skip this if the user's last plan check of that
+  goal (a learning from source `plan`, in Goals' learnings) is newer than
+  the last change to the goal or plan.
 - **The goal or plan changed** since that check (more than rewording):
   suggest /subnotes:plan once.
-- **The plan is behind pace.** The plan learning names a signal and pace,
-  like "new clients a month, about 1 needed". If the notebook shows it falling
-  behind, or a month has passed since the plan check, suggest
+- **The plan is behind pace.** The goal's plan learning names a signal and
+  pace, like "new clients a month, about 1 needed". If the notebook shows it
+  falling behind, or a month has passed since the plan check, suggest
   /subnotes:plan once, with the numbers. Don't judge the strategy yourself.
+
+**When the user says yes to /subnotes:plan,** hand over:
+
+1. Write what's settled so far — this notebook's learnings and questions,
+   and its journal, with the plan check under Waiting to ask until Plan has
+   run.
+2. Say which notebooks are left to review after Plan.
+3. Start it with the Skill tool (`subnotes:plan`), with the goal and the gap
+   as its argument: "4k by June 2027 — no line of the strategy brings in a
+   client before June". Plan starts from there, not from scratch.
+
+When Plan is done, offer to carry on with the notebooks that were left.
 
 ## 8. Find what's worth talking about
 
