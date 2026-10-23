@@ -207,6 +207,17 @@ if (process.env.SUBNOTES_DIR) {
   const kept = await call('new_thoughts', { notebook: first });
   check('marking it again without a note keeps what it became', kept.text.includes('became: suggestion: Pick one of three'), kept.text);
   check('the store holds fingerprints and notes, not the text', !readFileSync(store, 'utf8').includes('wonder'));
+  // A decision written under it, or a new schedule, doesn't make it new again.
+  writeFileSync(file, bare + '\n## Ideas test\nI wonder about one thing [Soon] #idea\n\twith a detail\n\tDecided 2026-10-23: not now\n• A task-like thought #idea [Next]\n## Thoughts\nnot a thought\n');
+  const decided = await call('new_thoughts', { notebook: first });
+  check('a seen thought stays seen after a subnote is added and its schedule changes',
+        decided.text.includes('I wonder about one thing — with a detail; Decided 2026-10-23: not now · in: Ideas test (seen ')
+        && !decided.text.includes('[Soon]'), decided.text);
+  const short = await call('mark_thoughts_seen', { notebook: first, thoughts: ['A task-like thought'] });
+  check('a thought can be marked by its own line, without where it sits', !short.isError, short.text);
+  const listed = await call('mark_thoughts_seen', { notebook: first, thoughts: ['I wonder about one thing — with a detail'] });
+  check('a refusal lists the thoughts as the notebook has them, not the one passed',
+        listed.isError && listed.text.includes('- I wonder about one thing — with a detail; Decided 2026-10-23: not now · in: Ideas test'), listed.text);
   writeFileSync(file, bare + '\n## Ideas test\n• A task-like thought #idea [Next]\n');
   await call('mark_thoughts_seen', { notebook: first, thoughts: ['A task-like thought · in: Ideas test'] });
   check('a thought the user deleted leaves the store', !readFileSync(store, 'utf8').includes('Pick one of three'));

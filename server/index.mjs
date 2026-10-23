@@ -774,6 +774,12 @@ const DONE_TAG = /\[Done\]\s*$/i;
 
 const withoutIdeaTag = t => t.replace(IDEA_TAG_ALL, ' ').replace(/\s+/g, ' ').trim();
 
+// Any schedule tag on an idea, wherever it sits — a bucket, a date with or
+// without a time, a repeat — so rescheduling an idea doesn't make it new
+// (2026-10-23: "[Soon] #idea" moved to Someday read as a new thought).
+const SCHEDULE_TAG_ANYWHERE = new RegExp(
+  `\\s*\\[(?:${[...PRIORITIES, 'Done', 'Daily', 'Weekly', 'Biweekly', 'Monthly', 'Quarterly', 'Yearly'].join('|')}|\\d{4}-\\d{2}-\\d{2}[^\\]]*)\\]`, 'gi');
+
 // Only a tagged line loses its tag, so a thought seen before keeps its
 // fingerprint exactly.
 const bareLine = l => {
@@ -791,9 +797,9 @@ function thoughtsIn(nb) {
     if (h) { section = h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim(); parent = null; continue; }
     if (!line.trim()) continue;
     const nested = line.startsWith('\t');
-    if (!nested) parent = bareLine(line);
+    if (!nested) parent = bareLine(line).replace(SCHEDULE_TAG_ANYWHERE, '').replace(/\s+/g, ' ').trim();
     if (!IDEA_TAG.test(line) || DONE_TAG.test(line)) continue;
-    const main = bareLine(line);
+    const main = bareLine(line).replace(SCHEDULE_TAG_ANYWHERE, '').replace(/\s+/g, ' ').trim();
     if (!main) continue;
     const subs = [];
     if (!nested) for (let k = i + 1; k < lines.length && lines[k].startsWith('\t'); k++) subs.push(lines[k].trim());
@@ -801,8 +807,19 @@ function thoughtsIn(nb) {
     thoughts.push({ main, subs, where });
   }
   if (!thoughts.length) return null;
-  return thoughts.map(t => (t.subs.length ? `${t.main} — ${t.subs.join('; ')}` : t.main) + ` · ${t.where}`);
+  // Known by its own line and where it sits, not its subnotes: the review
+  // writes "Decided …" under an idea it has talked through, and that made the
+  // idea new again (2026-10-23). New subnotes still show in `text`. `legacy`
+  // is the fingerprint the store used before, of the whole text.
+  return thoughts.map(t => {
+    const text = (t.subs.length ? `${t.main} — ${t.subs.join('; ')}` : t.main) + ` · ${t.where}`;
+    return { text, short: `${t.main} · ${t.where}`, key: fingerprint(`${t.main} · ${t.where}`), legacy: fingerprint(text) };
+  });
 }
+
+// What the store has for a thought: under its key, or under the fingerprint
+// used before.
+const seenFor = (seen, t) => seen[t.key] ?? seen[t.legacy];
 
 function fingerprint(text) {
   return createHash('sha256').update(text.trim()).digest('hex').slice(0, 16);
@@ -836,19 +853,19 @@ function newThoughts({ notebook }) {
   // The review's own suggestions are #idea tasks too: the journal says which.
   const own = openSuggestionsIn(journalText(nb));
   const mine = t => own.some(o => sameText(t.split(' — ')[0].split(' · ')[0], o)) ? ' (your own open suggestion, from the journal)' : '';
-  const fresh = thoughts.filter(t => !seen[fingerprint(t)]);
-  const open = thoughts.filter(t => seen[fingerprint(t)]);
+  const fresh = thoughts.filter(t => !seenFor(seen, t));
+  const open = thoughts.filter(t => seenFor(seen, t));
   const parts = [];
   if (fresh.length) parts.push(
     `New thoughts in "${nb.name}" — the user's own words, unless marked as yours; handle each, then mark_thoughts_seen:\n` +
-    fresh.map((t, i) => `${i + 1}. ${t}${mine(t)}`).join('\n'));
+    fresh.map((t, i) => `${i + 1}. ${t.text}${mine(t.text)}`).join('\n'));
   else parts.push(`No new thoughts in "${nb.name}".`);
   if (open.length) parts.push(
     `Seen before and still open — the user deletes a thought once it's dealt with:\n` +
     open.map((t, i) => {
-      const { date, became } = seen[fingerprint(t)];
+      const { date, became } = seenFor(seen, t);
       const note = [date && `seen ${date}`, became && `became: ${became}`].filter(Boolean).join(', ');
-      return `${i + 1}. ${t} (${note || 'marked under the old rule, which closed it once filed: take it as new, once'})${mine(t)}`;
+      return `${i + 1}. ${t.text} (${note || 'marked under the old rule, which closed it once filed: take it as new, once'})${mine(t.text)}`;
     }).join('\n'));
   return parts.join('\n\n');
 }
@@ -864,16 +881,32 @@ function markThoughtsSeen({ notebook, thoughts }) {
   if (!Array.isArray(thoughts) || !thoughts.length) throw new UserError('No thoughts given.');
   const given = thoughts.map(t => (typeof t === 'string' ? { text: t } : t ?? {}))
     .map(t => ({ text: String(t.text ?? '').trim(), became: t.became ? String(t.became).trim() : undefined }));
-  const now = new Map(current.map(t => [t.trim(), fingerprint(t)]));
-  const missing = given.filter(t => !now.has(t.text)).map(t => t.text);
+  // A thought is matched by its text as new_thoughts gave it, or without the
+  // " · in: …" ending, or by its own line alone — whichever picks out one.
+  const withoutWhere = s => s.replace(/ · (?:in: .*|under: .*|at the top)$/, '');
+  const ways = [t => t.text, t => withoutWhere(t.text), t => withoutWhere(t.short)];
+  const find = text => {
+    for (const way of ways) {
+      const hits = current.filter(t => way(t).trim() === text);
+      if (hits.length === 1) return hits[0];
+    }
+    return null;
+  };
+  const missing = given.filter(t => !find(t.text)).map(t => t.text);
+  // The thoughts as the notebook has them, not the ones passed: echoing
+  // those back hid the difference (2026-10-23).
   if (missing.length) throw new UserError(
-    `Not a thought in "${nb.name}" as it stands — pass each exactly as new_thoughts gave it:\n` +
-    missing.map(t => `- ${t}`).join('\n'));
-  const keep = new Set(now.values());
-  const seen = Object.fromEntries(Object.entries(seenThoughts(nb)).filter(([f]) => keep.has(f)));
-  for (const t of given) {
-    const f = now.get(t.text);
-    seen[f] = { date: today(), became: t.became ?? seen[f]?.became };
+    `Not a thought in "${nb.name}" as it stands: ${missing.map(t => `"${t}"`).join(', ')}.\n` +
+    `Its #idea lines are, exactly:\n` + current.map(t => `- ${t.text}`).join('\n'));
+  const stored = seenThoughts(nb);
+  const seen = {};
+  for (const t of current) {
+    const was = seenFor(stored, t);
+    if (was) seen[t.key] = was;
+  }
+  for (const g of given) {
+    const t = find(g.text);
+    seen[t.key] = { date: today(), became: g.became ?? seen[t.key]?.became };
   }
   writeEntryFile(thoughtsStore(nb), JSON.stringify({ seen }, null, 2) + '\n');
   return `Marked ${given.length} thought${given.length === 1 ? '' : 's'} seen in "${nb.name}".`;
