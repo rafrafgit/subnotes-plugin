@@ -99,14 +99,14 @@ from here — even when the user still has to try it: "Partly done" reads as
 half of it built (2026-10-21). Say "Stopped:" only when you did part of the
 work, with what's missing.
 
-When nothing is left that only the user can do — a task to draft something
-is done once the draft is under it; one to send it isn't until they've sent
-it — mark it Done (`set_schedule`, the task's text as `match`) and say so:
-the user asked for completed tasks to be marked (2026-10-19). If something
-is left for them — try it on the iPhone, look at it in the running app —
-leave the task as it is and end the report with "Left for you: …, then mark
-it Done". When you stopped short, or the work failed its check, it isn't
-done: say "Stopped:" and leave it.
+When it's built, mark it Done (`set_schedule`, the task's text as `match`)
+and say so. Done means built; the user tests it, and deletes the task once
+it's tested (2026-10-23). Name what's left — "Left for you: try it on the
+iPhone" — and any check that couldn't run, such as tests while the app is
+open. A task whose work the user does themselves isn't done until they have:
+a task to draft something is done once the draft is under it; one to send it
+isn't until they've sent it. When you stopped short, or the build or a check
+that ran failed, it isn't done: say "Stopped:" and leave it.
 
 Then go on to the next task in "I can do this here". When there is none left,
 offer the follow-ups the work turned up, all together, and add them with
@@ -131,12 +131,12 @@ this run did, in one place, so nothing is lost in the scroll (2026-10-21):
 
 ```
 This session
-Done: Fix the contact form's slow upload (Portfolio site) — left for you: try it on your phone
+Done: Fix the contact form's slow upload (Portfolio site) — marked Done; left for you: try it on your phone
 Done: Draft the follow-up to Anna (Freelance) — the draft is under the task
 Stopped: Add the price list page (Portfolio site) — needs your prices
 Commits: a1b2c3d contact form upload (pushed)
 Learnings: 1 — run the linter before every commit
-Left for you: try the contact form, send Anna the follow-up, then mark them Done
+Left for you: try the contact form on your phone; send Anna the follow-up
 ```
 
 One line per task taken, with its notebook; what's committed or not; the
