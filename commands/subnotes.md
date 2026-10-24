@@ -45,6 +45,9 @@ A plan check is due: "Portfolio site live" changed since its check on 2 March �
   notebook's name when only one is.
 - **Do:** `subnotes:do`, with nothing as its argument.
 
+Keep replies short: lead with the question, in about 5 lines (said
+2026-10-24).
+
 When the skill you started is done, offer the next one down the line, ending
 with Do: what else `whats_due` showed was due, and then Do with its count —
 "Do is next: 3 Next tasks across your notebooks — continue?" Stop when the

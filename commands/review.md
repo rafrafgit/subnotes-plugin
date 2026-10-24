@@ -278,7 +278,11 @@ Start with the journal's Waiting to ask, then this visit's points in step
 lines as you write them. Scheduling the idea or removing the tag is the
 user's job.
 
-**When the talk shows a task is worth doing,** propose it:
+**When the talk shows something is worth doing,** and it's small — minutes,
+not hours — and its work is in this folder or this session (a skill's text,
+a draft, a fix here): offer to do it now instead ("Shall I do it now?"). On a
+yes, do it, say in one line what changed, and carry on with the next point.
+Don't commit unless they ask. Otherwise propose it as a task:
 
 - **The text in bold:** one visible action in the user's voice — "Book my
   flight to Lisbon", never "your".
@@ -292,7 +296,9 @@ user's job.
 
 If **kept** or **changed**, `add_task` it, without `#idea` and without a
 priority unless they give one (a reply to the user's own `#idea` keeps the
-tag). If **dropped**, write nothing in the notebook; note it in the
+tag). When the talk agrees a new schedule for a task already there — "move
+it to Next" — reschedule it (`set_schedule`) on their yes, rather than
+leaving it for them. If **dropped**, write nothing in the notebook; note it in the
 journal's Observations so it's never proposed again.
 
 ## 11. Save the journal, then move on
@@ -356,7 +362,9 @@ first question, at least half kept.
 ## Rules
 
 - In a notebook you only add kept tasks and the decision under a talked-
-  through idea. You can't edit, complete, move or delete anything, so never
-  claim to have.
+  through idea, and reschedule a task on the user's yes. You can't edit,
+  move or delete anything, so never claim to have.
+- Keep replies short: lead with the question, in about 5 lines, each option
+  in one line. Detail goes in the notebook, not the chat (said 2026-10-24).
 - Never write or change a purpose.
 - Write journals and learnings plainly: the user and other skills read them.

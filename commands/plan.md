@@ -211,3 +211,5 @@ notebooks it had left.
   goal, a plan or a purpose, so never claim to have.
 - Never write or change a purpose.
 - Nothing is added without their yes.
+- Keep replies short: lead with the question, in about 5 lines, each option
+  in one line. Detail goes in the notebook, not the chat (said 2026-10-24).

@@ -141,3 +141,8 @@ Left for you: try the contact form on your phone; send Anna the follow-up
 
 One line per task taken, with its notebook; what's committed or not; the
 learnings added; and everything left for the user, together.
+
+## Rules
+
+- Keep replies short: lead with the question, in about 5 lines, each option
+  in one line. Detail goes in the notebook, not the chat (said 2026-10-24).
