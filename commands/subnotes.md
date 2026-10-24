@@ -12,11 +12,13 @@ other than the user typing it, stop and do nothing.
 
 ## 1. See what's due
 
-Call `whats_due`. It says which to run — Plan, then Review, then Do, the
-first that's due — and why:
+Call `whats_due`. It says which to run — Plan, then Journal, then Review,
+then Do, the first that's due — and why:
 
 - **Plan** is due for a goal 30 days after its last check, when its text
   has changed since, or when its date has passed.
+- **Journal** is due when the Journal notebook has an entry since Journal
+  last ran. Before the review, so it has that context.
 - **Review** is due once a day, in the notebooks that changed since their
   last visit. Once it has run today, the ones it didn't reach wait until
   tomorrow.
@@ -40,6 +42,7 @@ A plan check is due: "Portfolio site live" changed since its check on 2 March �
 
 - **Plan:** `subnotes:plan`, with the goal and why it's due as its argument.
   More than one goal due: name them all, the first to take first.
+- **Journal:** `subnotes:journal`, with nothing as its argument.
 - **Review:** `subnotes:review`, with nothing as its argument when more than
   one notebook is due (it skips the ones that haven't changed), or the one
   notebook's name when only one is.

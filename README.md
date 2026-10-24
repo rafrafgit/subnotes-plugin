@@ -45,6 +45,8 @@ from there instead, without adding this marketplace first.
   the text)
 - `ideas_context` — everything the review's ideas sub-skill reads, for several
   notebooks in one read-only call
+- `journal_entries`, `mark_journal_read` — what's new in the Journal
+  notebook since Journal last ran, and marking it read
 - `whats_due` — what `/subnotes` runs: each goal's last plan check, each
   notebook's last review, and the tasks Do would pick up
 
@@ -56,6 +58,11 @@ notebook and section, or name them yourself: "… in Work, under Backlog".
 of a goal not checked for 30 days, or changed since; a review of a notebook
 that changed since yesterday's — and otherwise `/subnotes:do`. The three
 below still work on their own.
+
+`/subnotes:journal` reads what you wrote in a notebook called Journal since
+its last run, and files what the other skills need to know — dates, replies,
+decisions — as learnings, with any task proposed on your yes. `/subnotes`
+runs it when there's a new entry.
 
 `/subnotes:review` reads each notebook that has a purpose, remembers earlier
 visits in a journal, and talks through what it finds with you in Claude Code,

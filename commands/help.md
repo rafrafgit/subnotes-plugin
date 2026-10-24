@@ -25,6 +25,8 @@ they need.
   section in the same sentence to be explicit.
 - `/subnotes` — the one to start from: it runs whatever is due, a plan check
   or a review, and otherwise Do. The commands below still work on their own.
+- `/subnotes:journal` — reads what they wrote in a notebook called Journal
+  and files what the skills need to know, so no skill asks for it again.
 - `/subnotes:review` — a review agent per notebook: it reads the notebook
   against its purpose, remembers earlier visits in a journal, keeps what it
   learns about the notebook and about them where every skill reads it, and

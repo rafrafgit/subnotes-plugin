@@ -89,7 +89,8 @@ Skipping: Recipes — no purpose
 - **First:** what Goals puts first, a deadline soonest, a goal behind pace.
   A notebook serves the goals that link it.
 - **Skip:** a notebook with no purpose (but review its `#idea` lines if it
-  has any); one Goals parks, pauses or names as blocked.
+  has any); one Goals parks, pauses or names as blocked; the Journal
+  notebook, which `/subnotes:journal` reads.
 - If a notebook was named above, review only that one (still after steps
   1–3); if it has no purpose, say so and stop.
 

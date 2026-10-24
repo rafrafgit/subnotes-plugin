@@ -1455,7 +1455,7 @@ function reviewDue(m) {
   const now = today();
   const rows = [];
   for (const nb of m.notebooks) {
-    if (!nb.purpose && nb.role !== 'goals') continue;
+    if ((!nb.purpose && nb.role !== 'goals') || isJournal(nb)) continue;
     let text;
     try { text = readFileSync(join(DIR, nb.file), 'utf8'); } catch { continue; }
     const old = readSnapshot(snapshotPath(nb));
@@ -1479,6 +1479,51 @@ function reviewDue(m) {
   return { due, lines };
 }
 
+// The Journal notebook, found by name until the app marks it by role, as it
+// does Goals (2026-10-24: a trial before an isJournal field). Journal reads
+// what changed in it since its last run, the review's own way of telling, but
+// from a snapshot of its own: the review doesn't read the journal.
+const isJournal = nb => nb.name.trim().toLowerCase() === 'journal' && nb.role !== 'goals';
+const journalSnapshotPath = nb => agentFile('journal', nb).replace(/\.md$/, '.snapshot.json');
+
+function journalNotebook(m) {
+  return m.notebooks.find(isJournal) ?? null;
+}
+
+// True when the Journal notebook has an entry since Journal last ran: any
+// change at all, or any text on a first run.
+function journalHasNew(nb) {
+  const text = readFileSync(join(DIR, nb.file), 'utf8');
+  const old = readSnapshot(journalSnapshotPath(nb));
+  if (!old) return text.split('\n').some(l => l.trim() && !HEADING.test(l));
+  const changes = changesSince(old, text);
+  return changes === null || changes.length > 0;
+}
+
+function journalEntries() {
+  const nb = journalNotebook(manifest());
+  if (!nb) return 'No notebook called "Journal" is connected. The user creates one and connects it in Subnotes\' Settings (⌘,).';
+  const text = readFileSync(join(DIR, nb.file), 'utf8');
+  const old = readSnapshot(journalSnapshotPath(nb));
+  const changes = old ? changesSince(old, text) : null;
+  let body;
+  if (!old) body = 'First run, so here is the whole notebook:\n\n' + text.replace(/\n*$/, '');
+  else if (!changes) body = `Most of it is new since ${old.taken}, so here is the whole notebook:\n\n` + text.replace(/\n*$/, '');
+  else if (!changes.length) body = `Nothing new since the last run (${old.taken}).`;
+  else body = `Since the last run (${old.taken}) — "+" is a new or changed line, the rest is context:\n\n` + changes.join('\n\n');
+  return [`# ${nb.name}`, ...(nb.purpose ? [`Purpose: ${nb.purpose}`] : []), '', body].join('\n');
+}
+
+// Called once Journal has handled what journal_entries gave it, so the next
+// run starts after it.
+function markJournalRead() {
+  const nb = journalNotebook(manifest());
+  if (!nb) throw new UserError('No notebook called "Journal" is connected.');
+  const path = journalSnapshotPath(nb);
+  writeEntryFile(path, JSON.stringify(snapshotOf(readFileSync(join(DIR, nb.file), 'utf8'), readSnapshot(path))) + '\n');
+  return `Journal read up to now (${localTime(new Date())}).`;
+}
+
 // What Do would pick up: tasks, not headings, Today or overdue, then Next.
 function doCounts(m) {
   let now = 0, next = 0;
@@ -1498,7 +1543,10 @@ function whatsDue() {
   const m = manifest();
   if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,).";
   const plan = planDue(m), review = reviewDue(m), work = doCounts(m);
-  const run = plan.due.length ? 'Plan' : review.due.length ? 'Review' : 'Do';
+  const journal = journalNotebook(m);
+  let journalNew = false;
+  try { journalNew = !!journal && journalHasNew(journal); } catch {}
+  const run = plan.due.length ? 'Plan' : journalNew ? 'Journal' : review.due.length ? 'Review' : 'Do';
   return [
     `Today: ${today()}`,
     `Run: ${run}`,
@@ -1506,6 +1554,10 @@ function whatsDue() {
     `## Plan — ${plan.due.length ? `due for ${plan.due.length} goal${plan.due.length > 1 ? 's' : ''}` : 'not due'}`,
     `A goal is due ${PLAN_EVERY_DAYS} days after its last check, when its text has changed since, or when its date has passed.`,
     ...plan.lines,
+    '',
+    `## Journal — ${journalNew ? 'due' : 'not due'}`,
+    !journal ? 'No notebook called "Journal" is connected.'
+      : journalNew ? `"${journal.name}" has an entry since Journal last ran.` : `Nothing new in "${journal.name}" since Journal last ran.`,
     '',
     `## Review — ${review.due.length ? `due in ${review.due.join(', ')}` : 'not due'}`,
     'Due once a day, in the notebooks that changed since their last visit.',
@@ -1682,6 +1734,18 @@ const TOOLS = [
     description: "For /subnotes: what's due, read-only — each goal's last plan check, each notebook's last review visit and whether it changed since, and the tasks Do would pick up — and which to run first: Plan, Review or Do.",
     inputSchema: { type: 'object', properties: {} },
     run: whatsDue,
+  },
+  {
+    name: 'journal_entries',
+    description: "For the Journal skill: what's new in the user's Journal notebook since Journal last ran (the whole notebook on a first run), read-only. Call mark_journal_read once it's handled.",
+    inputSchema: { type: 'object', properties: {} },
+    run: journalEntries,
+  },
+  {
+    name: 'mark_journal_read',
+    description: 'For the Journal skill: record that the Journal notebook has been read up to now, so its next run starts after it. Call last, once every entry is handled.',
+    inputSchema: { type: 'object', properties: {} },
+    run: markJournalRead,
   },
   {
     name: 'read_journal',
