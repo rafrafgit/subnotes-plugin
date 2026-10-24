@@ -45,10 +45,17 @@ from there instead, without adding this marketplace first.
   the text)
 - `ideas_context` — everything the review's ideas sub-skill reads, for several
   notebooks in one read-only call
+- `whats_due` — what `/subnotes` runs: each goal's last plan check, each
+  notebook's last review, and the tasks Do would pick up
 
 Ask what is on a notebook, or what to pick up next — reading is half the point.
 Say "put that on the backlog" mid-conversation and it lands in the right
 notebook and section, or name them yourself: "… in Work, under Backlog".
+
+`/subnotes` is the one to start from: it runs whatever is due — a plan check
+of a goal not checked for 30 days, or changed since; a review of a notebook
+that changed since yesterday's — and otherwise `/subnotes:do`. The three
+below still work on their own.
 
 `/subnotes:review` reads each notebook that has a purpose, remembers earlier
 visits in a journal, and talks through what it finds with you in Claude Code,

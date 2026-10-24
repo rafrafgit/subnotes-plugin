@@ -1,0 +1,51 @@
+---
+description: Start your work here — runs whatever is due, a plan check, a review, or else the tasks you've prioritized
+---
+
+The one command to start from: it finds what's due across the user's
+connected notebooks and starts it. Anything the user added after the
+command:
+$ARGUMENTS
+
+This command needs someone at the keyboard. If it was started by anything
+other than the user typing it, stop and do nothing.
+
+## 1. See what's due
+
+Call `whats_due`. It says which to run — Plan, then Review, then Do, the
+first that's due — and why:
+
+- **Plan** is due for a goal 30 days after its last check, when its text
+  has changed since, or when its date has passed.
+- **Review** is due once a day, in the notebooks that changed since their
+  last visit. Once it has run today, the ones it didn't reach wait until
+  tomorrow.
+- **Do** is everything else.
+
+A goal due only because its text changed: read it in Goals beside its plan
+learning. If the learning still describes it, it was rewording — not due.
+
+If the user added something after the command ("just do", "review Work"),
+that wins over what's due.
+
+## 2. Say it, then start it
+
+One line, what you're starting and why, then start it straight away with the
+Skill tool — the user redirects you if they want something else; don't wait
+for a yes:
+
+```
+A plan check is due: "Portfolio site live" changed since its check on 2 March — starting it.
+```
+
+- **Plan:** `subnotes:plan`, with the goal and why it's due as its argument.
+  More than one goal due: name them all, the first to take first.
+- **Review:** `subnotes:review`, with nothing as its argument when more than
+  one notebook is due (it skips the ones that haven't changed), or the one
+  notebook's name when only one is.
+- **Do:** `subnotes:do`, with nothing as its argument.
+
+When the skill you started is done, offer the next one down the line, ending
+with Do: what else `whats_due` showed was due, and then Do with its count —
+"Do is next: 3 Next tasks across your notebooks — continue?" Stop when the
+user says so.

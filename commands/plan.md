@@ -171,13 +171,14 @@ don't say.
 *Leave the review what it needs to watch this goal.*
 
 One learning for the goal (`add_learning`, source `plan`, in the Goals
-notebook), saying where the goal and plan are, the notebooks that serve it,
+notebook, with `goal` set to the goal's heading so /subnotes knows when it's
+next due), saying where the goal and plan are, the notebooks that serve it,
 its signal and pace, and what you found: "Goal: 4k/month by June 2027
 (Goals). Plan: Goals' strategy, the retainer line; served by Freelance and
 Portfolio site. Signal: new clients a month, pace about 1; 0.8 on
 2026-10-19. Checked with the user: no gap." Replace your earlier one for the
-goal (`correct_learning`) rather than adding a second. The review reads it,
-so it doesn't ask for what you've settled, and watches the signal against
+goal (`correct_learning`, with `goal` too) rather than adding a second. The
+review reads it, so it doesn't ask for what you've settled, and watches the signal against
 the pace to know when to send the user back here.
 
 What stays unsettled — "Is the newsletter meant to earn, or to find

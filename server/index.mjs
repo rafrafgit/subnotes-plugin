@@ -714,11 +714,15 @@ function findEntry(kind, notebook, match) {
 }
 
 const readLearnings = ({ notebook }) => readEntries('learnings', notebook);
-const addLearning = args => addEntry('learnings', args);
+const addLearning = args => {
+  const done = addEntry('learnings', args);
+  recordPlanCheck(args);
+  return done;
+};
 
 // Changes or removes one learning. The old wording stays beside the new, so a
 // correction can itself be judged.
-function correctLearning({ notebook, match, text, reason, source }) {
+function correctLearning({ notebook, match, text, reason, source, goal }) {
   const who = sourceName(source);
   const why = String(reason ?? '').trim();
   if (!why) throw new UserError('A correction needs `reason`: why the entry no longer holds.');
@@ -731,6 +735,7 @@ function correctLearning({ notebook, match, text, reason, source }) {
     found.lines.splice(found.i, 1);
   }
   writeEntryFile(found.path, found.lines.join('\n'));
+  if (replacement) recordPlanCheck({ notebook, source, goal });
   return replacement ? `Corrected, in ${found.label}: ${replacement}` : `Removed from ${found.label}: ${found.old}`;
 }
 
@@ -1348,6 +1353,169 @@ function ideasContext({ notebooks }) {
   ].join('\n');
 }
 
+// MARK: - What's due
+
+// /subnotes picks the skill to run from what's due (RITUALS_SPEC.md, One
+// command): a plan check, then a review, then Do. Until the connector reads
+// rituals, default rhythms decide, from dates already kept here — a goal's
+// plan check, and each notebook's last review visit (2026-10-24).
+const PLAN_EVERY_DAYS = 30;
+const SCHEDULE_PARTS = /((?:\s*\[[^\[\]]+\])+)\s*$/;
+const PLAN_CHECKS = () => join(AGENT_DIR, 'plan', 'checks.json');
+
+// Every heading in Goals with a schedule is a goal: a date, maybe with a
+// time, or Today, Next, Soon, Someday (GOALS_NOTEBOOK_SPEC.md). Its text runs
+// to the next heading, whatever the level, so a goal's parts are their own.
+function goalsIn(text) {
+  const lines = text.split('\n');
+  const goals = [];
+  for (let i = 0; i < lines.length; i++) {
+    const h = HEADING.exec(lines[i]);
+    const tags = h && SCHEDULE_PARTS.exec(h[2]);
+    if (!tags) continue;
+    const parts = [...tags[1].matchAll(/\[([^\]]+)\]/g)].map(m => m[1].trim());
+    if (parts.some(p => p.toLowerCase() === 'done')) continue;
+    const date = parts.map(p => /^(\d{4}-\d{2}-\d{2})/.exec(p)?.[1]).find(Boolean) ?? null;
+    const word = parts.find(p => PRIORITIES.some(x => x.toLowerCase() === p.toLowerCase())) ?? null;
+    const name = h[2].slice(0, tags.index).trim();
+    if (!name || (!date && !word)) continue;
+    const block = [lines[i]];
+    for (let k = i + 1; k < lines.length && !HEADING.test(lines[k]); k++) if (lines[k].trim()) block.push(lines[k]);
+    goals.push({ name, level: h[1].length, date, word,
+      hash: fingerprint(block.map(l => l.replace(/\s+$/, '')).join('\n')) });
+  }
+  return goals;
+}
+
+const goalKey = name => normText(name);
+
+function readPlanChecks() {
+  try {
+    return JSON.parse(readFileSync(PLAN_CHECKS(), 'utf8'));
+  } catch {
+    return {};
+  }
+}
+
+// A plan learning in Goals that names its goal records the check: the day,
+// and the goal's text as it stood, so a later change to it shows.
+function recordPlanCheck({ notebook, source, goal }) {
+  if (!goal || String(source ?? '').trim().toLowerCase() !== 'plan') return;
+  const m = manifest();
+  const nb = notebook && findNotebook(m, notebook);
+  if (nb?.role !== 'goals') return;
+  const found = goalsIn(readFileSync(join(DIR, nb.file), 'utf8')).find(g => goalKey(g.name) === goalKey(goal));
+  if (!found) return;
+  const checks = readPlanChecks();
+  checks[goalKey(found.name)] = { name: found.name, checked: today(), hash: found.hash };
+  writeEntryFile(PLAN_CHECKS(), JSON.stringify(checks, null, 2) + '\n');
+}
+
+// The newest plan learning in Goals: the check date for a goal checked
+// before checks were recorded by goal.
+function newestPlanLearning(goals) {
+  const lines = (readEntryFile(agentFile('learnings', goals)) ?? '').split('\n')
+    .map(l => ENTRY.exec(l)).filter(e => e && e[2].trim() === 'plan');
+  return lines.map(e => e[1]).sort().pop() ?? null;
+}
+
+function planDue(m) {
+  const goalsNb = m.notebooks.find(n => n.role === 'goals');
+  if (!goalsNb) return { due: [], lines: ['No Goals notebook is connected, so no plan check is due.'] };
+  const goals = goalsIn(readFileSync(join(DIR, goalsNb.file), 'utf8'));
+  if (!goals.length) return { due: [{ name: '(none)', why: 'Goals has no goal yet' }],
+    lines: [`- Goals ("${goalsNb.name}") has no goal yet — a heading with a schedule.`] };
+  const checks = readPlanChecks();
+  const fallback = newestPlanLearning(goalsNb);
+  const now = today();
+  const due = [], lines = [];
+  for (const g of goals) {
+    const c = checks[goalKey(g.name)];
+    const checked = c?.checked ?? fallback;
+    const whys = [];
+    if (g.date && g.date < now) whys.push(`its date, ${g.date}, has passed`);
+    if (!checked) whys.push('never checked');
+    else if (daysSince(checked) >= PLAN_EVERY_DAYS) whys.push(`last checked ${checked}, ${daysSince(checked)} days ago`);
+    if (c && c.hash !== g.hash) whys.push(`its text changed since the check on ${c.checked} — due only if more than rewording`);
+    const when = g.date ? `[${g.date}]` : `[${g.word}], no date yet`;
+    const was = !checked ? 'never checked'
+      : c ? `checked ${c.checked}` : `checked ${checked} (the newest plan learning; not recorded by goal)`;
+    lines.push(`${'  '.repeat(g.level - 1)}- ${g.name} ${when} — ${was}${whys.length ? ` — DUE: ${whys.join('; ')}` : ''}`);
+    if (whys.length) due.push({ name: g.name, why: whys.join('; ') });
+  }
+  return { due, lines };
+}
+
+// The review is due once a day, in the notebooks that changed since their
+// last visit (RITUALS_SPEC.md). Once it has visited any notebook today it
+// isn't due again until tomorrow: a notebook skipped or not reached waits,
+// so the next /subnotes goes on to Do (2026-10-24). Due tasks aren't the
+// review's: they're Do's.
+function reviewDue(m) {
+  const now = today();
+  const rows = [];
+  for (const nb of m.notebooks) {
+    if (!nb.purpose && nb.role !== 'goals') continue;
+    let text;
+    try { text = readFileSync(join(DIR, nb.file), 'utf8'); } catch { continue; }
+    const old = readSnapshot(snapshotPath(nb));
+    const visited = old?.taken?.slice(0, 10) ?? null;
+    const changes = old ? changesSince(old, text) : null;
+    rows.push({ name: nb.name, visited, changed: !old || changes === null || changes.length > 0 });
+  }
+  const ranToday = rows.some(r => r.visited === now);
+  const due = [], lines = [];
+  for (const r of rows) {
+    let state;
+    if (r.visited === now) state = `visited today${r.changed ? ', changed since' : ''}`;
+    else if (!r.visited) state = 'never reviewed';
+    else state = r.changed ? `changed since the last visit, ${r.visited}` : `no change since the last visit, ${r.visited}`;
+    const waiting = r.changed && r.visited !== now;
+    if (waiting && !ranToday) { state += ' — DUE'; due.push(r.name); }
+    else if (waiting) state += ' — waits until tomorrow';
+    lines.push(`- ${r.name} — ${state}`);
+  }
+  if (ranToday) lines.unshift('The review already ran today, so it is due again tomorrow.');
+  return { due, lines };
+}
+
+// What Do would pick up: tasks, not headings, Today or overdue, then Next.
+function doCounts(m) {
+  let now = 0, next = 0;
+  for (const nb of m.notebooks) {
+    let text;
+    try { text = readFileSync(join(DIR, nb.file), 'utf8'); } catch { continue; }
+    for (const s of scheduledLines(text)) {
+      if (s.heading || /\[Done\]\s*$/i.test(s.line)) continue;
+      if (s.group === 'Today') now++;
+      else if (s.group === 'Next') next++;
+    }
+  }
+  return { now, next };
+}
+
+function whatsDue() {
+  const m = manifest();
+  if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,).";
+  const plan = planDue(m), review = reviewDue(m), work = doCounts(m);
+  const run = plan.due.length ? 'Plan' : review.due.length ? 'Review' : 'Do';
+  return [
+    `Today: ${today()}`,
+    `Run: ${run}`,
+    '',
+    `## Plan — ${plan.due.length ? `due for ${plan.due.length} goal${plan.due.length > 1 ? 's' : ''}` : 'not due'}`,
+    `A goal is due ${PLAN_EVERY_DAYS} days after its last check, when its text has changed since, or when its date has passed.`,
+    ...plan.lines,
+    '',
+    `## Review — ${review.due.length ? `due in ${review.due.join(', ')}` : 'not due'}`,
+    'Due once a day, in the notebooks that changed since their last visit.',
+    ...review.lines,
+    '',
+    '## Do',
+    `${work.now} task${work.now === 1 ? '' : 's'} Today or overdue, ${work.next} Next, across the connected notebooks.`,
+  ].join('\n');
+}
+
 const ALLOW_DUPLICATE = {
   type: 'boolean',
   description: 'Only after the user has confirmed they want a task the notebook already has. Default false, which refuses such a write.',
@@ -1422,6 +1590,7 @@ const TOOLS = [
       notebook: { type: 'string', description: 'The notebook it is about. Leave out when it is about the owner or holds across notebooks.' },
       text: { type: 'string', description: 'One line, plainly written: the owner may read it.' },
       source: { type: 'string', description: 'The skill writing it, one word: review, do, plan.' },
+      goal: { type: 'string', description: "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check, so /subnotes knows when it's next due." },
     }, required: ['text', 'source'] },
     run: addLearning,
   },
@@ -1434,6 +1603,7 @@ const TOOLS = [
       text: { type: 'string', description: 'The corrected line. Leave out to remove the entry.' },
       reason: { type: 'string', description: 'Why it no longer holds.' },
       source: { type: 'string', description: 'The skill correcting it, one word.' },
+      goal: { type: 'string', description: "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check." },
     }, required: ['match', 'reason', 'source'] },
     run: correctLearning,
   },
@@ -1506,6 +1676,12 @@ const TOOLS = [
       notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks whose ideas to read.' },
     }, required: ['notebooks'] },
     run: ideasContext,
+  },
+  {
+    name: 'whats_due',
+    description: "For /subnotes: what's due, read-only — each goal's last plan check, each notebook's last review visit and whether it changed since, and the tasks Do would pick up — and which to run first: Plan, Review or Do.",
+    inputSchema: { type: 'object', properties: {} },
+    run: whatsDue,
   },
   {
     name: 'read_journal',

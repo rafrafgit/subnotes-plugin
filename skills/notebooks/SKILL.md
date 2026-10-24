@@ -1,5 +1,5 @@
 ---
-name: subnotes
+name: notebooks
 description: Read the user's Subnotes notebooks and add tasks to them. Use when they ask to add something to their notes, backlog, or to-do list, when they say to note something down or put it on a list, or when they ask what is on a notebook.
 ---
 
