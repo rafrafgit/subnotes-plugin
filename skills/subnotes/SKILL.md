@@ -138,6 +138,14 @@ working toward across notebooks, and how they rank. Read it before answering
 what to pick up next, or before judging any notebook's work. It is the user's
 writing like any other notebook — append to it only when asked.
 
+In Goals, every heading with a schedule is a goal: a date like
+`[2027-06-01]`, or Today, Next, Soon or Someday. The schedule is the goal's
+date; one without a date has none yet. A heading under another is part of
+it, not less important, and goals rank in the notebook's order. A goal's own
+text links the notebooks that serve it, like `[[Freelance]]`. A project — a
+scheduled heading in another notebook — serves the goal that links its
+notebook; when several do, the deepest one.
+
 ## Thoughts and open questions
 
 A line tagged `#idea` is an idea: a task not decided yet, the user's or a

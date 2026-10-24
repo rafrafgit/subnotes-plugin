@@ -46,8 +46,12 @@ there, and its open Today, Next and Soon tasks. The rest is background.
 
 *Nothing else can be checked until there is something to work toward.*
 
-Find goals by meaning, never by heading: one can sit in a purpose, under
-"About", or in a status line.
+In Goals, every heading with a schedule is a goal, and its schedule is the
+goal's date: `# Earn 4k a month from freelance work [2027-06-01]`. A heading
+under another is part of it. The text under a goal says why and how, and
+links the notebooks that serve it, like `[[Freelance]]`. A goal written
+elsewhere — in a purpose, under "About", in a status line — counts too, but
+belongs in Goals as a heading: suggest moving it (step 6).
 
 - A **goal** is what the user wants to be true. A good one has a number and
   a date: "Earn 4k a month from freelance work by June 2027". A direction or
@@ -58,14 +62,17 @@ Then, in order, stopping at the first gap:
 
 1. **There's a goal.** None in Goals: work one out with them (step 6), and
    stop there.
-2. **Each goal has a number and a date.** Check only that. Whether it's
+2. **Each goal has a number and a date** — the date in its heading; Today,
+   Next, Soon or Someday is no date yet. A part's number can be the whole's:
+   "Land a job before summer" moves the 4k. Check only that. Whether it's
    achievable comes out of Part 2; whether it's the right goal is theirs to
    say.
-3. **Every notebook serves a goal,** or Goals says it's parked. One that
-   serves none is a question, never a judgment.
+3. **Every notebook serves a goal** — a goal links it — or Goals says it's
+   parked. One that serves none is a question, never a judgment.
 
-Then name the goals in the order you'll take them — what Goals puts first,
-the nearest date, one behind pace — and ask to start with the first. If a
+Then name the goals in the order you'll take them — a goal with its parts,
+in Goals' order, unless one is nearer or behind pace — and ask to start
+with the first. If a
 goal was named above, take only that one.
 
 # Part 2 — Each goal, one at a time
@@ -79,8 +86,10 @@ goal was named above, take only that one.
   more visible online" says what should change, not the work that gets
   there.
 
-It can be in Goals' strategy, in the notebooks that serve the goal, or
-spread across them; gather it from all of them. If the review handed over,
+It can be in the text under the goal and its parts, in the notebooks it
+links, or spread across them; gather it from all of them. A project in a
+linked notebook — a scheduled heading — is part of the plan, and its tasks
+are the work behind it. If the review handed over,
 start from the gap it named.
 
 ## 4. Check the plan, in order, and stop at the first gap
@@ -139,12 +148,13 @@ writes only add tasks — so once they agree, show the lines and say where
 they go:
 
 ```
-Goals › Strategy, as a new first line:
-- Sign two retainer clients by March 2027: the income that carries the rest.
+Goals, under "Earn 4k a month from freelance work", as a new part:
+## Sign two retainer clients [2027-03-31]
+Why: the income that carries the rest. Find them through [[Freelance]].
 ```
 
 and put them where they'll see them: a task at the end of the section they
-go in, tagged `#idea` ("Add as the first line of Strategy #idea"), with the
+go in, tagged `#idea` ("Add as a part of the 4k goal #idea"), with the
 agreed lines as subnotes and a last subnote "Why: agreed in /subnotes:plan,
 <today>", so the review knows it isn't its own. Not when they say they've
 already written it in.

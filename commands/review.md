@@ -49,9 +49,12 @@ way to get there.*
   direction like "Be more visible online" — it says what should
   change, not what to do.
 
-Find both by meaning, not by heading. If Goals has no goal, or goals but no
-plan for them anywhere (in Goals or in the notebooks it links to), stop
-here: "Goals — no goal (or plan) yet, so nothing else was reviewed. Shall
+In Goals, every heading with a schedule is a goal, its schedule the goal's
+date; a heading under another is part of it, and the text under a goal
+links the notebooks that serve it (`[[Freelance]]`). Find the plan by
+meaning: under the goal, or in those notebooks. If Goals has no goal, or
+goals but no plan for them anywhere (in Goals or in the notebooks it links
+to), stop here: "Goals — no goal (or plan) yet, so nothing else was reviewed. Shall
 we run /subnotes:plan?" On a yes, hand over as in step 7.
 
 ## 3. Raise what's in Goals
@@ -61,6 +64,7 @@ we run /subnotes:plan?" On a yes, hand over as in step 7.
 Worth raising, if there:
 
 - a goal, phase or season whose date has passed — what comes next?
+- a goal with no date yet (Today, Next, Soon or Someday, not a date)
 - Goals says one thing comes first, but the "Last changed" dates in
   `list_notebooks` show the time going elsewhere — ask, never judge
 - Goals' own `#idea` lines, and its tasks due now
@@ -83,6 +87,7 @@ Skipping: Recipes — no purpose
 ```
 
 - **First:** what Goals puts first, a deadline soonest, a goal behind pace.
+  A notebook serves the goals that link it.
 - **Skip:** a notebook with no purpose (but review its `#idea` lines if it
   has any); one Goals parks, pauses or names as blocked.
 - If a notebook was named above, review only that one (still after steps
