@@ -94,10 +94,12 @@ one that still needs you to try it is left for you to mark.
 
 ## Two rules that shape everything
 
-**Writes only add, or reschedule.** Tasks and lines under a task can be added,
-and a task can be rescheduled or marked Done; nothing can be edited, deleted,
-reordered or renamed, and notebooks cannot be created. A write that never
-removes text cannot lose work.
+**Writes only add, reschedule, or edit one line.** Tasks and lines under a
+task can be added, a task can be rescheduled or marked Done, and one line's
+words can be changed once you've seen the old and new line and said yes;
+nothing can be deleted, reordered or renamed, and notebooks cannot be
+created. A write that never removes a line cannot lose work, and an edited
+line's old words stay in the conversation.
 
 **Reads are opt-in per notebook.** Only notebooks connected in Subnotes are
 exported to the connector folder at all. An unconnected notebook is never

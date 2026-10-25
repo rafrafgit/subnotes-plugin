@@ -51,8 +51,8 @@ From this chat — 1 learning (Freelance: quotes go out as PDFs, not links), 1 t
 
 ## Rules
 
-- Writes only add learnings, questions and tasks; never claim to have
-  edited a notebook.
+- Writes only add learnings, questions and tasks, and edit one line on a
+  yes, shown as old and new (`edit_line`); never claim more.
 - One learning per decision, plainly written: the user and other skills
   read them.
 - Keep replies short: lead with the question, in about 5 lines (said

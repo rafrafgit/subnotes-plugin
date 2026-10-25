@@ -37,6 +37,6 @@ Do not walk through the tools — `/subnotes:help` covers orientation, and
 repeating it here makes a finished setup feel unfinished.
 
 Two limits to state plainly if setup was needed, because both are surprising
-when discovered later: writes only add or reschedule — a task can be marked
-done, but nothing can be edited, deleted or reordered — and an unconnected notebook is invisible rather
+when discovered later: writes only add, reschedule, or edit one line on your
+yes — a task can be marked done, but nothing can be deleted or reordered — and an unconnected notebook is invisible rather
 than private-but-visible.

@@ -474,6 +474,75 @@ function setSchedule({ notebook, match, schedule }) {
     `A Subnotes older than this plugin can't apply it and sets it aside.`;
 }
 
+// A line's own words and kind, mirroring the app's Connector.editableParts:
+// a task's marker and trailing tags off, a subnote's tab and any list or quote
+// marker off. Null for a line with no words to edit.
+const LINE_MARKER = /^(\t?)(> |- |\d+\. )?/;
+
+function lineWords(line) {
+  if (/^#{1,6} /.test(line)) return { kind: 'heading', text: line.replace(/^#+ /, '').replace(/(\s*\[[^\]]*\])+$/, '').trim() };
+  if (!line.trim() || /^\s*\|.*\|\s*$/.test(line) || line.startsWith('```') || line === '---' || line.startsWith('⟦')) return null;
+  const task = taskWords(line);
+  if (task) return { kind: 'task', text: task.text };
+  return { kind: 'line', text: line.slice(LINE_MARKER.exec(line)[0].length).trim() };
+}
+
+// Rewords one existing line on the user's yes — so a skill makes an agreed
+// wording itself instead of handing the user the edit (ONE_LINE_EDIT_SPEC.md).
+// Any line but a heading, a table row or code; never in the Journal. Only the
+// words change: the app keeps the marker, a task's schedule, its subnotes and
+// its place. Named by its words, checked here and again in the app.
+function editLine({ notebook, match, text }) {
+  const m = manifest();
+  const nb = findNotebook(m, notebook);
+  if (isJournal(nb)) throw new UserError(
+    `"${nb.name}" is the Journal, the user's own writing: skills read it and never change it.`);
+  const wanted = String(match ?? '').trim();
+  if (!wanted) throw new UserError('Name the line to edit: its words, as read_notebook shows them.');
+  const words = String(text ?? '').trim();
+  if (!words || words.includes('\n')) throw new UserError('The new text is one line, and not empty. Edit one line per ask.');
+  if (/^(• |#{1,6} |- |\d+\. |> |\||```|⟦)/.test(words) || words === '---' || /\[[^\]]*\]$/.test(words)) throw new UserError(
+    `"${words}" starts with a marker or ends with a schedule tag. Send only the line's words: its kind and schedule stay as they are.`);
+
+  let content = null;
+  try {
+    content = readFileSync(join(DIR, nb.file), 'utf8');
+  } catch {}
+  let old = wanted;
+  if (content !== null) {
+    const key = withoutIdeaTag(lineWords(`• ${wanted}`)?.text || wanted).toLowerCase();
+    let inCode = false;
+    const hits = [];
+    for (const line of content.split('\n')) {
+      if (line.startsWith('```')) { inCode = !inCode; continue; }
+      if (inCode) continue;
+      const found = lineWords(line);
+      if (found && withoutIdeaTag(found.text).toLowerCase() === key) hits.push(found);
+    }
+    if (!hits.length) throw new UserError(
+      `"${nb.name}" has no line "${wanted}". Pass the line's words as read_notebook shows them, without its marker or schedule tag.`);
+    if (hits.length > 1) throw new UserError(
+      `"${nb.name}" has ${hits.length} lines "${wanted}". An edit changes exactly one, so this can't be placed — tell the user instead.`);
+    if (hits[0].kind === 'heading') throw new UserError(
+      `"${wanted}" is a heading. Renaming a section isn't an edit skills make — tell the user instead.`);
+    old = hits[0].text;
+  }
+
+  const payload = {
+    connectorVersion: CONNECTOR_VERSION,
+    ...(PLUGIN_VERSION ? { pluginVersion: PLUGIN_VERSION } : {}),
+    id: randomUUID().slice(0, 8),
+    op: 'edit_line',
+    notebook: nb.name,
+    match: old,
+    text: words,
+  };
+  writeInbox(payload);
+  return `Queued in "${nb.name}":\n  − ${old}\n  + ${words}` +
+    `\n\nSubnotes applies it when it is running, or at next launch if it is closed. ` +
+    `A Subnotes older than this plugin can't apply it and sets it aside. To undo, edit it back.`;
+}
+
 // MARK: - Journals
 
 // A review agent's memory of one notebook (/subnotes:review): what it noticed,
@@ -527,6 +596,7 @@ function agentFile(folder, nb) {
 const RENAMED_FILES = [
   ['review', '.md'], ['review', '.snapshot.json'], ['review', '.pending.json'],
   ['learnings', '.md'], ['questions', '.md'], ['thoughts', '.json'],
+  ['journal', '.snapshot.json'],
 ];
 
 function followRenames(m) {
@@ -1636,6 +1706,16 @@ const TOOLS = [
       schedule: { type: 'string', description: 'Today, Next, Soon, Someday or Done, or a date as yyyy-MM-dd.' },
     }, required: ['notebook', 'match', 'schedule'] },
     run: setSchedule,
+  },
+  {
+    name: 'edit_line',
+    description: "Change the words of one existing line — a task, subtask, subnote, list item, quote or body text — only after showing the user the old and new line and getting their yes. Never a heading, a table row, code, or the Journal notebook. Keeps the line's kind, schedule, subnotes and place; one line per ask. To undo, edit it back.",
+    inputSchema: { type: 'object', properties: {
+      notebook: { type: 'string' },
+      match: { type: 'string', description: "The line's words, as read_notebook shows them, without its marker or schedule tag; a task's #idea tag may be left out." },
+      text: { type: 'string', description: 'The new words, one line, with no marker or schedule tag.' },
+    }, required: ['notebook', 'match', 'text'] },
+    run: editLine,
   },
   {
     name: 'read_learnings',

@@ -61,8 +61,10 @@ first step as the thing you'd do.
 Show the groups, most useful first within each, each task with its notebook. Then start on the first task
 in "I can do this here" without asking: the user doesn't want to give
 permission for work you can do on your own (2026-10-18). One task at a time,
-in that order, each reported before the next. When that group is done, ask
-which of "with your input" to take, with its question.
+in that order, each reported before the next. When that group is done, go
+on to "with your input" the same way: one task at a time, in order, asking
+only that task's question. Never ask which one to take next (said
+2026-10-25).
 
 ## Do it
 
@@ -110,7 +112,8 @@ that ran failed, it isn't done: say "Stopped:" and leave it.
 
 Then go on to the next task in "I can do this here". When there is none left,
 offer the follow-ups the work turned up, all together, and add them with
-`add_tasks` only if they say yes; and offer the tasks that need their input.
+`add_tasks` only if they say yes; then take the first task that needs their
+input, with its question.
 Lead each follow-up with its task text in bold and put where it would go
 after it, plain — the user reads what it is first (asked 2026-10-19).
 
@@ -144,5 +147,8 @@ learnings added; and everything left for the user, together.
 
 ## Rules
 
+- A task that is a rewording of a line already in a notebook: show it as
+  old and new (`− …` / `+ …`) and, on a yes, `edit_line` — one line per ask,
+  never a heading or the Journal. To undo, edit it back.
 - Keep replies short: lead with the question, in about 5 lines, each option
   in one line. Detail goes in the notebook, not the chat (said 2026-10-24).

@@ -51,8 +51,8 @@ they need.
   Done once it's finished and checked.
 
 Then state the two limits plainly, because both are surprising if discovered
-later: writes only add or reschedule — a task can be marked done, but nothing
-can be edited, deleted or reordered — and only connected notebooks are readable, so an unconnected one is
+later: writes only add, reschedule, or edit one line on your yes — a task
+can be marked done, but nothing can be deleted or reordered — and only connected notebooks are readable, so an unconnected one is
 invisible rather than private-but-visible.
 
 Keep it short. This is an orientation, not a manual.

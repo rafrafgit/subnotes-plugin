@@ -53,7 +53,9 @@ question left unanswered: still mark it read, and keep the question
 
 ## Rules
 
-- Writes only add learnings, questions and tasks; you can't edit or delete
-  the journal, so never claim to have.
+- Writes only add learnings, questions and tasks, and edit one line in
+  another notebook on a yes, shown as old and new (`edit_line`) — when an
+  entry changes a line that's there. You can't edit or delete the journal,
+  so never claim to have.
 - Keep replies short: lead with the question, in about 5 lines (said
   2026-10-24).
