@@ -27,6 +27,9 @@ they need.
   or a review, and otherwise Do. The commands below still work on their own.
 - `/subnotes:journal` — reads what they wrote in a notebook called Journal
   and files what the skills need to know, so no skill asks for it again.
+- `/subnotes:wrapup` — the same for a chat with Claude that didn't start
+  from a skill: its decisions become learnings, its open tasks are proposed.
+  Claude offers it when they wrap up such a chat.
 - `/subnotes:review` — a review agent per notebook: it reads the notebook
   against its purpose, remembers earlier visits in a journal, keeps what it
   learns about the notebook and about them where every skill reads it, and

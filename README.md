@@ -64,6 +64,10 @@ its last run, and files what the other skills need to know — dates, replies,
 decisions — as learnings, with any task proposed on your yes. `/subnotes`
 runs it when there's a new entry.
 
+`/subnotes:wrapup` does the same for a chat with Claude that didn't start
+from a skill: what it decided or found becomes learnings, and any task left
+open is proposed on your yes. Claude offers it when you wrap up such a chat.
+
 `/subnotes:review` reads each notebook that has a purpose, remembers earlier
 visits in a journal, and talks through what it finds with you in Claude Code,
 one question at a time. When the talk shows a next step is worth doing, it
