@@ -137,6 +137,9 @@ function sectionOutline(n) {
 // because that's what every skill calls first.
 const GOALS_ROLE = 'Role: Goals — what the user is working toward and how their notebooks rank. ' +
   'Read it before working in any notebook, and judge each notebook against it as well as its own purpose.';
+// The Journal notebook likewise (JOURNAL_NOTEBOOK_SPEC.md in the app's repo).
+const JOURNAL_ROLE = "Role: Journal — the user's own entries on how their goals are going. " +
+  '/subnotes:journal reads it and files what matters; no other skill reviews it or writes in it.';
 
 function listNotebooks() {
   listedAt = Date.now();
@@ -145,6 +148,7 @@ function listNotebooks() {
   return m.notebooks.map(n => {
     const lines = [`## ${n.name}`];
     if (n.role === 'goals') lines.push(GOALS_ROLE);
+    if (isJournal(n)) lines.push(JOURNAL_ROLE);
     if (n.purpose) lines.push(`Purpose: ${n.purpose}`);
     lines.push(`Open tasks: ${n.openTasks ?? 'unknown'}`);
     const changed = lastChanged(n);
@@ -167,6 +171,7 @@ function readNotebook({ name }) {
 function connectorNotes(nb) {
   const notes = [];
   if (nb.role === 'goals') notes.push(GOALS_ROLE);
+  if (isJournal(nb)) notes.push(JOURNAL_ROLE);
   const changed = lastChanged(nb);
   if (changed) notes.push(`Last changed: ${changed}`);
   const queued = queuedTasks(nb);
@@ -1479,11 +1484,11 @@ function reviewDue(m) {
   return { due, lines };
 }
 
-// The Journal notebook, found by name until the app marks it by role, as it
-// does Goals (2026-10-24: a trial before an isJournal field). Journal reads
+// The Journal notebook, marked by role as Goals is (2026-10-25), so a rename
+// keeps it; by its name only for an app too old to mark it. Journal reads
 // what changed in it since its last run, the review's own way of telling, but
 // from a snapshot of its own: the review doesn't read the journal.
-const isJournal = nb => nb.name.trim().toLowerCase() === 'journal' && nb.role !== 'goals';
+const isJournal = nb => nb.role === 'journal' || (!nb.role && nb.name.trim().toLowerCase() === 'journal');
 const journalSnapshotPath = nb => agentFile('journal', nb).replace(/\.md$/, '.snapshot.json');
 
 function journalNotebook(m) {
@@ -1502,7 +1507,7 @@ function journalHasNew(nb) {
 
 function journalEntries() {
   const nb = journalNotebook(manifest());
-  if (!nb) return 'No notebook called "Journal" is connected. The user creates one and connects it in Subnotes\' Settings (⌘,).';
+  if (!nb) return 'No Journal notebook is connected. The user creates one and connects it in Subnotes\' Settings (⌘,).';
   const text = readFileSync(join(DIR, nb.file), 'utf8');
   const old = readSnapshot(journalSnapshotPath(nb));
   const changes = old ? changesSince(old, text) : null;
@@ -1518,7 +1523,7 @@ function journalEntries() {
 // run starts after it.
 function markJournalRead() {
   const nb = journalNotebook(manifest());
-  if (!nb) throw new UserError('No notebook called "Journal" is connected.');
+  if (!nb) throw new UserError('No Journal notebook is connected.');
   const path = journalSnapshotPath(nb);
   writeEntryFile(path, JSON.stringify(snapshotOf(readFileSync(join(DIR, nb.file), 'utf8'), readSnapshot(path))) + '\n');
   return `Journal read up to now (${localTime(new Date())}).`;
@@ -1558,7 +1563,7 @@ function whatsDue() {
     ...plan.lines,
     '',
     `## Journal — ${journalNew ? 'due' : 'not due'}`,
-    !journal ? 'No notebook called "Journal" is connected.'
+    !journal ? 'No Journal notebook is connected.'
       : journalNew ? `"${journal.name}" has an entry since Journal last ran.` : `Nothing new in "${journal.name}" since Journal last ran.`,
     '',
     `## Review — ${review.due.length ? `due in ${review.due.join(', ')}` : 'not due'}`,

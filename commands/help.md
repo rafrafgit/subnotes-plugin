@@ -25,7 +25,7 @@ they need.
   section in the same sentence to be explicit.
 - `/subnotes` — the one to start from: it runs whatever is due, a plan check
   or a review, and otherwise Do. The commands below still work on their own.
-- `/subnotes:journal` — reads what they wrote in a notebook called Journal
+- `/subnotes:journal` — reads what they wrote in their Journal notebook
   and files what the skills need to know, so no skill asks for it again.
 - `/subnotes:wrapup` — the same for a chat with Claude that didn't start
   from a skill: its decisions become learnings, its open tasks are proposed.

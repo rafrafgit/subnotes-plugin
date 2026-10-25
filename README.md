@@ -59,7 +59,7 @@ of a goal not checked for 30 days, or changed since; a review of a notebook
 that changed since yesterday's — and otherwise `/subnotes:do`. The three
 below still work on their own.
 
-`/subnotes:journal` reads what you wrote in a notebook called Journal since
+`/subnotes:journal` reads what you wrote in your Journal notebook since
 its last run, and files what the other skills need to know — dates, replies,
 decisions — as learnings, with any task proposed on your yes. `/subnotes`
 runs it when there's a new entry.
