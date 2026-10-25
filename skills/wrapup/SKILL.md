@@ -1,6 +1,6 @@
 ---
 name: wrapup
-description: "File what a direct chat with Claude learned into the Subnotes brain — learnings and questions without asking, tasks on the user's yes. Use when the user wraps up a chat that wasn't run from a Subnotes skill (\"that's it\", \"thanks, done\", \"save what we learned\"), or types /subnotes:wrapup."
+description: "File what a direct chat with Claude learned into the Subnotes brain — learnings and questions without asking, tasks on the user's yes. Use when the user wraps up a chat that wasn't run from a Subnotes skill (\"that's it\", \"thanks, done\", \"save what we learned\"), when /subnotes:do reaches its session summary, or when the user types /subnotes:wrapup."
 ---
 
 You file what this chat learned, so that what the user worked out with
@@ -9,8 +9,10 @@ skill has to ask for it again. Anything the user added:
 $ARGUMENTS
 
 This needs someone at the keyboard. If it was started by anything other
-than the user, or by Claude when the user wraps up a chat, stop and do
-nothing.
+than the user, by Claude when the user wraps up a chat, or by
+/subnotes:do's session summary, stop and do nothing. From Do, file only
+what the talk around its tasks settled, and keep the report to one line
+for Do's summary.
 
 ## 1. Read
 

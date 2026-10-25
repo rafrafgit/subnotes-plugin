@@ -130,7 +130,12 @@ there.
 ## End with the session
 
 When the user stops, or there's nothing left to take, end with everything
-this run did, in one place, so nothing is lost in the scroll (2026-10-21):
+this run did, in one place, so nothing is lost in the scroll (2026-10-21).
+
+First, file what the talk around the tasks settled — a design ruled out, a
+decision, a cause found — that no task's subnotes or learning holds yet:
+start `subnotes:wrapup` (Skill tool) and let it finish, so the user never has
+to run it (said 2026-10-25). Then the summary, with what it filed:
 
 ```
 This session
@@ -139,11 +144,13 @@ Done: Draft the follow-up to Anna (Freelance) — the draft is under the task
 Stopped: Add the price list page (Portfolio site) — needs your prices
 Commits: a1b2c3d contact form upload (pushed)
 Learnings: 1 — run the linter before every commit
+Filed from our talk: 1 learning — the price list waits for the new range
 Left for you: try the contact form on your phone; send Anna the follow-up
 ```
 
 One line per task taken, with its notebook; what's committed or not; the
-learnings added; and everything left for the user, together.
+learnings added; what wrapup filed (or "nothing new"); and everything left
+for the user, together.
 
 ## Rules
 
