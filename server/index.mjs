@@ -10,7 +10,7 @@
 // 60-second dependency fetch on first cache, nothing to go stale. Revisit if
 // this ever needs sampling, resources or notifications.
 
-import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync, readdirSync, statSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
@@ -796,15 +796,20 @@ const addLearning = args => {
 };
 
 // Changes or removes one learning. The old wording stays beside the new, so a
-// correction can itself be judged.
-function correctLearning({ notebook, match, text, reason, source, goal }) {
+// correction can itself be judged — except in the monthly prune, which
+// replaces it outright, keeping its date and skill: chained "was:" versions
+// had grown one Goals line to six (2026-10-25).
+function correctLearning({ notebook, match, text, reason, source, goal, prune }) {
   const who = sourceName(source);
   const why = String(reason ?? '').trim();
   if (!why) throw new UserError('A correction needs `reason`: why the entry no longer holds.');
   const found = findEntry('learnings', notebook, match);
   const replacement = String(text ?? '').trim();
   if (replacement.includes('\n')) throw new UserError('A learning is one line.');
-  if (replacement) {
+  if (replacement && prune) {
+    const [, date, by] = ENTRY.exec(found.old);
+    found.lines[found.i] = `- ${date} · ${by.trim()} · ${replacement}`;
+  } else if (replacement) {
     found.lines[found.i] = `- ${today()} · ${who} · ${replacement} (corrected: ${why}; was: "${found.text}")`;
   } else {
     found.lines.splice(found.i, 1);
@@ -1616,14 +1621,118 @@ function doCounts(m) {
   return { now, next, soon };
 }
 
+// MARK: - Prune
+
+// The brain is pruned once a month from /subnotes (2026-10-25), in place of
+// the Calibrate skill: counting what was kept couldn't tell a finished task
+// the user deleted from a declined one, but a run by hand found stale,
+// duplicate and contradicting learnings, and the brain of a notebook no longer
+// connected. Learnings and questions are read whole, every file, connected or
+// not; the prune changes them one entry at a time like any skill.
+const PRUNE_EVERY_DAYS = 30;
+const PRUNED = () => join(AGENT_DIR, 'prune.json');
+const BRAIN_FOLDERS = [...new Set(RENAMED_FILES.map(([folder]) => folder))];
+
+function lastPruned() {
+  try { return JSON.parse(readFileSync(PRUNED(), 'utf8')).pruned ?? null; } catch { return null; }
+}
+
+// Brain files kept for a notebook that isn't connected now: its name, and
+// the files. A rename is followed before this runs, so these are notebooks
+// turned off or deleted.
+function orphanBrains(m) {
+  const connected = new Set();
+  for (const nb of m.notebooks) for (const [folder, ext] of RENAMED_FILES)
+    connected.add(agentFile(folder, nb).replace(/\.md$/, ext));
+  const orphans = new Map();
+  for (const folder of BRAIN_FOLDERS) {
+    let files;
+    try { files = readdirSync(join(AGENT_DIR, folder)); } catch { continue; }
+    for (const f of files) {
+      const path = join(AGENT_DIR, folder, f);
+      const ext = RENAMED_FILES.find(([d, e]) => d === folder && f.endsWith(e))?.[1];
+      if (!ext || f === `${SHARED}.md` || connected.has(path)) continue;
+      const name = f.slice(0, -ext.length);
+      if (!orphans.has(name)) orphans.set(name, []);
+      orphans.get(name).push(path);
+    }
+  }
+  return orphans;
+}
+
+function crowdedFiles() {
+  const crowded = [];
+  let files = [];
+  try { files = readdirSync(join(AGENT_DIR, 'learnings')).filter(f => f.endsWith('.md')); } catch {}
+  for (const f of files) {
+    const n = entryCount(readFileSync(join(AGENT_DIR, 'learnings', f), 'utf8'));
+    if (n > 40) crowded.push(`${f.slice(0, -3)} (${n})`);
+  }
+  return crowded;
+}
+
+function pruneDue(m) {
+  const last = lastPruned();
+  const whys = [];
+  if (!last) whys.push('never pruned');
+  else if (daysSince(last) >= PRUNE_EVERY_DAYS) whys.push(`last pruned ${last}, ${daysSince(last)} days ago`);
+  const lines = [last ? `Last pruned ${last}.` : 'Never pruned.'];
+  const crowded = crowdedFiles();
+  if (crowded.length) lines.push(`Over 40 learnings: ${crowded.join(', ')}.`);
+  const orphans = [...orphanBrains(m).keys()];
+  if (orphans.length) lines.push(`Kept for notebooks not connected now: ${orphans.join(', ')}.`);
+  return { due: whys.length > 0, why: whys.join('; '), lines };
+}
+
+// For the prune: every learnings and questions file whole, with how many
+// entries each has, and the brains of notebooks not connected now.
+function pruneContext() {
+  const m = manifest();
+  const out = [`Today: ${today()}`, `Last pruned: ${lastPruned() ?? 'never'}`, '',
+    `Connected: ${m.notebooks.map(n => n.name + (n.role ? ` (role ${n.role})` : '')).join(', ')}`];
+  const orphans = orphanBrains(m);
+  out.push(orphans.size
+    ? `Not connected, brain still kept: ${[...orphans.keys()].join(', ')} — remove_notebook_brain removes one`
+    : 'Not connected, brain still kept: none');
+  for (const kind of ['learnings', 'questions']) {
+    let files = [];
+    try { files = readdirSync(join(AGENT_DIR, kind)).filter(f => f.endsWith('.md')).sort(); } catch {}
+    for (const f of files) {
+      const text = readFileSync(join(AGENT_DIR, kind, f), 'utf8');
+      const name = f.slice(0, -3);
+      const off = orphans.has(name) ? ', not connected' : '';
+      out.push('', `## ${kind} — ${name} (${entryCount(text)} entries${off})`, '',
+        ...text.split('\n').filter(l => ENTRY.test(l)));
+    }
+  }
+  return out.join('\n');
+}
+
+function removeNotebookBrain({ notebook }) {
+  const name = String(notebook ?? '').trim();
+  const m = manifest();
+  if (m.notebooks.some(n => n.name.toLowerCase() === name.toLowerCase()))
+    throw new UserError(`"${name}" is connected: its brain is still in use. Remove single entries with correct_learning.`);
+  const orphans = orphanBrains(m);
+  const key = [...orphans.keys()].find(k => k.toLowerCase() === name.toLowerCase());
+  if (!key) throw new UserError(`No brain kept for "${name}". Kept for notebooks not connected: ${[...orphans.keys()].join(', ') || 'none'}.`);
+  for (const path of orphans.get(key)) unlinkSync(path);
+  return `Removed the brain kept for "${key}": ${orphans.get(key).map(p => p.slice(AGENT_DIR.length + 1)).join(', ')}.`;
+}
+
+function markPruned() {
+  writeEntryFile(PRUNED(), JSON.stringify({ pruned: today() }, null, 2) + '\n');
+  return `Pruned ${today()}; due again in ${PRUNE_EVERY_DAYS} days.`;
+}
+
 function whatsDue() {
   const m = manifest();
   if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,).";
-  const plan = planDue(m), review = reviewDue(m), work = doCounts(m);
+  const plan = planDue(m), review = reviewDue(m), prune = pruneDue(m), work = doCounts(m);
   const journal = journalNotebook(m);
   let journalNew = false;
   try { journalNew = !!journal && journalHasNew(journal); } catch {}
-  const run = plan.due.length ? 'Plan' : journalNew ? 'Journal' : review.due.length ? 'Review' : 'Do';
+  const run = plan.due.length ? 'Plan' : journalNew ? 'Journal' : review.due.length ? 'Review' : prune.due ? 'Prune' : 'Do';
   return [
     `Today: ${today()}`,
     `Run: ${run}`,
@@ -1639,6 +1748,10 @@ function whatsDue() {
     `## Review — ${review.due.length ? `due in ${review.due.join(', ')}` : 'not due'}`,
     'Due once a day, in the notebooks that changed since their last visit.',
     ...review.lines,
+    '',
+    `## Prune — ${prune.due ? `due: ${prune.why}` : 'not due'}`,
+    `Due ${PRUNE_EVERY_DAYS} days after the last prune.`,
+    ...prune.lines,
     '',
     '## Do',
     `${work.now} task${work.now === 1 ? '' : 's'} Today or overdue, ${work.next} Next, ${work.soon} Soon, across the connected notebooks.`,
@@ -1744,8 +1857,27 @@ const TOOLS = [
       reason: { type: 'string', description: 'Why it no longer holds.' },
       source: { type: 'string', description: 'The skill correcting it, one word.' },
       goal: { type: 'string', description: "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check." },
+      prune: { type: 'boolean', description: 'Only for the monthly prune: replace the entry outright, keeping its date and skill, with no old wording beside it.' },
     }, required: ['match', 'reason', 'source'] },
     run: correctLearning,
+  },
+  {
+    name: 'prune_context',
+    description: "For the monthly prune: every learnings and questions file whole, with entry counts, and the brains still kept for notebooks not connected now. Read-only.",
+    inputSchema: { type: 'object', properties: {} },
+    run: pruneContext,
+  },
+  {
+    name: 'remove_notebook_brain',
+    description: "For the monthly prune, on the user's yes: delete everything kept for a notebook that isn't connected now — its learnings, questions and review journal. Refuses a connected notebook.",
+    inputSchema: { type: 'object', properties: { notebook: { type: 'string', description: 'The name prune_context lists as not connected.' } }, required: ['notebook'] },
+    run: removeNotebookBrain,
+  },
+  {
+    name: 'mark_pruned',
+    description: 'For the monthly prune, last: records today as the last prune, so /subnotes makes it due again in 30 days.',
+    inputSchema: { type: 'object', properties: {} },
+    run: markPruned,
   },
   {
     name: 'read_questions',
@@ -1819,7 +1951,7 @@ const TOOLS = [
   },
   {
     name: 'whats_due',
-    description: "For /subnotes: what's due, read-only — each goal's last plan check, each notebook's last review visit and whether it changed since, and the tasks Do would pick up — and which to run first: Plan, Review or Do.",
+    description: "For /subnotes: what's due, read-only — each goal's last plan check, each notebook's last review visit and whether it changed since, and the tasks Do would pick up — and which to run first: Plan, Journal, Review, Prune or Do.",
     inputSchema: { type: 'object', properties: {} },
     run: whatsDue,
   },

@@ -48,7 +48,10 @@ from there instead, without adding this marketplace first.
 - `journal_entries`, `mark_journal_read` — what's new in the Journal
   notebook since Journal last ran, and marking it read
 - `whats_due` — what `/subnotes` runs: each goal's last plan check, each
-  notebook's last review, and the tasks Do would pick up
+  notebook's last review, the last prune, and the tasks Do would pick up
+- `prune_context`, `remove_notebook_brain`, `mark_pruned` — the monthly
+  prune: every learnings and questions file, the brain kept for a notebook
+  no longer connected, and marking it done
 
 Ask what is on a notebook, or what to pick up next — reading is half the point.
 Say "put that on the backlog" mid-conversation and it lands in the right
@@ -56,7 +59,8 @@ notebook and section, or name them yourself: "… in Work, under Backlog".
 
 `/subnotes` is the one to start from: it runs whatever is due — a plan check
 of a goal not checked for 30 days, or changed since; a review of a notebook
-that changed since yesterday's — and otherwise `/subnotes:do`. The three
+that changed since yesterday's; once a month, a prune of what the skills
+have learned — and otherwise `/subnotes:do`. The three
 below still work on their own.
 
 `/subnotes:journal` reads what you wrote in your Journal notebook since
@@ -67,6 +71,10 @@ runs it when there's a new entry.
 `/subnotes:wrapup` does the same for a chat with Claude that didn't start
 from a skill: what it decided or found becomes learnings, and any task left
 open is proposed on your yes. Claude offers it when you wrap up such a chat.
+
+`/subnotes:prune` goes through everything the skills have learned and
+removes or merges what's stale, duplicated or contradicted by the notebooks
+as they are now, on one yes. `/subnotes` runs it once a month.
 
 `/subnotes:review` reads each notebook that has a purpose, remembers earlier
 visits in a journal, and talks through what it finds with you in Claude Code,
