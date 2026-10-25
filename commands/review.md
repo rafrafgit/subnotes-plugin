@@ -204,7 +204,9 @@ Look in this order, and stop at about three:
 1. **The plan's next step.** Is there a task for what the plan needs next,
    scheduled Today, Next, Soon or on a date? If not, ask "What's the next
    step on X?" with your best guess. A project heading isn't a step; its
-   next step is a task under it.
+   next step is a task under it. If the step sits in Soon and nothing in the
+   notebook is Today or Next, offer to move it to Next, so Do has something
+   to start.
 2. **Today and overdue,** then **Next** — every line, changed or not — then
    **Soon** (new or changed lines only).
 3. **`#idea` lines,** as `review-ideas` returned them: its replies are your
