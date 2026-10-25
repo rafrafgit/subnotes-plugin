@@ -51,7 +51,9 @@ A plan check is due: "Portfolio site live" changed since its check on 2 March �
 Keep replies short: lead with the question, in about 5 lines (said
 2026-10-24).
 
-When the skill you started is done, offer the next one down the line, ending
-with Do: what else `whats_due` showed was due, and then Do with its count —
-"Do is next: 3 Next tasks across your notebooks — continue?" Stop when the
-user says so.
+When the skill you started is done, offer the next one down the line: what
+else `whats_due` showed was due. When that's Do — after a review, too, when
+it ended before every notebook was reached — start it straight away, as in
+step 2, if it has tasks (Today, Next, or Soon when those are fewer than
+three): "Do is next: 1 Next and 4 Soon tasks — starting it." No tasks: say
+so and stop. Stop whenever the user says so.

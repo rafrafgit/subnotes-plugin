@@ -1524,9 +1524,10 @@ function markJournalRead() {
   return `Journal read up to now (${localTime(new Date())}).`;
 }
 
-// What Do would pick up: tasks, not headings, Today or overdue, then Next.
+// What Do would pick up: tasks, not headings, Today or overdue, then Next,
+// and Soon when those are fewer than three.
 function doCounts(m) {
-  let now = 0, next = 0;
+  let now = 0, next = 0, soon = 0;
   for (const nb of m.notebooks) {
     let text;
     try { text = readFileSync(join(DIR, nb.file), 'utf8'); } catch { continue; }
@@ -1534,9 +1535,10 @@ function doCounts(m) {
       if (s.heading || /\[Done\]\s*$/i.test(s.line)) continue;
       if (s.group === 'Today') now++;
       else if (s.group === 'Next') next++;
+      else if (s.group === 'Soon') soon++;
     }
   }
-  return { now, next };
+  return { now, next, soon };
 }
 
 function whatsDue() {
@@ -1564,8 +1566,9 @@ function whatsDue() {
     ...review.lines,
     '',
     '## Do',
-    `${work.now} task${work.now === 1 ? '' : 's'} Today or overdue, ${work.next} Next, across the connected notebooks.`,
-  ].join('\n');
+    `${work.now} task${work.now === 1 ? '' : 's'} Today or overdue, ${work.next} Next, ${work.soon} Soon, across the connected notebooks.`,
+    work.now + work.next < 3 && work.soon ? 'Fewer than three Today or Next, so Do adds Soon ones.' : null,
+  ].filter(l => l !== null).join('\n');
 }
 
 const ALLOW_DUPLICATE = {
