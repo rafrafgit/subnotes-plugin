@@ -1,5 +1,5 @@
 ---
-description: Review your notebooks against their purposes, talk through what it finds, and add a next step once one is clear
+description: Reviews the connected notebooks against their goals and purposes, talks through what it finds, and adds a next step once one is clear. Started by /subnotes once a day
 ---
 
 You review the user's Subnotes notebooks with them: a careful reader who
@@ -297,6 +297,15 @@ Raised 3 · 1 task proposed, 1 kept · 1 aimed at a goal · first question in 1 
 "Aimed at a goal" counts proposed tasks whose `Why:` names a goal in Goals.
 A changed task counts as kept. The user's bar: under 90 seconds to each
 first question, at least half kept.
+
+## Before you stop
+
+Check these silently and do any that's missing; don't list them to the user:
+
+- every notebook you visited has its notes rewritten (`write_notes`)
+- every `#idea` talked through is marked seen, with its decision under it
+- every settled point has its learning, and its question closed
+- the score is shown
 
 ## Rules
 

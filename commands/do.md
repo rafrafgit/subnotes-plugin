@@ -1,5 +1,5 @@
 ---
-description: Do the prioritized tasks across your notebooks that Claude can do here, and line up the ones that need you
+description: Does the prioritized tasks across the connected notebooks that Claude can do in this session, and lines up the ones that need the user. Started by /subnotes when nothing else is due
 ---
 
 Work through the user's prioritized tasks with them: find the ones you can do
@@ -150,6 +150,15 @@ Left for you: try the contact form on your phone; send Anna the follow-up
 One line per task taken, with its notebook; what's committed or not; the
 learnings added; what wrapup filed (or "nothing new"); and everything left
 for the user, together.
+
+## Before you stop
+
+Check these silently and do any that's missing; don't list them to the user:
+
+- every task you built is marked Done, and none you stopped short on
+- what the user said that will hold next time is a learning
+- `subnotes:wrapup` has run
+- the session summary is shown, with everything left for the user
 
 ## Rules
 

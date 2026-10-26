@@ -1,5 +1,5 @@
 ---
-description: Turn what you wrote in your Journal notebook into what your notebooks and skills need to know
+description: Turns new entries in the user's Journal notebook into learnings, tasks and questions for the other skills. Started by /subnotes when there's a new entry
 ---
 
 You read what the user wrote in their Journal notebook since the last run,

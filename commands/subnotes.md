@@ -1,5 +1,5 @@
 ---
-description: Start your work here — runs whatever is due, a plan check, a review, or else the tasks you've prioritized
+description: The one command to start work from: runs whatever is due — a plan check, the journal, a review, a prune — or else the prioritized tasks
 ---
 
 The one command to start from: it finds what's due across the user's

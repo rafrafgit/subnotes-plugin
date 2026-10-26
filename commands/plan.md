@@ -1,5 +1,5 @@
 ---
-description: Check that your goals are clear, your plan can reach them and is working, and work out what's missing with you
+description: Checks with the user that each goal is clear, its plan can reach it and is working, and works out what's missing. Started by /subnotes when a goal's check is due
 ---
 
 You check the user's goals and plans with them: is there something to work
@@ -206,6 +206,14 @@ Portfolio live by March — plan good, on pace. No gap.
 What you found, what was agreed, what you added, and what's left for them.
 If the review handed over, say so, and that the review can carry on with the
 notebooks it had left.
+
+## Before you stop
+
+Check these silently and do any that's missing; don't list them to the user:
+
+- every goal you checked has its learning in Goals, with `goal` set
+- what stays unsettled is an open question
+- the report is shown
 
 ## Rules
 

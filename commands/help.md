@@ -1,5 +1,5 @@
 ---
-description: Start here — what this plugin does and what to connect first
+description: Explains what the Subnotes plugin does and what to connect first. Use when starting out with it, or when unsure which command to run
 ---
 
 Explain the Subnotes plugin to someone who has just installed it.
