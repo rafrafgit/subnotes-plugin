@@ -136,6 +136,9 @@ One line each:
 - good, or vague — and what's vague about it
 - will it reach the goal, and why or why not
 - what an alternative plan would look like, in a line or two
+- not known: the one or two facts that would change this verdict, if any
+  ("how many leads a month the newsletter brings"). They become open
+  questions in step 7 unless the talk answers them
 
 ## 6. Work it out with them
 
@@ -184,7 +187,8 @@ review reads it, so it doesn't ask for what you've settled, and watches the sign
 the pace to know when to send the user back here.
 
 What stays unsettled — "Is the newsletter meant to earn, or to find
-clients?" — goes in as an open question (`add_question`, source `plan`).
+clients?", or a gap from the verdict the talk didn't answer — goes in as an
+open question (`add_question`, source `plan`).
 Something they said about how they plan that will hold next time is a
 learning without a notebook.
 

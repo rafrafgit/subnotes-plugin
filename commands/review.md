@@ -285,8 +285,12 @@ notebook doesn't: a call, a reply expected, an event; observations as what the n
 what to suggest next; points not reached under Waiting to ask; points
 skipped or waved off under Observations. Shorten old observations.
 
-Then sum up the notebook in one line, and ask: "Next is Subnotes —
-continue?" If the user stops, the notebooks not reached keep their changes
+Then sum up the notebook in one line. If there's something you don't know
+that would have changed what you raised — where a lead stands, what "done"
+means for the next step — add one line "Not known: …" with the one or two
+gaps, and offer to keep each as an open question (`add_question`) unless it
+already is one. Naming the gap is what lets the next visit close it. Then
+ask: "Next is Subnotes — continue?" If the user stops, the notebooks not reached keep their changes
 for next time.
 
 # End: the score
