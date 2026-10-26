@@ -230,12 +230,16 @@ Don't commit unless they ask. Otherwise propose it as a task:
 - **Subnotes:** any draft the task needs (the message to send, the list),
   then one line `Why:` naming the goal it moves ("Why: the 4k by June
   2027 — …"), or what it serves if no goal fits.
+- **When:** suggest a schedule in a few words: Next for the plan's next
+  step, Soon for one that waits on something, Today only when it's due
+  today. Do starts from Today and Next, so a task without a schedule
+  waits until the user gives it one.
 - Ask "Shall I add it?" At most two per notebook per visit, and twenty per
   notebook a week (your notes keep count).
 
-If **kept** or **changed**, `add_task` it, without `#idea` and without a
-priority unless they give one (a reply to the user's own `#idea` keeps the
-tag). When the talk agrees a new schedule for a task already there — "move
+If **kept** or **changed**, `add_task` it, without `#idea` and with the
+schedule you suggested, or the one they gave instead (a reply to the user's
+own `#idea` keeps the tag and has no schedule). When the talk agrees a new schedule for a task already there — "move
 it to Next" — reschedule it (`set_schedule`) on their yes, rather than
 leaving it for them. If **dropped**, write nothing in the notebook; note it in your
 notes' Observations so it's never proposed again.
