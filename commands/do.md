@@ -16,7 +16,7 @@ runs commands.
 Call `list_notebooks`. If a notebook was named, use only it, matching
 case-insensitively. Otherwise use **every connected notebook with a
 purpose**: much of what Claude can do — a draft, research, a write-up — sits
-in notebooks that have no code (2026-10-20). Note which one is about the
+in notebooks that have no code. Note which one is about the
 work in this folder — its name, purpose or sections match the project here
 (its folder name, README or what the code does): its code tasks are the ones
 you can change here.
@@ -60,11 +60,10 @@ first step as the thing you'd do.
 
 Show the groups, most useful first within each, each task with its notebook. Then start on the first task
 in "I can do this here" without asking: the user doesn't want to give
-permission for work you can do on your own (2026-10-18). One task at a time,
+permission for work you can do on your own. One task at a time,
 in that order, each reported before the next. When that group is done, go
 on to "with your input" the same way: one task at a time, in order, asking
-only that task's question. Never ask which one to take next (said
-2026-10-25).
+only that task's question. Never ask which one to take next.
 
 ## Do it
 
@@ -98,12 +97,12 @@ Done: The contact form drops attachments over 5 MB
 Say what changed, how you checked it, and what's left. Start with **Done:**
 when your part is finished — all of it built and checked as far as you can
 from here — even when the user still has to try it: "Partly done" reads as
-half of it built (2026-10-21). Say "Stopped:" only when you did part of the
+half of it built. Say "Stopped:" only when you did part of the
 work, with what's missing.
 
 When it's built, mark it Done (`set_schedule`, the task's text as `match`)
 and say so. Done means built; the user tests it, and deletes the task once
-it's tested (2026-10-23). Name what's left — "Left for you: try it on the
+it's tested. Name what's left — "Left for you: try it on the
 iPhone" — and any check that couldn't run, such as tests while the app is
 open. A task whose work the user does themselves isn't done until they have:
 a task to draft something is done once the draft is under it; one to send it
@@ -115,7 +114,7 @@ offer the follow-ups the work turned up, all together, and add them with
 `add_tasks` only if they say yes; then take the first task that needs their
 input, with its question.
 Lead each follow-up with its task text in bold and put where it would go
-after it, plain — the user reads what it is first (asked 2026-10-19).
+after it, plain — the user reads what it is first.
 
 Before you report, look back over the work for what the user told you that
 will hold next time, and add each one (`add_learning`, source `do`): with the
@@ -130,12 +129,12 @@ there.
 ## End with the session
 
 When the user stops, or there's nothing left to take, end with everything
-this run did, in one place, so nothing is lost in the scroll (2026-10-21).
+this run did, in one place, so nothing is lost in the scroll.
 
 First, file what the talk around the tasks settled — a design ruled out, a
 decision, a cause found — that no task's subnotes or learning holds yet:
 start `subnotes:wrapup` (Skill tool) and let it finish, so the user never has
-to run it (said 2026-10-25). Then the summary, with what it filed:
+to run it. Then the summary, with what it filed:
 
 ```
 This session
@@ -158,4 +157,4 @@ for the user, together.
   old and new (`− …` / `+ …`) and, on a yes, `edit_line` — one line per ask,
   never a heading or the Journal. To undo, edit it back.
 - Keep replies short: lead with the question, in about 5 lines, each option
-  in one line. Detail goes in the notebook, not the chat (said 2026-10-24).
+  in one line. Detail goes in the notebook, not the chat.

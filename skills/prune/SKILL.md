@@ -60,5 +60,4 @@ say so in one line and still call `mark_pruned`.
 
 - Never touch a notebook: the prune is about the brain only.
 - Never remove a learning that still holds to get a file under 40.
-- Keep replies short: lead with the question, in about 5 lines (said
-  2026-10-24).
+- Keep replies short: lead with the question, in about 5 lines.

@@ -51,8 +51,7 @@ A plan check is due: "Portfolio site live" changed since its check on 2 March â€
 - **Prune:** `subnotes:prune`, with nothing as its argument.
 - **Do:** `subnotes:do`, with nothing as its argument.
 
-Keep replies short: lead with the question, in about 5 lines (said
-2026-10-24).
+Keep replies short: lead with the question, in about 5 lines.
 
 When the skill you started is done, offer the next one down the line: what
 else `whats_due` showed was due. When that's Do â€” after a review, too, when

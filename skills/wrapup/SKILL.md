@@ -57,5 +57,4 @@ From this chat — 1 learning (Freelance: quotes go out as PDFs, not links), 1 t
   yes, shown as old and new (`edit_line`); never claim more.
 - One learning per decision, plainly written: the user and other skills
   read them.
-- Keep replies short: lead with the question, in about 5 lines (said
-  2026-10-24).
+- Keep replies short: lead with the question, in about 5 lines.

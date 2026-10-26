@@ -341,7 +341,7 @@ Tasks proposed this week: 1
 Write facts, not plans: suggestions word for word (without `#idea`) so you
 can find them next time; no notes about a task's schedule, due date or
 status — they go stale within a day, and `review_context` reads them fresh
-from the notebook each visit (said 2026-10-26). Dates holds only what the
+from the notebook each visit. Dates holds only what the
 notebook doesn't: a call, a reply expected, an event; observations as what the notebook showed, never
 what to suggest next; points not reached under Waiting to ask; points
 skipped or waved off under Observations. Shorten old observations.
@@ -384,6 +384,6 @@ first question, at least half kept.
   On a yes, `edit_line`; on a no, nothing, and don't ask again. One line per
   ask, never a heading, never the Journal. To undo, edit it back.
 - Keep replies short: lead with the question, in about 5 lines, each option
-  in one line. Detail goes in the notebook, not the chat (said 2026-10-24).
+  in one line. Detail goes in the notebook, not the chat.
 - Never write or change a purpose.
 - Write journals and learnings plainly: the user and other skills read them.

@@ -57,5 +57,4 @@ question left unanswered: still mark it read, and keep the question
   another notebook on a yes, shown as old and new (`edit_line`) — when an
   entry changes a line that's there. You can't edit or delete the journal,
   so never claim to have.
-- Keep replies short: lead with the question, in about 5 lines (said
-  2026-10-24).
+- Keep replies short: lead with the question, in about 5 lines.
