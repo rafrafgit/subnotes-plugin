@@ -9,94 +9,22 @@ $ARGUMENTS
 
 A review goes like this:
 
-- **Start from Goals:** read the Goals notebook, raise anything in it, and
-  agree the order to review the other notebooks in.
-- **Then one notebook at a time:** read it, find what's worth talking about,
-  talk it through, add any tasks that come out of it, and save your notes.
-  Then ask whether to go on to the next.
+- **Start from Goals:** start the `subnotes:review-goals` skill with the
+  Skill tool, with the named notebook (if any) as its argument. It reads
+  Goals, raises anything in it, agrees the order to review the notebooks in,
+  and saves your Goals notes. If it stops the review — no goal or plan yet,
+  or a named notebook with no purpose — stop too.
+- **Then one notebook at a time,** in that order: read it, find what's worth
+  talking about, talk it through, add any tasks that come out of it, and
+  save your notes. Then ask whether to go on to the next.
 - **End** with the score.
 
 The user waits for the first question in each notebook: keep it under 90
 seconds.
 
-# Part 1 — Start from Goals
+# Each notebook, one at a time
 
-## 1. Read Goals
-
-*Get the big picture before looking at any one notebook.*
-
-Call `list_notebooks`. Then, in one turn:
-
-- `read_notebook` for the notebook marked **"Role: Goals"**: the user's
-  goals and strategy across all notebooks.
-- `review_context` for Goals alone: your notes on it, its learnings and
-  questions, and the shared learnings and questions that hold everywhere.
-- the `subnotes:review-ideas` skill, with Goals as its argument: it reads the
-  `#idea` lines and returns replies and questions to raise.
-
-Goals outranks any learning that disagrees with it.
-
-## 2. Check there's a goal and a plan
-
-*Nothing is worth suggesting until there's something to work toward and a
-way to get there.*
-
-- A **goal** is something the user wants to be true, best with a number and
-  a date ("4k a month from freelance work by June 2027"). "Spend more time outdoors"
-  is a direction, not a goal.
-- A **plan** is how they'll get there: steps, phases, a strategy that names
-  the work. A pile of unrelated tasks isn't a plan, and neither is a
-  direction like "Be more visible online" — it says what should
-  change, not what to do.
-
-In Goals, every heading with a schedule is a goal, its schedule the goal's
-date; a heading under another is part of it, and the text under a goal
-links the notebooks that serve it (`[[Freelance]]`). Find the plan by
-meaning: under the goal, or in those notebooks. If Goals has no goal, or
-goals but no plan for them anywhere (in Goals or in the notebooks it links
-to), stop here: "Goals — no goal (or plan) yet, so nothing else was reviewed. Shall
-we run /subnotes:plan?" On a yes, hand over as in step 7.
-
-## 3. Raise what's in Goals
-
-*Points about the whole picture come before any one notebook.*
-
-Worth raising, if there:
-
-- a goal, phase or season whose date has passed — what comes next?
-- a goal with no date yet (Today, Next, Soon or Someday, not a date)
-- Goals says one thing comes first, but the "Last changed" dates in
-  `list_notebooks` show the time going elsewhere — ask, never judge
-- Goals' own `#idea` lines, and its tasks due now
-- anything from step 8 below that applies to Goals itself
-
-Talk these through as in step 10, before the order.
-
-## 4. Agree the order
-
-*Decide together which notebooks to review today, and in what order.*
-
-From `list_notebooks` and Goals, propose an order, one line each with the
-reason, and ask to start with the first:
-
-```
-1. Freelance — proposal due tomorrow; Goals' main route to the 4k
-2. Portfolio site — changed today; serves finding clients
-Skipping: Newsletter — paused in Goals until March
-Skipping: Recipes — no purpose
-```
-
-- **First:** what Goals puts first, a deadline soonest, a goal behind pace.
-  A notebook serves the goals that link it.
-- **Skip:** a notebook with no purpose (but review its `#idea` lines if it
-  has any); one Goals parks, pauses or names as blocked; the Journal
-  notebook, which `/subnotes:journal` reads.
-- If a notebook was named above, review only that one (still after steps
-  1–3); if it has no purpose, say so and stop.
-
-# Part 2 — Each notebook, one at a time
-
-## 5. Read the notebook
+## 1. Read the notebook
 
 *Get what this notebook needs, and nothing from the others.*
 
@@ -130,7 +58,7 @@ these is true, in which case review it:
 stale. Before acting on a line in them, check the notebook still has what it
 names; if not, drop the line.
 
-## 6. Follow up on the last visit
+## 2. Follow up on the last visit
 
 *Learn from what the user did with your earlier suggestions.*
 
@@ -156,7 +84,7 @@ context, find the answer and save it, so you never ask twice. If a learning
 no longer holds, fix it with `correct_learning`; if a file passes 40
 entries, merge or drop the weakest.
 
-## 7. Check this notebook's goal and plan
+## 3. Check this notebook's goal and plan
 
 *Make sure there's a goal and a workable plan before anything else.*
 
@@ -193,7 +121,7 @@ says about it.
 
 When Plan is done, offer to carry on with the notebooks that were left.
 
-## 8. Find what's worth talking about
+## 4. Find what's worth talking about
 
 *Pick up to three points the user would want to discuss. Often there is
 nothing, and that's a good result: a needless point costs attention and
@@ -206,7 +134,10 @@ Look in this order, and stop at about three:
    step on X?" with your best guess. A project heading isn't a step; its
    next step is a task under it. If the step sits in Soon and nothing in the
    notebook is Today or Next, offer to move it to Next, so Do has something
-   to start.
+   to start. Then the pace: when the plan names a number for a period ("5
+   applications a week") and the notebook shows it short, say how far short
+   and lead with that, before anything off the plan. Tasks waiting in Next
+   aren't the work done.
 2. **Today and overdue,** then **Next** — every line, changed or not — then
    **Soon** (new or changed lines only).
 3. **`#idea` lines,** as `review-ideas` returned them: its replies are your
@@ -243,7 +174,7 @@ Don't raise:
 - a point your notes or learnings say was already talked through
 - reorganising what's already there
 
-## 9. Record and report
+## 5. Record and report
 
 *Save what doesn't depend on the user's answers, then say what you found.*
 
@@ -259,13 +190,13 @@ Freelance — 2 things to talk about: the Acme proposal is due today; the plan c
 
 If `review-ideas` failed, add "ideas not read" and leave them for next time.
 
-## 10. Talk it through, one point at a time
+## 6. Talk it through, one point at a time
 
 *Discuss first; a task comes only when the talk shows something should be
 done.*
 
 Start with your notes' Waiting to ask, then this visit's points in step
-8's order. For each point:
+4's order. For each point:
 
 - Say what you noticed, short and plain.
 - Give two or three options, what each costs and gains, and which you'd pick
@@ -273,6 +204,10 @@ Start with your notes' Waiting to ask, then this visit's points in step
   homework. A simple question ("Is the side project with Sam still wanted?") just needs
   your best guess.
 - Ask the one question that decides it, and say how many points are left.
+  End the reply there. The reply that raises a point names no task — not
+  offered, not previewed ("If c, I'd add…") — and no "Shall I do it now?",
+  even for the option you'd pick: the user's answer decides whether anything
+  is worth doing.
 
 **When a point is settled,** write: a learning for the decision, and
 `close_question` for its question. For an `#idea`, mark it seen with its
@@ -305,7 +240,7 @@ it to Next" — reschedule it (`set_schedule`) on their yes, rather than
 leaving it for them. If **dropped**, write nothing in the notebook; note it in your
 notes' Observations so it's never proposed again.
 
-## 11. Save your notes, then move on
+## 7. Save your notes, then move on
 
 *Leave yourself accurate notes for next time, then offer the next
 notebook.*
@@ -350,13 +285,10 @@ Then sum up the notebook in one line, and ask: "Next is Subnotes —
 continue?" If the user stops, the notebooks not reached keep their changes
 for next time.
 
-# Part 3 — End
+# End: the score
 
-## 12. Save Goals and show the score
-
-When the last notebook is done, or the user stops: rewrite the Goals
-notes the same way, with what you saw of where the time went. Then the
-score for the whole review:
+When the last notebook is done, or the user stops, show the score for the
+whole review:
 
 ```
 Raised 3 · 1 task proposed, 1 kept · 1 aimed at a goal · first question in 1 min 2 s (Freelance), 48 s (Portfolio site)
