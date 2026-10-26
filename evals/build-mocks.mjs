@@ -6,7 +6,7 @@
 // server returns, from a fixture that never changes under them.
 //
 //   node evals/build-mocks.mjs
-//   claude plugin eval . --ablation none -j 3
+//   claude plugin eval . --ablation none -j 3 --judge-model sonnet
 //
 // --ablation none: the review is a command, so a run without the plugin has
 // nothing to compare against.
