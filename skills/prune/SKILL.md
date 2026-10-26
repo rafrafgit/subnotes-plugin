@@ -45,7 +45,7 @@ Show what you'd change, grouped by notebook, one line each, then ask once:
 Prune — 6 changes:
 Goals: remove 2 (still say "North Star"); cut the 5k plan line to its current version
 Subnotes: merge 2 pairs (now 40); correct "What good looks like" (its measure was questioned)
-Old notebook "Side project": remove its brain (9 learnings, a review journal)
+Old notebook "Side project": remove its brain (9 learnings, review notes)
 Fix all?
 ```
 

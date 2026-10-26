@@ -156,11 +156,11 @@ scheduling it or taking the tag off.
 learnings before judging a notebook's next step, and close a question
 (`close_question`) when the user answers it.
 
-## Journals and learnings
+## Review notes and learnings
 
-`read_journal` and `write_journal` are the review agent's working memory
+`read_notes` and `write_notes` are the review agent's working memory
 (`/subnotes:review`). Use them only for that review, never to store anything
-else, and never treat a journal as the notebook itself.
+else, and never treat review notes as the notebook itself.
 
 `read_learnings`, `add_learning` and `correct_learning` are what Subnotes'
 skills have learned — about one notebook, and (no notebook given) about the

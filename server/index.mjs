@@ -543,13 +543,13 @@ function editLine({ notebook, match, text }) {
     `A Subnotes older than this plugin can't apply it and sets it aside. To undo, edit it back.`;
 }
 
-// MARK: - Journals
+// MARK: - Review notes
 
 // A review agent's memory of one notebook (/subnotes:review): what it noticed,
 // what it suggested and what became of it, what it has learned. Plain text, in
 // a folder of the connector's own that the app never reads or prunes — it
 // only ever deletes its notebook files and the inbox files it has applied —
-// so a journal is the agent's alone, and the user's to read and correct.
+// so its notes are the agent's alone, and the user's to read and correct.
 //
 // Keyed by the notebook's name, which is how everything here addresses a
 // notebook; followRenames moves the files when a notebook is renamed. Only a
@@ -560,7 +560,7 @@ function editLine({ notebook, match, text }) {
 // in each a file per notebook plus shared.md for what isn't about one
 // notebook.
 //
-//   agent/review/<notebook>.md     the review's working state (its journal)
+//   agent/review/<notebook>.md     the review's working state (its notes)
 //   agent/learnings/<notebook>.md  what any skill has learned about a notebook
 //   agent/learnings/shared.md      what any skill has learned that isn't
 //                                  about one notebook — the user, mostly
@@ -572,7 +572,7 @@ function editLine({ notebook, match, text }) {
 // time, each entry saying which skill wrote it and when: a whole-file rewrite
 // would let one skill prune what another learned without knowing what it was
 // for.
-const JOURNAL_LIMIT = 20_000;
+const NOTES_LIMIT = 20_000;
 const AGENT_DIR = join(DIR, 'agent');
 const SHARED = 'shared';
 
@@ -587,7 +587,7 @@ function agentFile(folder, nb) {
 
 // The brain is filed by notebook name, and a rename used to strand it: the
 // notebook came back under its new name with no learnings, questions or
-// journal (2026-10-17). The app sends an `id` per notebook that a rename
+// notes (2026-10-17). The app sends an `id` per notebook that a rename
 // doesn't change, and agent/ids.json remembers the name each id last had.
 // When one comes back under a new name, its files move to that name — every
 // time the manifest is read, so a rename is followed before any tool looks.
@@ -633,9 +633,9 @@ function moveBrain(from, to) {
   }
 }
 
-// Journals used to sit at agent/<notebook>.md. Moved on first use rather than
+// Review notes used to sit at agent/<notebook>.md. Moved on first use rather than
 // by a migration step, which a plugin has nowhere to run.
-function journalPath(nb) {
+function notesPath(nb) {
   const path = agentFile('review', nb);
   const legacy = join(AGENT_DIR, `${nb.name.replace(/[\/:\0]/g, '-').trim() || 'notebook'}.md`);
   if (!existsSync(path) && existsSync(legacy)) {
@@ -645,28 +645,28 @@ function journalPath(nb) {
   return path;
 }
 
-function readJournal({ notebook }) {
+function readNotes({ notebook }) {
   const nb = findNotebook(manifest(), notebook);
-  const path = journalPath(nb);
-  if (!existsSync(path)) return `No journal yet for "${nb.name}" — this is the first review of it.`;
+  const path = notesPath(nb);
+  if (!existsSync(path)) return `No notes yet for "${nb.name}" — this is the first review of it.`;
   return readFileSync(path, 'utf8');
 }
 
-// Replaces the whole journal: the agent keeps it short by rewriting it, not
+// Replaces the whole notes file: the agent keeps it short by rewriting it, not
 // by appending forever. Temp file then rename, as for the inbox.
-function writeJournal({ notebook, content }) {
+function writeNotes({ notebook, content }) {
   const nb = findNotebook(manifest(), notebook);
   const text = String(content ?? '');
-  if (!text.trim()) throw new UserError('A journal needs content. To start over, write a one-line note saying so.');
-  if (text.length > JOURNAL_LIMIT) throw new UserError(
-    `The journal is ${text.length} characters, over the ${JOURNAL_LIMIT} limit. Summarise older entries and write it again.`);
-  const path = journalPath(nb);
+  if (!text.trim()) throw new UserError('Notes need content. To start over, write a one-line note saying so.');
+  if (text.length > NOTES_LIMIT) throw new UserError(
+    `The notes are ${text.length} characters, over the ${NOTES_LIMIT} limit. Summarise older entries and write it again.`);
+  const path = notesPath(nb);
   mkdirSync(dirname(path), { recursive: true });
   const tmp = `${path}.tmp`;
   writeFileSync(tmp, text.endsWith('\n') ? text : text + '\n');
   renameSync(tmp, path);
   keepSnapshot(nb);
-  return `Journal for "${nb.name}" saved (${text.length} characters).`;
+  return `Notes for "${nb.name}" saved (${text.length} characters).`;
 }
 
 // MARK: - Learnings and open questions
@@ -843,7 +843,7 @@ function closeQuestion({ notebook, match, answer, source }) {
 // agents what's on their mind (THOUGHTS_SPEC.md, "Idea as a task state"): an
 // idea is a task that isn't decided yet. It replaced the Thoughts and
 // Suggestions sections on 2026-10-18 — the review writes its own suggestions
-// as #idea tasks too, and knows them from its journal. Done ones are dealt
+// as #idea tasks too, and knows them from its notes. Done ones are dealt
 // with. Each says where it sits, so the review reads a subtask's idea with the
 // task it's about — and so moving one reads as a new thought, as editing one
 // does.
@@ -935,9 +935,9 @@ function newThoughts({ notebook }) {
   const thoughts = thoughtsIn(nb);
   if (thoughts === null) return `"${nb.name}" has no #idea lines — nothing to read.`;
   const seen = seenThoughts(nb);
-  // The review's own suggestions are #idea tasks too: the journal says which.
-  const own = openSuggestionsIn(journalText(nb));
-  const mine = t => own.some(o => sameText(t.split(' — ')[0].split(' · ')[0], o)) ? ' (your own open suggestion, from the journal)' : '';
+  // The review's own suggestions are #idea tasks too: its notes say which.
+  const own = openSuggestionsIn(notesText(nb));
+  const mine = t => own.some(o => sameText(t.split(' — ')[0].split(' · ')[0], o)) ? ' (your own open suggestion, from your notes)' : '';
   const fresh = thoughts.filter(t => !seenFor(seen, t));
   const open = thoughts.filter(t => seenFor(seen, t));
   const parts = [];
@@ -1010,9 +1010,9 @@ function markThoughtsSeen({ notebook, thoughts }) {
 // priority, which is what lets a changed line say "was Next".
 //
 // The snapshot is of what review_context showed, not of the notebook when the
-// journal is written: an edit made between the two would otherwise be counted
-// as seen. review_context leaves it pending; write_journal keeps it. A visit
-// that writes no journal keeps the old snapshot, so its changes show again.
+// notes are written: an edit made between the two would otherwise be counted
+// as seen. review_context leaves it pending; write_notes keeps it. A visit
+// that writes no notes keeps the old snapshot, so its changes show again.
 const SECTION_HEADING = /^(#{1,6})\s+(.*?)\s*$/;
 const TOP = '(above the first heading)';
 const SHOWN_WHOLE = 12;      // a changed section this short is shown whole
@@ -1246,11 +1246,11 @@ function sharedEntryLines(kind) {
   return lines.length ? lines.join('\n') : '(none)';
 }
 
-// The suggestions the journal lists as open: a journal line is
+// The suggestions the notes list as open: a notes line is
 // "- date — the suggestion's text — why: …", the text as it was written to
 // the notebook, without its #idea tag.
-function openSuggestionsIn(journal) {
-  const block = /^## Open suggestions\s*$([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(journal);
+function openSuggestionsIn(notes) {
+  const block = /^## Open suggestions\s*$([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(notes);
   if (!block) return [];
   return block[1].split('\n').filter(l => /^\s*-\s/.test(l)).map(l => {
     const body = l.replace(/^\s*-\s*/, '').replace(/^\d{4}-\d{2}-\d{2}\s*[—-]\s*/, '');
@@ -1267,19 +1267,19 @@ function sameText(a, b) {
   return n >= 15 && x.slice(0, n) === y.slice(0, n);
 }
 
-function journalText(nb) {
-  const journal = journalPath(nb);
-  return existsSync(journal) ? readFileSync(journal, 'utf8').trim() : '';
+function notesText(nb) {
+  const path = notesPath(nb);
+  return existsSync(path) ? readFileSync(path, 'utf8').trim() : '';
 }
 
-// What became of each suggestion the journal lists as open, read from the
-// notebook as it stands rather than left to the journal: the journal is the
+// What became of each suggestion the notes list as open, read from the
+// notebook as it stands rather than left to the notes: the notes are the
 // review's own notes and goes stale, the notebook doesn't (2026-10-18). A
 // suggestion is an #idea task until the user schedules it, marks it Done or
 // takes the tag off; the Suggestions section it used to go to still counts,
 // for the ones written there before.
-function openSuggestionStatus(nb, text, journal) {
-  const wanted = openSuggestionsIn(journal);
+function openSuggestionStatus(nb, text, reviewNotes) {
+  const wanted = openSuggestionsIn(reviewNotes);
   if (!wanted.length) return [];
   const tasks = [];
   let section = '';
@@ -1304,7 +1304,7 @@ function openSuggestionStatus(nb, text, journal) {
       else if (found.section.toLowerCase() === 'suggestions') status = 'still in Suggestions, unscheduled — waiting';
       else status = `#idea taken off${where} — accepted`;
     } else if (queued.some(q => sameText(withoutIdeaTag(q.text), w))) status = 'queued, not in the notebook yet — waiting';
-    else status = 'not in the notebook — declined, cleared after Done, or the journal words it differently';
+    else status = 'not in the notebook — declined, cleared after Done, or the notes word it differently';
     return `- ${w}: ${status}`;
   });
 }
@@ -1324,18 +1324,18 @@ function contextFor(nb) {
   else if (!changes.length) changed = `Nothing has changed since the last visit (${old.taken}).`;
   else changed = `Since the last visit (${old.taken}) — "+" is a new or changed line, the rest is unchanged context:\n\n` + changes.join('\n\n');
 
-  // Pending until write_journal keeps it: see the top of this section.
+  // Pending until write_notes keeps it: see the top of this section.
   writeEntryFile(snapshotPath(nb, true), JSON.stringify(snapshotOf(text, old)) + '\n');
 
   const notes = connectorNotes(nb);
-  const journal = journalText(nb);
-  const status = openSuggestionStatus(nb, text, journal);
+  const reviewNotes = notesText(nb);
+  const status = openSuggestionStatus(nb, text, reviewNotes);
   return [
     `# ${nb.name}`,
     ...(nb.purpose ? [`Purpose: ${nb.purpose}`] : []),
     '',
-    '## Journal',
-    journal || 'No journal yet — this is the first review of it.',
+    '## Your notes',
+    reviewNotes || 'No notes yet — this is the first review of it.',
     ...(status.length ? ['', '## Your open suggestions, as the notebook has them now', ...status] : []),
     '',
     '## Learnings about this notebook',
@@ -1374,7 +1374,7 @@ function reviewElapsed() {
 
 // Everything one visit needs, for every notebook the review is visiting, in
 // one call: the shared learnings and questions once, then per notebook its
-// journal, learnings, questions, scheduled lines, new thoughts and what changed.
+// notes, learnings, questions, scheduled lines, new thoughts and what changed.
 function reviewContext({ notebooks }) {
   const m = manifest();
   const names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
@@ -1869,7 +1869,7 @@ const TOOLS = [
   },
   {
     name: 'remove_notebook_brain',
-    description: "For the monthly prune, on the user's yes: delete everything kept for a notebook that isn't connected now — its learnings, questions and review journal. Refuses a connected notebook.",
+    description: "For the monthly prune, on the user's yes: delete everything kept for a notebook that isn't connected now — its learnings, questions and review notes. Refuses a connected notebook.",
     inputSchema: { type: 'object', properties: { notebook: { type: 'string', description: 'The name prune_context lists as not connected.' } }, required: ['notebook'] },
     run: removeNotebookBrain,
   },
@@ -1929,7 +1929,7 @@ const TOOLS = [
   },
   {
     name: 'review_context',
-    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its journal, what the notebook shows now of each suggestion the journal lists as open, learnings, open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), thoughts, and only what changed since the review last wrote that notebook's journal (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_journal, read_notebook, read_learnings, read_questions and new_thoughts for each.",
+    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its notes, what the notebook shows now of each suggestion the notes list as open, learnings, open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), thoughts, and only what changed since the review last wrote that notebook's notes (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_notes, read_notebook, read_learnings, read_questions and new_thoughts for each.",
     inputSchema: { type: 'object', properties: {
       notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks to visit.' },
     }, required: ['notebooks'] },
@@ -1968,16 +1968,16 @@ const TOOLS = [
     run: markJournalRead,
   },
   {
-    name: 'read_journal',
-    description: "Read the review agent's journal for one connected notebook (/subnotes:review): its notes from earlier reviews. Says so when there is none yet.",
+    name: 'read_notes',
+    description: "Read the review agent's notes for one connected notebook (/subnotes:review): its notes from earlier reviews. Says so when there is none yet.",
     inputSchema: { type: 'object', properties: { notebook: { type: 'string' } }, required: ['notebook'] },
-    run: readJournal,
+    run: readNotes,
   },
   {
-    name: 'write_journal',
-    description: "Replace the review agent's journal for one connected notebook with new content — the whole journal, kept short by rewriting rather than appending. Only for /subnotes:review; never the notebook itself.",
+    name: 'write_notes',
+    description: "Replace the review agent's notes for one connected notebook with new content — the whole notes file, kept short by rewriting rather than appending. Only for /subnotes:review; never the notebook itself.",
     inputSchema: { type: 'object', properties: { notebook: { type: 'string' }, content: { type: 'string' } }, required: ['notebook', 'content'] },
-    run: writeJournal,
+    run: writeNotes,
   },
 ];
 

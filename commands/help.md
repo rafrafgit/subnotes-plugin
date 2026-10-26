@@ -33,7 +33,7 @@ they need.
 - `/subnotes:prune` — once a month from `/subnotes`: clears what's stale,
   duplicated or contradicted out of what the skills have learned, on one yes.
 - `/subnotes:review` — a review agent per notebook: it reads the notebook
-  against its purpose, remembers earlier visits in a journal, keeps what it
+  against its purpose, remembers earlier visits in its notes, keeps what it
   learns about the notebook and about them where every skill reads it, and
   talks through what it finds, one question at a time, adding a next step as
   a task only once the talk shows it's worth doing. It reviews every

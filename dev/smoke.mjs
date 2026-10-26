@@ -52,7 +52,7 @@ const init = await send('initialize', {});
 check('initialize', init.result?.serverInfo?.name === 'subnotes');
 
 const tools = await send('tools/list', {});
-check('twenty-two tools', tools.result.tools.length === 22,
+check('twenty-six tools', tools.result.tools.length === 26,
       tools.result.tools.map(t => t.name).join(', '));
 
 const list = await call('list_notebooks');
@@ -124,17 +124,17 @@ const legacyJournal = join(DIR, 'agent', `${first.replace(/[\/:\0]/g, '-')}.md`)
 if (existsSync(journal) || existsSync(legacyJournal)) {
   console.log('  --   journal round trip skipped: a real journal exists');
 } else {
-  const none = await call('read_journal', { notebook: first });
-  check('read_journal says when there is none', !none.isError && none.text.includes('No journal yet'));
-  const saved = await call('write_journal', { notebook: first, content: '# Smoke test journal' });
-  check('write_journal saves', !saved.isError && existsSync(journal));
-  const back = await call('read_journal', { notebook: first });
-  check('read_journal returns it', back.text.trim() === '# Smoke test journal');
+  const none = await call('read_notes', { notebook: first });
+  check('read_notes says when there is none', !none.isError && none.text.includes('No notes yet'));
+  const saved = await call('write_notes', { notebook: first, content: '# Smoke test journal' });
+  check('write_notes saves', !saved.isError && existsSync(journal));
+  const back = await call('read_notes', { notebook: first });
+  check('read_notes returns it', back.text.trim() === '# Smoke test journal');
   rmSync(journal);
 }
-const emptyJournal = await call('write_journal', { notebook: first, content: '  ' });
+const emptyJournal = await call('write_notes', { notebook: first, content: '  ' });
 check('an empty journal refuses', emptyJournal.isError);
-const strayJournal = await call('read_journal', { notebook: 'Definitely Not Connected' });
+const strayJournal = await call('read_notes', { notebook: 'Definitely Not Connected' });
 check('a journal for an unconnected notebook refuses', strayJournal.isError);
 
 // Learnings: the same rule — only in a notebook that has none of its own yet.
@@ -238,7 +238,7 @@ if (process.env.SUBNOTES_DIR) {
   rmSync(store, { force: true });
 }
 
-// review_context writes a snapshot and write_journal a journal, so only in a
+// review_context writes a snapshot and write_notes a journal, so only in a
 // fixture folder too — and whatever journal the fixture had is put back.
 if (process.env.SUBNOTES_DIR) {
   const safe = first.replace(/[\/:\0]/g, '-');
@@ -255,8 +255,8 @@ if (process.env.SUBNOTES_DIR) {
         !firstVisit.isError && firstVisit.text.includes('No snapshot') && firstVisit.text.split('# Shared learnings').length === 2,
         firstVisit.text.slice(0, 80));
   check('review_context leaves its snapshot pending', existsSync(pending) && !existsSync(snap));
-  await call('write_journal', { notebook: first, content: '# Smoke test journal' });
-  check('write_journal keeps the pending snapshot', existsSync(snap) && !existsSync(pending));
+  await call('write_notes', { notebook: first, content: '# Smoke test journal' });
+  check('write_notes keeps the pending snapshot', existsSync(snap) && !existsSync(pending));
   const same = await call('review_context', { notebooks: [first] });
   check('an unchanged notebook says so', same.text.includes('Nothing has changed since the last visit'));
   writeFileSync(file, original.replace(/\n*$/, '\n') + '## Smoke section\n• Smoke diff task [Next]\n• Smoke idea still waiting #idea\n');
@@ -268,7 +268,7 @@ if (process.env.SUBNOTES_DIR) {
         diff.text.split('## Scheduled lines')[1]?.split('## Ideas')[0].includes('### Next\n• Smoke diff task [Next]   ← task, new'),
         diff.text.split('## Scheduled lines')[1]?.split('## Ideas')[0]);
   check('a snapshot holds fingerprints, not text', !readFileSync(pending, 'utf8').includes('Smoke diff'));
-  await call('write_journal', { notebook: first, content:
+  await call('write_notes', { notebook: first, content:
     '## Open suggestions\n- 2026-10-18 — Smoke diff task — why: it is there\n- 2026-10-18 — Smoke task the user deleted — why: gone\n- 2026-10-18 — Smoke idea still waiting — why: an idea\n\n## Observations\n' });
   const status = await call('review_context', { notebooks: [first] });
   check('open suggestions come with what the notebook shows of them',
@@ -276,7 +276,7 @@ if (process.env.SUBNOTES_DIR) {
         && status.text.includes('- Smoke task the user deleted: not in the notebook')
         && status.text.includes('- Smoke idea still waiting: still an #idea, unscheduled, in Smoke section — waiting'), status.text.split('## Learnings')[0].slice(-400));
   check('the review\'s own #idea suggestion is marked as its own',
-        status.text.includes('Smoke idea still waiting · in: Smoke section (your own open suggestion, from the journal)'), status.text.split('## Ideas')[1]?.slice(0, 400));
+        status.text.includes('Smoke idea still waiting · in: Smoke section (your own open suggestion, from your notes)'), status.text.split('## Ideas')[1]?.slice(0, 400));
   const stray = await call('review_context', { notebooks: ['Definitely Not Connected'] });
   check('review_context refuses an unconnected notebook', stray.isError);
 

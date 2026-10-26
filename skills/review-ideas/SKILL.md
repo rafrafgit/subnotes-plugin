@@ -160,6 +160,6 @@ notebook with no ideas: "## Freelance — no ideas". Nothing else: no commentary
 ## Limits
 
 - Writes only ever add. You write learnings and questions, close questions
-  and mark ideas seen — never a task, a subnote or the journal: those are the
+  and mark ideas seen — never a task, a subnote or the review's notes: those are the
   review's.
 - Never write or change a purpose.

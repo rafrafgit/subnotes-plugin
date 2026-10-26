@@ -38,7 +38,7 @@ from there instead, without adding this marketplace first.
   decisions depend on; an answered one becomes a learning
 - `new_thoughts` / `mark_thoughts_seen` — a notebook's new and still-open `#idea`
   thoughts, with what became of each (fingerprints only, never a copy of the text)
-- `read_journal` / `write_journal` — the review's working memory per notebook
+- `read_notes` / `write_notes` — the review's working memory per notebook
 - `review_context` — everything a review visit needs, for several notebooks in
   one call, with the lines scheduled Today, Next and Soon and only what
   changed since the last visit (kept as line fingerprints, never a copy of
@@ -77,7 +77,7 @@ removes or merges what's stale, duplicated or contradicted by the notebooks
 as they are now, on one yes. `/subnotes` runs it once a month.
 
 `/subnotes:review` reads each notebook that has a purpose, remembers earlier
-visits in a journal, and talks through what it finds with you in Claude Code,
+visits in its notes, and talks through what it finds with you in Claude Code,
 one question at a time. When the talk shows a next step is worth doing, it
 proposes the task, and adds it to the section it belongs in only on your yes.
 

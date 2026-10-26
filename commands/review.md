@@ -29,7 +29,7 @@ Call `list_notebooks`. Then, in one turn:
 
 - `read_notebook` for the notebook marked **"Role: Goals"**: the user's
   goals and strategy across all notebooks.
-- `review_context` for Goals alone: your journal for it, its learnings and
+- `review_context` for Goals alone: your notes on it, its learnings and
   questions, and the shared learnings and questions that hold everywhere.
 - the `subnotes:review-ideas` skill, with Goals as its argument: it reads the
   `#idea` lines and returns replies and questions to raise.
@@ -102,7 +102,7 @@ Skipping: Recipes — no purpose
 
 In one turn:
 
-- `review_context` for this notebook: your journal from last time, its
+- `review_context` for this notebook: your notes from last time, its
   learnings and open questions, its `#idea` lines, and its lines:
 
   | Part of the notebook | What you get |
@@ -118,23 +118,23 @@ Read the notebook whole (`read_notebook`) only when what changed isn't
 enough to judge it.
 
 **When nothing changed,** say "no change since last visit", leave its
-journal alone, and move to the next notebook without asking — unless one of
+notes alone, and move to the next notebook without asking — unless one of
 these is true, in which case review it:
 
 - a task is due today or overdue
-- a date in the journal's Dates section has come
+- a date in your notes' Dates section has come
 - one of your suggestions has waited more than 7 days
-- a stall the journal names has gone 7 days unchanged
+- a stall your notes name has gone 7 days unchanged
 
-**The notebook beats the journal.** The journal is your own notes and goes
-stale. Before acting on a journal line, check the notebook still has what it
+**The notebook beats your notes.** Your notes go
+stale. Before acting on a line in them, check the notebook still has what it
 names; if not, drop the line.
 
 ## 6. Follow up on the last visit
 
 *Learn from what the user did with your earlier suggestions.*
 
-`review_context` shows each suggestion the journal lists as open, as the
+`review_context` shows each suggestion your notes list as open, as the
 notebook has it now:
 
 | The notebook shows | It was |
@@ -144,7 +144,7 @@ notebook has it now:
 | queued by the connector, not yet in the notebook | still on its way |
 | still an unscheduled `#idea` | waiting — after 7 days, ignored |
 
-An ignored suggestion is never raised again: drop it from the journal, and
+An ignored suggestion is never raised again: drop it from your notes, and
 mark it seen (`mark_thoughts_seen`, became "own suggestion, ignored") so it
 never reads as the user's own idea.
 
@@ -184,7 +184,7 @@ says about it.
 **When the user says yes to /subnotes:plan,** hand over:
 
 1. Write what's settled so far — this notebook's learnings and questions,
-   and its journal, with the plan check under Waiting to ask until Plan has
+   and its notes, with the plan check under Waiting to ask until Plan has
    run.
 2. Say which notebooks are left to review after Plan.
 3. Start it with the Skill tool (`subnotes:plan`), with the goal and the gap
@@ -240,7 +240,7 @@ Don't raise:
 - anything declined, ignored, or skipped at an earlier review, until its
   text changes
 - anything Goals parks, or the learnings say the user doesn't want
-- a point the journal or learnings say was already talked through
+- a point your notes or learnings say was already talked through
 - reorganising what's already there
 
 ## 9. Record and report
@@ -249,7 +249,7 @@ Don't raise:
 
 In one turn: add your questions (`add_question`, source `review`) and any
 learnings, close answered questions, and call `review_elapsed` last. Wait
-with the journal and with marking ideas seen until after the talk.
+with the notes and with marking ideas seen until after the talk.
 
 Then one line — what there is to talk about, never a task:
 
@@ -264,7 +264,7 @@ If `review-ideas` failed, add "ideas not read" and leave them for next time.
 *Discuss first; a task comes only when the talk shows something should be
 done.*
 
-Start with the journal's Waiting to ask, then this visit's points in step
+Start with your notes' Waiting to ask, then this visit's points in step
 8's order. For each point:
 
 - Say what you noticed, short and plain.
@@ -296,22 +296,22 @@ Don't commit unless they ask. Otherwise propose it as a task:
   then one line `Why:` naming the goal it moves ("Why: the 4k by June
   2027 — …"), or what it serves if no goal fits.
 - Ask "Shall I add it?" At most two per notebook per visit, and twenty per
-  notebook a week (the journal keeps count).
+  notebook a week (your notes keep count).
 
 If **kept** or **changed**, `add_task` it, without `#idea` and without a
 priority unless they give one (a reply to the user's own `#idea` keeps the
 tag). When the talk agrees a new schedule for a task already there — "move
 it to Next" — reschedule it (`set_schedule`) on their yes, rather than
-leaving it for them. If **dropped**, write nothing in the notebook; note it in the
-journal's Observations so it's never proposed again.
+leaving it for them. If **dropped**, write nothing in the notebook; note it in your
+notes' Observations so it's never proposed again.
 
-## 11. Save the journal, then move on
+## 11. Save your notes, then move on
 
 *Leave yourself accurate notes for next time, then offer the next
 notebook.*
 
-Mark any remaining ideas seen, then rewrite this notebook's journal in full
-(`write_journal`), under 60 lines. Writing it also tells the next visit
+Mark any remaining ideas seen, then rewrite this notebook's notes in full
+(`write_notes`), under 60 lines. Writing it also tells the next visit
 where "what changed" starts.
 
 ```
@@ -355,7 +355,7 @@ for next time.
 ## 12. Save Goals and show the score
 
 When the last notebook is done, or the user stops: rewrite the Goals
-journal the same way, with what you saw of where the time went. Then the
+notes the same way, with what you saw of where the time went. Then the
 score for the whole review:
 
 ```
@@ -386,4 +386,4 @@ first question, at least half kept.
 - Keep replies short: lead with the question, in about 5 lines, each option
   in one line. Detail goes in the notebook, not the chat.
 - Never write or change a purpose.
-- Write journals and learnings plainly: the user and other skills read them.
+- Write notes and learnings plainly: the user and other skills read them.
