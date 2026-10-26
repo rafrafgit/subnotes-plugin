@@ -1,0 +1,551 @@
+{
+ "tools": [
+  {
+   "name": "list_notebooks",
+   "description": "List the connected Subnotes notebooks with their purpose, section headings and open task count. Call this before writing, to choose a notebook and a section without reading a whole notebook.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   }
+  },
+  {
+   "name": "read_notebook",
+   "description": "Read one connected notebook as plain text. Only when the answer needs its contents \u2014 list_notebooks is usually enough.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ]
+   }
+  },
+  {
+   "name": "add_task",
+   "description": "Append one task to a connected notebook. Appends only: it cannot edit, complete, delete or reorder anything. Refuses a task the notebook already has, unless allowDuplicate is true.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string"
+     },
+     "text": {
+      "type": "string",
+      "description": "The task, one line, naming a physical visible action."
+     },
+     "section": {
+      "type": "string",
+      "description": "An EXISTING section heading from list_notebooks. Omit to add at the top."
+     },
+     "priority": {
+      "type": "string",
+      "enum": [
+       "Today",
+       "Next",
+       "Soon",
+       "Someday"
+      ],
+      "description": "Leave out to use the section's schedule (Someday if it has none)."
+     },
+     "subnotes": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Detail lines shown under the task. Paths and links go here, not in the text."
+     },
+     "allowDuplicate": {
+      "type": "boolean",
+      "description": "Only after the user has confirmed they want a task the notebook already has. Default false, which refuses such a write."
+     }
+    },
+    "required": [
+     "notebook",
+     "text"
+    ]
+   }
+  },
+  {
+   "name": "add_tasks",
+   "description": "Append several tasks to one connected notebook in a single write. Prefer this over repeated add_task calls: one file, one save, one sync cycle. Refuses a task the notebook already has, unless allowDuplicate is true.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string"
+     },
+     "tasks": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "text": {
+         "type": "string",
+         "description": "The task, one line, naming a physical visible action."
+        },
+        "section": {
+         "type": "string",
+         "description": "An EXISTING section heading from list_notebooks. Omit to add at the top."
+        },
+        "priority": {
+         "type": "string",
+         "enum": [
+          "Today",
+          "Next",
+          "Soon",
+          "Someday"
+         ],
+         "description": "Leave out to use the section's schedule (Someday if it has none)."
+        },
+        "subnotes": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         },
+         "description": "Detail lines shown under the task. Paths and links go here, not in the text."
+        }
+       },
+       "required": [
+        "text"
+       ]
+      }
+     },
+     "allowDuplicate": {
+      "type": "boolean",
+      "description": "Only after the user has confirmed they want a task the notebook already has. Default false, which refuses such a write."
+     }
+    },
+    "required": [
+     "notebook",
+     "tasks"
+    ]
+   }
+  },
+  {
+   "name": "add_subnotes",
+   "description": "Write detail lines under one existing task, after the subnotes it already has \u2014 such as a decision talked through in Claude Code, under the idea it settles. Adds only: it cannot change or remove the task or its subnotes. The task is named by its text and must be exactly one top-level task in the notebook.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string"
+     },
+     "match": {
+      "type": "string",
+      "description": "The task's text, as read_notebook shows it, without its schedule tag; its #idea tag may be left out."
+     },
+     "subnotes": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "The lines to add, one subnote each."
+     }
+    },
+    "required": [
+     "notebook",
+     "match",
+     "subnotes"
+    ]
+   }
+  },
+  {
+   "name": "set_schedule",
+   "description": "Reschedule one existing task: Today, Next, Soon, Someday, Done, or a date. Only when the user has asked for it or agreed to it \u2014 such as marking a task done that was just finished, or accepting an idea. Scheduling an #idea takes its tag off; Done leaves it. Done on a repeating task moves it to its next date. The task is named by its text and must be exactly one task in the notebook; a subtask is fine.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string"
+     },
+     "match": {
+      "type": "string",
+      "description": "The task's text, as read_notebook shows it, without its schedule tag; its #idea tag may be left out."
+     },
+     "schedule": {
+      "type": "string",
+      "description": "Today, Next, Soon, Someday or Done, or a date as yyyy-MM-dd."
+     }
+    },
+    "required": [
+     "notebook",
+     "match",
+     "schedule"
+    ]
+   }
+  },
+  {
+   "name": "edit_line",
+   "description": "Change the words of one existing line \u2014 a task, subtask, subnote, list item, quote or body text \u2014 only after showing the user the old and new line and getting their yes. Never a heading, a table row, code, or the Journal notebook. Keeps the line's kind, schedule, subnotes and place; one line per ask. To undo, edit it back.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string"
+     },
+     "match": {
+      "type": "string",
+      "description": "The line's words, as read_notebook shows them, without its marker or schedule tag; a task's #idea tag may be left out."
+     },
+     "text": {
+      "type": "string",
+      "description": "The new words, one line, with no marker or schedule tag."
+     }
+    },
+    "required": [
+     "notebook",
+     "match",
+     "text"
+    ]
+   }
+  },
+  {
+   "name": "read_learnings",
+   "description": "Read what Subnotes' skills have learned: about one notebook, if named, and always the shared learnings \u2014 the owner and how they work, anything not about one notebook. Read before deciding what to suggest or do.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string",
+      "description": "A connected notebook. Leave out for the shared learnings alone."
+     }
+    }
+   }
+  },
+  {
+   "name": "add_learning",
+   "description": "Add one thing learned, as one line, to a notebook's learnings or (no notebook) the shared ones. Something that will still hold next time and would change what a skill suggests or does \u2014 not what happened today. Adds only; refuses one already there.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string",
+      "description": "The notebook it is about. Leave out when it is about the owner or holds across notebooks."
+     },
+     "text": {
+      "type": "string",
+      "description": "One line, plainly written: the owner may read it."
+     },
+     "source": {
+      "type": "string",
+      "description": "The skill writing it, one word: review, do, plan."
+     },
+     "goal": {
+      "type": "string",
+      "description": "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check, so /subnotes knows when it's next due."
+     }
+    },
+    "required": [
+     "text",
+     "source"
+    ]
+   }
+  },
+  {
+   "name": "correct_learning",
+   "description": "Change or remove one learned entry that no longer holds. `match` must pick out exactly one entry; leave `text` out to remove it. Keeps the old wording beside a change.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string",
+      "description": "Leave out for the shared learnings."
+     },
+     "match": {
+      "type": "string",
+      "description": "A piece of the entry's text that only it contains."
+     },
+     "text": {
+      "type": "string",
+      "description": "The corrected line. Leave out to remove the entry."
+     },
+     "reason": {
+      "type": "string",
+      "description": "Why it no longer holds."
+     },
+     "source": {
+      "type": "string",
+      "description": "The skill correcting it, one word."
+     },
+     "goal": {
+      "type": "string",
+      "description": "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check."
+     },
+     "prune": {
+      "type": "boolean",
+      "description": "Only for the monthly prune: replace the entry outright, keeping its date and skill, with no old wording beside it."
+     }
+    },
+    "required": [
+     "match",
+     "reason",
+     "source"
+    ]
+   }
+  },
+  {
+   "name": "prune_context",
+   "description": "For the monthly prune: every learnings and questions file whole, with entry counts, and the brains still kept for notebooks not connected now. Read-only.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   }
+  },
+  {
+   "name": "remove_notebook_brain",
+   "description": "For the monthly prune, on the user's yes: delete everything kept for a notebook that isn't connected now \u2014 its learnings, questions and review notes. Refuses a connected notebook.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string",
+      "description": "The name prune_context lists as not connected."
+     }
+    },
+    "required": [
+     "notebook"
+    ]
+   }
+  },
+  {
+   "name": "mark_pruned",
+   "description": "For the monthly prune, last: records today as the last prune, so /subnotes makes it due again in 30 days.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   }
+  },
+  {
+   "name": "read_questions",
+   "description": "Read the open questions: what isn't settled yet but decisions depend on \u2014 about one notebook, if named, and always the shared ones. Read before suggesting or doing work that may hang on one.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string",
+      "description": "A connected notebook. Leave out for the shared questions alone."
+     }
+    }
+   }
+  },
+  {
+   "name": "add_question",
+   "description": "Record one open question, as one line: something unsettled that decisions depend on (\"Is Sam as committed as I am to the side project?\"). Not a task, not a learning. Refuses one already open.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string",
+      "description": "The notebook it affects. Leave out when it spans notebooks."
+     },
+     "text": {
+      "type": "string",
+      "description": "The question, one line, never quoting the user at length."
+     },
+     "source": {
+      "type": "string",
+      "description": "The skill recording it, one word: review, do, plan."
+     }
+    },
+    "required": [
+     "text",
+     "source"
+    ]
+   }
+  },
+  {
+   "name": "close_question",
+   "description": "Close one open question that has been answered. `match` must pick out exactly one; the answer becomes a learning in the same place.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string",
+      "description": "Leave out for the shared questions."
+     },
+     "match": {
+      "type": "string",
+      "description": "A piece of the question's text that only it contains."
+     },
+     "answer": {
+      "type": "string",
+      "description": "What settled it, one line."
+     },
+     "source": {
+      "type": "string",
+      "description": "The skill closing it, one word."
+     }
+    },
+    "required": [
+     "match",
+     "answer",
+     "source"
+    ]
+   }
+  },
+  {
+   "name": "new_thoughts",
+   "description": "A notebook's lines tagged #idea, anywhere, each with where it sits \u2014 what the user wrote about what's on their mind: the new ones, then those seen before and still open, with what became of them. Says so when there are none of either.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "notebook"
+    ]
+   }
+  },
+  {
+   "name": "mark_thoughts_seen",
+   "description": "Record what you did with each thought, exactly as new_thoughts gave it, with what it became. A thought stays open until the user deletes it: it comes back each visit as seen, beside what became of it. Keeps a fingerprint and your note, never the text.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string"
+     },
+     "thoughts": {
+      "type": "array",
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "object",
+         "properties": {
+          "text": {
+           "type": "string",
+           "description": "The thought, exactly as new_thoughts gave it."
+          },
+          "became": {
+           "type": "string",
+           "description": "What came of it, in your words, never quoting it: \"suggestion: Pick a name for Goals\", \"a learning\", \"nothing\"."
+          }
+         },
+         "required": [
+          "text"
+         ]
+        }
+       ]
+      }
+     }
+    },
+    "required": [
+     "notebook",
+     "thoughts"
+    ]
+   }
+  },
+  {
+   "name": "review_context",
+   "description": "For /subnotes:review: everything a visit needs, for every notebook named, in one call \u2014 the shared learnings and questions once, then per notebook its notes, what the notebook shows now of each suggestion the notes list as open, learnings, open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), thoughts, and only what changed since the review last wrote that notebook's notes (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_notes, read_notebook, read_learnings, read_questions and new_thoughts for each.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebooks": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "The connected notebooks to visit."
+     }
+    },
+    "required": [
+     "notebooks"
+    ]
+   }
+  },
+  {
+   "name": "review_elapsed",
+   "description": "For /subnotes:review run by hand: how long since the review started (its list_notebooks, or review_context). Call it last before showing the report, so the time leaves out the user's answer.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   }
+  },
+  {
+   "name": "ideas_context",
+   "description": "For review-ideas: everything it reads, for every notebook named, in one read-only call \u2014 the shared learnings and questions and the Goals notebook whole, then per notebook its purpose, sections, learnings, open questions and #idea lines (as new_thoughts gives them). Call it once instead of list_notebooks, read_notebook, read_learnings, read_questions and new_thoughts.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebooks": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "The connected notebooks whose ideas to read."
+     }
+    },
+    "required": [
+     "notebooks"
+    ]
+   }
+  },
+  {
+   "name": "whats_due",
+   "description": "For /subnotes: what's due, read-only \u2014 each goal's last plan check, each notebook's last review visit and whether it changed since, and the tasks Do would pick up \u2014 and which to run first: Plan, Journal, Review, Prune or Do.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   }
+  },
+  {
+   "name": "journal_entries",
+   "description": "For the Journal skill: what's new in the user's Journal notebook since Journal last ran (the whole notebook on a first run), read-only. Call mark_journal_read once it's handled.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   }
+  },
+  {
+   "name": "mark_journal_read",
+   "description": "For the Journal skill: record that the Journal notebook has been read up to now, so its next run starts after it. Call last, once every entry is handled.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   }
+  },
+  {
+   "name": "read_notes",
+   "description": "Read the review agent's notes for one connected notebook (/subnotes:review): its notes from earlier reviews. Says so when there is none yet.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "notebook"
+    ]
+   }
+  },
+  {
+   "name": "write_notes",
+   "description": "Replace the review agent's notes for one connected notebook with new content \u2014 the whole notes file, kept short by rewriting rather than appending. Only for /subnotes:review; never the notebook itself.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "notebook": {
+      "type": "string"
+     },
+     "content": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "notebook",
+     "content"
+    ]
+   }
+  }
+ ]
+}
