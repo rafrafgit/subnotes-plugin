@@ -1759,6 +1759,67 @@ function whatsDue() {
   ].filter(l => l !== null).join('\n');
 }
 
+// MARK: - Search
+
+// A skill that needs "anything about X" used to read whole notebooks to find
+// a few lines — the costliest call there is. Plain words, no embeddings: a
+// line matches when it holds every word, ignoring case and accents. Each hit
+// says where it sits, so the skill rarely needs the notebook after it.
+const SEARCH_LIMIT = 40;
+const searchable = t => t.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+
+function searchNotes({ query, notebooks }) {
+  const words = searchable(String(query ?? '')).split(/\s+/).filter(Boolean);
+  if (!words.length) throw new UserError('Give `query` one or more words to look for.');
+  const m = manifest();
+  const named = Array.isArray(notebooks) && notebooks.length;
+  const nbs = named ? notebooks.map(n => findNotebook(m, n)) : m.notebooks;
+  const matches = line => { const t = searchable(line); return words.every(w => t.includes(w)); };
+
+  const groups = [];
+  let total = 0;
+  const add = (title, hits) => {
+    if (!hits.length) return;
+    total += hits.length;
+    groups.push({ title, hits });
+  };
+
+  for (const nb of nbs) {
+    const hits = [];
+    let section = TOP, parent = null;
+    for (const line of readFileSync(join(DIR, nb.file), 'utf8').split('\n')) {
+      if (!line.trim()) continue;
+      const h = HEADING.exec(line);
+      if (h) { section = h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim() || '(untitled)'; parent = null; }
+      else if (indentOf(line) === 0) parent = line.trim();
+      if (!matches(line)) continue;
+      const under = !h && indentOf(line) > 0 && parent ? ` (under: ${parent})` : '';
+      hits.push(`- ${section} › ${line.trim()}${under}`);
+    }
+    add(`## ${nb.name}`, hits);
+  }
+
+  const brain = [...nbs, ...(named ? [] : [null])];
+  for (const kind of ['learnings', 'questions']) {
+    for (const nb of brain) {
+      const text = readEntryFile(agentFile(kind, nb));
+      if (!text) continue;
+      const hits = text.split('\n').filter(l => ENTRY.test(l) && matches(l));
+      add(`## ${KINDS[kind].title} — ${nb ? nb.name : 'shared'}`, hits);
+    }
+  }
+
+  if (!total) return `No line holds all of: ${words.join(', ')}. Try fewer or other words.`;
+  let left = SEARCH_LIMIT;
+  const shown = groups.map(g => {
+    const hits = g.hits.slice(0, Math.max(left, 0));
+    left -= hits.length;
+    return hits.length ? `${g.title}\n${hits.join('\n')}` : null;
+  }).filter(Boolean);
+  const more = total > SEARCH_LIMIT ? `\n\n${total - SEARCH_LIMIT} more not shown. Add a word, or name the notebooks, to narrow it.` : '';
+  return `${total} line${total === 1 ? '' : 's'} with ${words.join(', ')}:\n\n${shown.join('\n\n')}${more}`;
+}
+
 const ALLOW_DUPLICATE = {
   type: 'boolean',
   description: 'Only after the user has confirmed they want a task the notebook already has. Default false, which refuses such a write.',
@@ -1787,6 +1848,15 @@ const TOOLS = [
     description: 'Read one connected notebook as plain text. Only when the answer needs its contents — list_notebooks is usually enough.',
     inputSchema: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] },
     run: readNotebook,
+  },
+  {
+    name: 'search_notes',
+    description: "Find the lines that hold every word of a query, across the connected notebooks and what the skills have learned and asked: each with its notebook, section and schedule, and a subnote with the task it's under. Use it instead of read_notebook when you need what's written about something, not a whole notebook.",
+    inputSchema: { type: 'object', properties: {
+      query: { type: 'string', description: 'Words to look for; a line matches when it holds all of them, ignoring case and accents.' },
+      notebooks: { type: 'array', items: { type: 'string' }, description: 'Connected notebooks to look in, with their learnings and questions. Leave out for all of them and the shared ones.' },
+    }, required: ['query'] },
+    run: searchNotes,
   },
   {
     name: 'add_task',

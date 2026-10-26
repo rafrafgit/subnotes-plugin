@@ -29,6 +29,8 @@ from there instead, without adding this marketplace first.
 
 - `list_notebooks` — names, purposes, section headings, open counts
 - `read_notebook` — one notebook as plain text
+- `search_notes` — the lines that hold every word of a query, across the
+  connected notebooks, learnings and questions, each with where it sits
 - `add_task` / `add_tasks` — append tasks to a notebook
 - `add_subnotes` — add detail lines under an existing task (needs a Subnotes that knows it; an older one sets the write aside)
 - `set_schedule` — reschedule an existing task: Today, Next, Soon, Someday, Done or a date (needs a Subnotes that knows it; an older one sets the write aside)

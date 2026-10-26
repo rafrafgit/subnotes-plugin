@@ -52,7 +52,7 @@ const init = await send('initialize', {});
 check('initialize', init.result?.serverInfo?.name === 'subnotes');
 
 const tools = await send('tools/list', {});
-check('twenty-six tools', tools.result.tools.length === 26,
+check('twenty-seven tools', tools.result.tools.length === 27,
       tools.result.tools.map(t => t.name).join(', '));
 
 const list = await call('list_notebooks');
@@ -74,6 +74,15 @@ check('read_notebook matches case-insensitively', !read.isError, `${read.text.le
 const block = list.text.split(/\n(?=## )/).find(b => b.startsWith(`## ${first}\n`)) ?? list.text;
 check('reading is dearer than its listing', read.text.length > block.length,
       `${block.length} vs ${read.text.length} chars`);
+
+// A word from the notebook itself, so this holds whatever the notebook says.
+const word = read.text.split(/\s+/).find(w => /^\p{L}{4,}$/u.test(w));
+if (word) {
+  const found = await call('search_notes', { query: word.toUpperCase(), notebooks: [first] });
+  check('search_notes finds a word from the notebook, ignoring case',
+        !found.isError && found.text.includes(`## ${first}`), word);
+}
+check('search_notes refuses an empty query', (await call('search_notes', { query: ' ' })).isError);
 
 const unknown = await call('read_notebook', { name: 'Definitely Not Connected' });
 check('unknown notebook refuses and lists what is connected',
