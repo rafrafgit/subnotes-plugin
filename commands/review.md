@@ -321,7 +321,7 @@ Last visit: 2026-10-12
 - Goal: 4k/month by June 2027 (Goals), served through retainer clients
 - Plan: Goals › Strategy, the Freelance line; the Leads section
 - Signal: new clients a month, pace about 1; last 2026-10-08
-- Next step: the Acme proposal (Leads section, due 2026-10-20) — scheduled
+- Next step: the Acme proposal (Leads section)
 
 ## Open suggestions
 - 2026-10-12 — Send Anna this follow-up about the logo project
@@ -332,14 +332,17 @@ Tasks proposed this week: 1
 - 2026-10-12 — Is the side project with Sam still wanted? (Status)
 
 ## Observations
-- 2026-10-12 — Price list marked Next, unchanged since 2026-09-28
+- 2026-10-12 — The user dropped the newsletter idea: no time before June
 
 ## Dates
 - 2026-10-21 — call with Acme: look for how it went
 ```
 
 Write facts, not plans: suggestions word for word (without `#idea`) so you
-can find them next time; observations as what the notebook showed, never
+can find them next time; no notes about a task's schedule, due date or
+status — they go stale within a day, and `review_context` reads them fresh
+from the notebook each visit (said 2026-10-26). Dates holds only what the
+notebook doesn't: a call, a reply expected, an event; observations as what the notebook showed, never
 what to suggest next; points not reached under Waiting to ask; points
 skipped or waved off under Observations. Shorten old observations.
 
