@@ -51,7 +51,6 @@ these is true, in which case review it:
 
 - a task is due today or overdue
 - a date in your notes' Dates section has come
-- one of your suggestions has waited more than 7 days
 - a stall your notes name has gone 7 days unchanged
 
 **The notebook beats your notes.** Your notes go
@@ -60,29 +59,19 @@ names; if not, drop the line.
 
 ## 2. Follow up on the last visit
 
-*Learn from what the user did with your earlier suggestions.*
+*Use what the last talk taught you before you pick anything to raise.*
 
-`review_context` shows each suggestion your notes list as open, as the
-notebook has it now:
+You learn from the talk itself (step 6), not from what happens to tasks
+afterwards: a task is added only once the user agrees to it, so a deleted
+one usually means done or no longer needed, and says nothing about why.
 
-| The notebook shows | It was |
-|---|---|
-| scheduled, done, or the `#idea` tag taken off | accepted |
-| gone, or done with a `Why dropped:` subnote | declined |
-| queued by the connector, not yet in the notebook | still on its way |
-| still an unscheduled `#idea` | waiting — after 7 days, ignored |
-
-An ignored suggestion is never raised again: drop it from your notes, and
-mark it seen (`mark_thoughts_seen`, became "own suggestion, ignored") so it
-never reads as the user's own idea.
-
-Save what this teaches you (`add_learning`, source `review`, with `cites`
-when it comes from one line of the notebook): only what will
-still hold next time and would change what you suggest. Leave out the
-notebook when it's true of the user everywhere. Any `Why …:` subnote is the
-user's reason for a decision — learn from it too. If a suggestion asked for
-context, find the answer and save it, so you never ask twice. If a learning
-no longer holds, fix it with `correct_learning`; if a file passes 40
+Read your notes' Lessons, the learnings you wrote at the last visit, and
+let them shape what you raise in step 4. If the notebook now shows one
+didn't hold — the user did what a lesson said they wouldn't — fix it with
+`correct_learning`. Any `Why …:` subnote is the user's reason for a
+decision: learn from it too (`add_learning`, source `review`, with `cites`
+for its line). If a point last time asked for context and the notebook now
+has the answer, save it, so you never ask twice. If a file passes 40
 entries, merge or drop the weakest.
 
 ## 3. Check this notebook's goal and plan
@@ -210,6 +199,17 @@ Start with your notes' Waiting to ask, then this visit's points in step
   even for the option you'd pick: the user's answer decides whether anything
   is worth doing.
 
+**Learn from each reply.** The user's answer is how you find out what good
+looks like; they won't give feedback any other way. When they correct you,
+wave a point off, or skip your point to raise something else, write a
+learning right away (`add_learning`, source `review`): a rule with their
+reason, "Don't raise X while Y: Z". A skip is the strongest signal — you
+raised the wrong thing — so say what you raised and what mattered to them
+instead. About this notebook, file it there; about how the user works,
+shared. Start your next reply with it in one line, "Learned: …", so they can
+correct it in passing; a correction goes in with `correct_learning`. A plain
+yes teaches nothing new; one lesson per point at most.
+
 **When a point is settled,** write: a learning for the decision, and
 `close_question` for its question. For an `#idea`, mark it seen with its
 `Idea:` line exactly as `review-ideas` gave it (`became` "talked through:
@@ -242,8 +242,8 @@ If **kept** or **changed**, `add_task` it, without `#idea` and with the
 schedule you suggested, or the one they gave instead (a reply to the user's
 own `#idea` keeps the tag and has no schedule). When the talk agrees a new schedule for a task already there — "move
 it to Next" — reschedule it (`set_schedule`) on their yes, rather than
-leaving it for them. If **dropped**, write nothing in the notebook; note it in your
-notes' Observations so it's never proposed again.
+leaving it for them. If **dropped**, write nothing in the notebook: it's a
+reply to learn from, as above.
 
 ## 7. Save your notes, then move on
 
@@ -263,8 +263,8 @@ Last visit: 2026-10-12
 - Signal: new clients a month, pace about 1; last 2026-10-08
 - Next step: the Acme proposal (Leads section)
 
-## Open suggestions
-- 2026-10-12 — Send Anna this follow-up about the logo project
+## Lessons
+- Don't raise the portfolio while a client proposal is due: the user does paid work first
 
 Tasks proposed this week: 1
 
@@ -278,8 +278,8 @@ Tasks proposed this week: 1
 - 2026-10-21 — call with Acme: look for how it went
 ```
 
-Write facts, not plans: suggestions word for word (without `#idea`) so you
-can find them next time; no notes about a task's schedule, due date or
+Write facts, not plans: Lessons as the learnings you wrote this visit,
+word for word, replacing last visit's; no notes about a task's schedule, due date or
 status — they go stale within a day, and `review_context` reads them fresh
 from the notebook each visit. Dates holds only what the
 notebook doesn't: a call, a reply expected, an event; observations as what the notebook showed, never
@@ -300,12 +300,12 @@ When the last notebook is done, or the user stops, show the score for the
 whole review:
 
 ```
-Raised 3 · 1 task proposed, 1 kept · 1 aimed at a goal · first question in 1 min 2 s (Freelance), 48 s (Portfolio site)
+Raised 3 · 2 settled, 1 skipped for something else · 1 lesson · 1 done here, 1 task added · first question in 1 min 2 s (Freelance), 48 s (Portfolio site)
 ```
 
-"Aimed at a goal" counts proposed tasks whose `Why:` names a goal in Goals.
-A changed task counts as kept. The user's bar: under 90 seconds to each
-first question, at least half kept.
+"Skipped for something else" counts points the user passed over to raise
+their own: the fewer, the better you chose. The user's bar: under 90
+seconds to each first question.
 
 ## Before you stop
 
@@ -314,6 +314,7 @@ Check these silently and do any that's missing; don't list them to the user:
 - every notebook you visited has its notes rewritten (`write_notes`)
 - every `#idea` talked through is marked seen, with its decision under it
 - every settled point has its learning, and its question closed
+- every correction, wave-off or skip has its lesson, and your notes' Lessons list them
 - the score is shown
 
 ## Rules
