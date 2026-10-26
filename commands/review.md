@@ -76,7 +76,8 @@ An ignored suggestion is never raised again: drop it from your notes, and
 mark it seen (`mark_thoughts_seen`, became "own suggestion, ignored") so it
 never reads as the user's own idea.
 
-Save what this teaches you (`add_learning`, source `review`): only what will
+Save what this teaches you (`add_learning`, source `review`, with `cites`
+when it comes from one line of the notebook): only what will
 still hold next time and would change what you suggest. Leave out the
 notebook when it's true of the user everywhere. Any `Why …:` subnote is the
 user's reason for a decision — learn from it too. If a suggestion asked for

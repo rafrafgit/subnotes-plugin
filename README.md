@@ -35,7 +35,9 @@ from there instead, without adding this marketplace first.
 - `add_subnotes` — add detail lines under an existing task (needs a Subnotes that knows it; an older one sets the write aside)
 - `set_schedule` — reschedule an existing task: Today, Next, Soon, Someday, Done or a date (needs a Subnotes that knows it; an older one sets the write aside)
 - `read_learnings` / `add_learning` / `correct_learning` — what the skills
-  have learned, about one notebook or about you, shared by all of them
+  have learned, about one notebook or about you, shared by all of them; a
+  learning can cite the line it came from (a fingerprint, never a copy), so
+  the prune sees when that line is gone or Done
 - `read_questions` / `add_question` / `close_question` — open questions that
   decisions depend on; an answered one becomes a learning
 - `new_thoughts` / `mark_thoughts_seen` — a notebook's new and still-open `#idea`

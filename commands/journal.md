@@ -39,7 +39,9 @@ second, and skip one already there.
 ## 3. Write, then report
 
 Write the learnings (`add_learning`, source `journal`) without asking: they
-are the user's own words, filed. Then, in about 5 lines:
+are the user's own words, filed. Give each the entry line it came from
+(`cites`, with `notebook` the Journal), so the prune can tell when that line
+is gone. Then, in about 5 lines:
 
 ```
 Journal — 3 learnings (Work: ESMT round on 5 Nov; shared: applications first this week), 1 task to add:

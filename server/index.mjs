@@ -595,7 +595,7 @@ function agentFile(folder, nb) {
 // nothing here ever stops a read: at worst the brain stays where it was.
 const RENAMED_FILES = [
   ['review', '.md'], ['review', '.snapshot.json'], ['review', '.pending.json'],
-  ['learnings', '.md'], ['questions', '.md'], ['thoughts', '.json'],
+  ['learnings', '.md'], ['learnings', '.cites.json'], ['questions', '.md'], ['thoughts', '.json'],
   ['journal', '.snapshot.json'],
 ];
 
@@ -788,11 +788,70 @@ function findEntry(kind, notebook, match) {
   return { path, label, lines, i, old, text: ENTRY.exec(old)[3] };
 }
 
+// MARK: - Citations
+
+// A learning can name the line it came from, so the prune can tell when its
+// source is gone or Done without reasoning over every entry. Kept beside the
+// learnings file rather than in it, so the file stays as readable as it was,
+// and as fingerprints, never a copy of the line — the same as thoughts.
+// Keyed by the learning's own text, so a correction carries it along.
+const citesPath = file => file.replace(/\.md$/, '.cites.json');
+const citeKey = text => fingerprint(text.toLowerCase());
+
+function readCites(file) {
+  try { return JSON.parse(readFileSync(citesPath(file), 'utf8')); } catch { return {}; }
+}
+
+function writeCites(file, cites) {
+  const path = citesPath(file);
+  if (Object.keys(cites).length) writeEntryFile(path, JSON.stringify(cites, null, 2) + '\n');
+  else if (existsSync(path)) unlinkSync(path);
+}
+
+// The line a citation names, as a notebook and a fingerprint of its words
+// (schedule left out, so rescheduling it doesn't read as the line gone).
+function resolveCite(cites, learningNotebook) {
+  if (cites === undefined || cites === null) return null;
+  const wanted = String(cites.line ?? '').trim();
+  if (!wanted) throw new UserError('`cites` needs `line`: the source line\'s words, as read_notebook shows them.');
+  const name = cites.notebook ?? learningNotebook;
+  if (!name) throw new UserError('`cites` needs `notebook` for a shared learning: the notebook the line is in.');
+  const nb = findNotebook(manifest(), name);
+  const found = readFileSync(join(DIR, nb.file), 'utf8').split('\n')
+    .some(l => lineWords(l)?.text.toLowerCase() === wanted.toLowerCase());
+  if (!found) throw new UserError(
+    `"${nb.name}" has no line "${wanted}". Pass its words as read_notebook shows them, without its marker or schedule tag.`);
+  return { id: nb.id ?? null, notebook: nb.name, line: fingerprint(wanted.toLowerCase()) };
+}
+
+// What the prune is told about one cited learning: nothing while its line is
+// there and open.
+function citeStatus(cite, m, texts) {
+  const nb = m.notebooks.find(n => cite.id && n.id === cite.id) ??
+    m.notebooks.find(n => n.name === cite.notebook);
+  if (!nb) return `its source notebook "${cite.notebook}" is not connected`;
+  if (!texts.has(nb.name)) texts.set(nb.name, readFileSync(join(DIR, nb.file), 'utf8').split('\n'));
+  const lines = texts.get(nb.name).filter(l => {
+    const w = lineWords(l);
+    return w && fingerprint(w.text.toLowerCase()) === cite.line;
+  });
+  if (!lines.length) return `its source line in ${nb.name} is gone`;
+  if (lines.every(l => DONE_TAG.test(l))) return `its source task in ${nb.name} is Done`;
+  return null;
+}
+
 const readLearnings = ({ notebook }) => readEntries('learnings', notebook);
 const addLearning = args => {
+  const cite = resolveCite(args.cites, args.notebook);
   const done = addEntry('learnings', args);
+  if (cite) {
+    const { path } = entryTarget('learnings', args.notebook);
+    const cites = readCites(path);
+    cites[citeKey(oneLine(args.text, 'learning'))] = cite;
+    writeCites(path, cites);
+  }
   recordPlanCheck(args);
-  return done;
+  return cite ? `${done} (cites a line in ${cite.notebook})` : done;
 };
 
 // Changes or removes one learning. The old wording stays beside the new, so a
@@ -815,6 +874,13 @@ function correctLearning({ notebook, match, text, reason, source, goal, prune })
     found.lines.splice(found.i, 1);
   }
   writeEntryFile(found.path, found.lines.join('\n'));
+  const cites = readCites(found.path);
+  const cite = cites[citeKey(found.text)];
+  if (cite) {
+    delete cites[citeKey(found.text)];
+    if (replacement) cites[citeKey(ENTRY.exec(found.lines[found.i])[3])] = cite;
+    writeCites(found.path, cites);
+  }
   if (replacement) recordPlanCheck({ notebook, source, goal });
   return replacement ? `Corrected, in ${found.label}: ${replacement}` : `Removed from ${found.label}: ${found.old}`;
 }
@@ -1651,7 +1717,7 @@ function orphanBrains(m) {
     for (const f of files) {
       const path = join(AGENT_DIR, folder, f);
       const ext = RENAMED_FILES.find(([d, e]) => d === folder && f.endsWith(e))?.[1];
-      if (!ext || f === `${SHARED}.md` || connected.has(path)) continue;
+      if (!ext || f === `${SHARED}${ext}` || connected.has(path)) continue;
       const name = f.slice(0, -ext.length);
       if (!orphans.has(name)) orphans.set(name, []);
       orphans.get(name).push(path);
@@ -1685,7 +1751,8 @@ function pruneDue(m) {
 }
 
 // For the prune: every learnings and questions file whole, with how many
-// entries each has, and the brains of notebooks not connected now.
+// entries each has, and the brains of notebooks not connected now. A learning
+// whose cited line is gone or Done says so after it.
 function pruneContext() {
   const m = manifest();
   const out = [`Today: ${today()}`, `Last pruned: ${lastPruned() ?? 'never'}`, '',
@@ -1694,6 +1761,7 @@ function pruneContext() {
   out.push(orphans.size
     ? `Not connected, brain still kept: ${[...orphans.keys()].join(', ')} — remove_notebook_brain removes one`
     : 'Not connected, brain still kept: none');
+  const texts = new Map();
   for (const kind of ['learnings', 'questions']) {
     let files = [];
     try { files = readdirSync(join(AGENT_DIR, kind)).filter(f => f.endsWith('.md')).sort(); } catch {}
@@ -1701,8 +1769,14 @@ function pruneContext() {
       const text = readFileSync(join(AGENT_DIR, kind, f), 'utf8');
       const name = f.slice(0, -3);
       const off = orphans.has(name) ? ', not connected' : '';
+      const cites = kind === 'learnings' ? readCites(join(AGENT_DIR, kind, f)) : {};
+      const flagged = l => {
+        const cite = cites[citeKey(ENTRY.exec(l)[3])];
+        const status = cite && citeStatus(cite, m, texts);
+        return status ? `${l}  ← ${status}` : l;
+      };
       out.push('', `## ${kind} — ${name} (${entryCount(text)} entries${off})`, '',
-        ...text.split('\n').filter(l => ENTRY.test(l)));
+        ...text.split('\n').filter(l => ENTRY.test(l)).map(flagged));
     }
   }
   return out.join('\n');
@@ -1914,6 +1988,10 @@ const TOOLS = [
       text: { type: 'string', description: 'One line, plainly written: the owner may read it.' },
       source: { type: 'string', description: 'The skill writing it, one word: review, do, plan.' },
       goal: { type: 'string', description: "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check, so /subnotes knows when it's next due." },
+      cites: { type: 'object', description: "The line it came from, when there is one — a task, a Journal entry's line — so the prune knows when that line is gone or Done. Kept beside the learning, not in it.", properties: {
+        line: { type: 'string', description: "The line's words, as read_notebook shows them, without its marker or schedule tag." },
+        notebook: { type: 'string', description: "The notebook the line is in. Leave out when it's the learning's own notebook." },
+      }, required: ['line'] },
     }, required: ['text', 'source'] },
     run: addLearning,
   },

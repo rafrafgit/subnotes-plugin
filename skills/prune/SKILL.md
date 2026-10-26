@@ -31,6 +31,10 @@ Go through every entry and pick out:
 - **Duplicated or overlapping** — two that say the same, or that read
   better as one. Merged into one line.
 - **Chained** — a line carrying old versions ("was: …"). Cut to what holds now.
+- **Source gone or Done** — `prune_context` marks a learning whose cited
+  line is gone or Done (`← its source task in Work is Done`). Often stale
+  then, but not always: a decision outlives the task that made it. Check it
+  like any other.
 - **Answered questions** still open. Closed (`close_question`).
 
 A file over 40 learnings is cut to 40 by the same rules, never by dropping
