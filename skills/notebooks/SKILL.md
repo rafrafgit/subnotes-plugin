@@ -154,12 +154,8 @@ text links the notebooks that serve it, like `[[Freelance]]`. A project — a
 scheduled heading in another notebook — serves the goal that links its
 notebook; when several do, the deepest one.
 
-## Thoughts and open questions
+## Open questions
 
-A line tagged `#idea` is an idea: a task not decided yet, the user's or a
-skill's suggestion. Only the review processes them (`new_thoughts`,
-`mark_thoughts_seen`). Don't do or schedule one — the user accepts an idea by
-scheduling it or taking the tag off.
 `read_questions` gives what's still unsettled — read it alongside the
 learnings before judging a notebook's next step, and close a question
 (`close_question`) when the user answers it.

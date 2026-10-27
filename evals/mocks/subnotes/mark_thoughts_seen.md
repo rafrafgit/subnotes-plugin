@@ -1,5 +1,0 @@
----
-type: fixed
----
-
-Marked seen.

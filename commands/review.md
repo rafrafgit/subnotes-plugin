@@ -26,11 +26,8 @@ seconds.
 
 ## 1. Read the notebook
 
-Call these two together:
-
-- `review_context` for this notebook: your notes from last time, its
-  learnings and open questions, and what has changed since your last visit.
-- `subnotes:review-ideas` for this notebook: what its `#idea` lines say.
+Call `review_context` for this notebook: your notes from last time, its
+learnings and open questions, and what has changed since your last visit.
 
 If nothing changed, say "No change since last visit" and go on to the next
 notebook. Review it anyway if a task is due today or overdue, or a date in
@@ -73,8 +70,9 @@ Look in this order, and stop at three:
      everything else.
 2. **Today, overdue and Next,** every line; then **Soon** lines that are new
    or changed.
-3. **`#idea` lines,** with `review-ideas`' replies as your lean.
-4. **New lines** in Someday or unscheduled text. Never dig through the rest.
+3. **New or changed lines** in Someday or unscheduled text: the user
+   writes what's on their mind as plain text, where it belongs. Never dig
+   through the rest.
 
 Worth raising: a task too big for a day (offer a first step), a vague task
 (offer a sharper wording), something important that hasn't moved in weeks,
@@ -102,7 +100,7 @@ Freelance → 4k a month by June 2027. Plan: retainer clients first. Next step: 
 2 things to talk about: the Acme proposal is due today; the newsletter idea
 ```
 
-Add "ideas not read" if `review-ideas` failed. Start with any point you
+Start with any point you
 didn't get to last time (your notes list them under Waiting to ask), then
 the new ones in the order step 3 found them. For each point, in one reply:
 
@@ -122,8 +120,7 @@ with "Learned: …", so they can correct it (`correct_learning`). A plain yes
 teaches nothing.
 
 **When a point is settled,** save the decision as a learning and close its
-question (`close_question`). For an `#idea`, mark it seen with the `Idea:`
-line `review-ideas` gave you (`became` "talked through: …"), and write the
+question (`close_question`). When the point was about a task, write the
 decision under it (`add_subnotes`): "Decided <today>: …", in the user's
 voice.
 
@@ -139,16 +136,14 @@ voice.
   the plan's next step, Soon when it waits on something, Today only when
   due), and any draft it needs plus a `Why:` line naming the goal, as
   subnotes. Ask "Shall I add it?", and on a yes, `add_task`. At most two
-  per notebook per visit. A reply to the user's own `#idea` keeps the tag
-  and has no schedule.
+  per notebook per visit.
 
 A no needs nothing written in the notebook: learn from it, as above.
 
 ## 5. Save your notes, then move on
 
-Mark any ideas not yet marked seen, then rewrite this notebook's notes in
-full (`write_notes`), under 60 lines. Writing them also marks where the
-next visit's "what changed" starts.
+Rewrite this notebook's notes in full (`write_notes`), under 60 lines.
+Writing them also marks where the next visit's "what changed" starts.
 
 ```
 Last visit: 2026-10-12
@@ -206,7 +201,7 @@ it, and save the answer as a lesson (`add_learning`, shared, source
 Check these silently and do any that's missing; don't list them to the user:
 
 - every notebook you visited has its notes rewritten (`write_notes`)
-- every `#idea` talked through is marked seen, with its decision under it
+- every task talked through has its decision under it
 - every settled point has its learning, and its question closed
 - every correction, wave-off or skip has its lesson
 - the score is shown, and the run rated (`rate_run`)
@@ -214,7 +209,7 @@ Check these silently and do any that's missing; don't list them to the user:
 ## Rules
 
 - In a notebook you only add kept tasks and the decision under a talked-
-  through idea, reschedule a task on the user's yes, and edit one line on
+  through task, reschedule a task on the user's yes, and edit one line on
   their yes. You can't move or delete anything, so never claim to have.
 - When the talk settles a new wording for a line already there, show it and
   ask once:

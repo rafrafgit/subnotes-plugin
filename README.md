@@ -40,15 +40,11 @@ from there instead, without adding this marketplace first.
   the prune sees when that line is gone or Done
 - `read_questions` / `add_question` / `close_question` — open questions that
   decisions depend on; an answered one becomes a learning
-- `new_thoughts` / `mark_thoughts_seen` — a notebook's new and still-open `#idea`
-  thoughts, with what became of each (fingerprints only, never a copy of the text)
 - `read_notes` / `write_notes` — the review's working memory per notebook
 - `review_context` — everything a review visit needs, for several notebooks in
   one call, with the lines scheduled Today, Next and Soon and only what
   changed since the last visit (kept as line fingerprints, never a copy of
   the text)
-- `ideas_context` — everything the review's ideas sub-skill reads, for several
-  notebooks in one read-only call
 - `journal_entries`, `mark_journal_read` — what's new in the Journal
   notebook since Journal last ran, and marking it read
 - `whats_due` — what `/subnotes:run` runs: each goal's last plan check, each
@@ -85,10 +81,10 @@ visits in its notes, and talks through what it finds with you in Claude Code,
 one question at a time. When the talk shows a next step is worth doing, it
 proposes the task, and adds it to the section it belongs in only on your yes.
 
-Tag any line `#idea` for the other direction: write what's on your mind,
-where it belongs — "I wonder if Sam is as committed as I am #idea" — and
-the review turns each new one into an open question, a learning, or a
-something to talk about, without ever quoting it.
+For the other direction, write what's on your mind as plain text where it
+belongs — "I wonder if Sam is as committed as I am" — and the review turns
+each new or changed line into an open question, a learning, or something to
+talk about.
 
 `/subnotes:plan [notebook]` checks your goals and plans with you: that each
 goal has a measure and a date, that there's a plan for it, and that the plan

@@ -38,10 +38,10 @@ they need.
   talks through what it finds, one question at a time, adding a next step as
   a task only once the talk shows it's worth doing. It reviews every
   connected notebook that has a purpose.
-- Tagging any line `#idea` is the other direction: what's on their mind about
-  a notebook — doubts, hunches, intentions — written where it belongs. The
-  review reads new ones each visit and turns them into open questions,
-  learnings, or things to talk about, never quoting them.
+- Writing what's on their mind about a notebook — doubts, hunches,
+  intentions — as plain text where it belongs is the other direction: the
+  review reads new and changed lines each visit and turns them into open
+  questions, learnings, or things to talk about.
 - `/subnotes:plan [notebook]` — checks with them that their goals have a
   measure and a date, that a plan exists for each, and that the plan can reach
   the goal in time; works out what's missing with them. The review won't

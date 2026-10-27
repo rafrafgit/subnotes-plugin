@@ -6,5 +6,5 @@ How: [[Freelance]] — apply to 5 posted projects a week on design job boards, a
 
 — From the connector, not part of the notebook —
 Role: Goals — what the user is working toward and how their notebooks rank. Read it before working in any notebook, and judge each notebook against it as well as its own purpose.
-Last changed: 2026-10-26 10:11
+Last changed: 2026-10-27 15:03
 

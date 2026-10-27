@@ -416,15 +416,14 @@ function addSubnotes({ notebook, match, subnotes }) {
 // The one task, at either level, that a write naming `wanted` means, checked
 // against the export so a wrong match fails in the conversation; the app checks
 // again when it applies the write. Sent without a schedule tag Claude may have
-// copied along, since the app matches the task's words alone. The #idea tag is
-// optional too: the review reads an idea's text without it, and the user may
-// take it off meanwhile. Returns the line's own words, tag and all, so an app
-// that matches them exactly still finds it — or the words as given when the
-// notebook can't be read, or the task is only queued.
+// copied along, since the app matches the task's words alone. Returns the
+// line's own words, so an app that matches them exactly still finds it — or
+// the words as given when the notebook can't be read, or the task is only
+// queued.
 function findTask(nb, wanted) {
   const words = taskWords(`• ${wanted}`)?.text || wanted;
-  const key = withoutIdeaTag(words).toLowerCase();
-  const sameTask = t => withoutIdeaTag(String(t ?? '')).toLowerCase() === key;
+  const key = words.toLowerCase();
+  const sameTask = t => String(t ?? '').toLowerCase() === key;
   let text = null;
   try {
     text = readFileSync(join(DIR, nb.file), 'utf8');
@@ -443,10 +442,9 @@ const SCHEDULES = [...PRIORITIES, 'Done'];
 
 // Reschedules one existing task — the first write that changes a line rather
 // than adding one, so the do skill can mark a task done and the review can move
-// an idea on once the user agrees. Named by text, like add_subnotes. The app
+// a task on once the user agrees. Named by text, like add_subnotes. The app
 // applies it through its own When menu's writers: a bucket clears any date,
-// Done on a repeating task moves it to its next date, and any schedule but Done
-// takes an #idea tag off.
+// and Done on a repeating task moves it to its next date.
 function setSchedule({ notebook, match, schedule }) {
   const m = manifest();
   const nb = findNotebook(m, notebook);
@@ -510,14 +508,14 @@ function editLine({ notebook, match, text }) {
   } catch {}
   let old = wanted;
   if (content !== null) {
-    const key = withoutIdeaTag(lineWords(`• ${wanted}`)?.text || wanted).toLowerCase();
+    const key = (lineWords(`• ${wanted}`)?.text || wanted).toLowerCase();
     let inCode = false;
     const hits = [];
     for (const line of content.split('\n')) {
       if (line.startsWith('```')) { inCode = !inCode; continue; }
       if (inCode) continue;
       const found = lineWords(line);
-      if (found && withoutIdeaTag(found.text).toLowerCase() === key) hits.push(found);
+      if (found && found.text.toLowerCase() === key) hits.push(found);
     }
     if (!hits.length) throw new UserError(
       `"${nb.name}" has no line "${wanted}". Pass the line's words as read_notebook shows them, without its marker or schedule tag.`);
@@ -565,7 +563,6 @@ function editLine({ notebook, match, text }) {
 //   agent/learnings/shared.md      what any skill has learned that isn't
 //                                  about one notebook — the user, mostly
 //   agent/questions/…              open questions, the same shape
-//   agent/thoughts/<notebook>.json fingerprints of the #idea lines seen, and what became of each
 //
 // Working state is one skill's own and is rewritten freely. Learnings are
 // every skill's, so they are only ever added to or corrected one entry at a
@@ -595,7 +592,7 @@ function agentFile(folder, nb) {
 // nothing here ever stops a read: at worst the brain stays where it was.
 const RENAMED_FILES = [
   ['review', '.md'], ['review', '.snapshot.json'], ['review', '.pending.json'],
-  ['learnings', '.md'], ['learnings', '.cites.json'], ['questions', '.md'], ['thoughts', '.json'],
+  ['learnings', '.md'], ['learnings', '.cites.json'], ['questions', '.md'],
   ['journal', '.snapshot.json'],
 ];
 
@@ -793,7 +790,7 @@ function findEntry(kind, notebook, match) {
 // A learning can name the line it came from, so the prune can tell when its
 // source is gone or Done without reasoning over every entry. Kept beside the
 // learnings file rather than in it, so the file stays as readable as it was,
-// and as fingerprints, never a copy of the line — the same as thoughts.
+// and as fingerprints, never a copy of the line.
 // Keyed by the learning's own text, so a correction carries it along.
 const citesPath = file => file.replace(/\.md$/, '.cites.json');
 const citeKey = text => fingerprint(text.toLowerCase());
@@ -903,164 +900,15 @@ function closeQuestion({ notebook, match, answer, source }) {
   return `Closed, in ${found.label}: ${found.text}\nAnd learned: ${learned}`;
 }
 
-// MARK: - Thoughts
+// MARK: - Lines and fingerprints
 
-// A line tagged #idea, anywhere in a notebook, is the user telling the
-// agents what's on their mind (THOUGHTS_SPEC.md, "Idea as a task state"): an
-// idea is a task that isn't decided yet. It replaced the Thoughts and
-// Suggestions sections on 2026-10-18 — the review writes its own suggestions
-// as #idea tasks too, and knows them from its notes. Done ones are dealt
-// with. Each says where it sits, so the review reads a subtask's idea with the
-// task it's about — and so moving one reads as a new thought, as editing one
-// does.
-//
-// The review can only append, so it can't clear what it has read. It keeps a
-// fingerprint of each thought instead — a hash of the text, never the text —
-// so nothing the user wrote is copied into the agent folder, and an edited
-// line reads as a new thought.
 const HEADING = /^(#{1,6})\s+(.*?)\s*$/;
-const IDEA_TAG = /(^|\s)#idea(?!\w)/i;
-const IDEA_TAG_ALL = /(^|\s)#idea(?!\w)/gi;
 const DONE_TAG = /\[Done\]\s*$/i;
 
-const withoutIdeaTag = t => t.replace(IDEA_TAG_ALL, ' ').replace(/\s+/g, ' ').trim();
-
-// Any schedule tag on an idea, wherever it sits — a bucket, a date with or
-// without a time, a repeat — so rescheduling an idea doesn't make it new
-// (2026-10-23: "[Soon] #idea" moved to Someday read as a new thought).
-const SCHEDULE_TAG_ANYWHERE = new RegExp(
-  `\\s*\\[(?:${[...PRIORITIES, 'Done', 'Daily', 'Weekly', 'Biweekly', 'Monthly', 'Quarterly', 'Yearly'].join('|')}|\\d{4}-\\d{2}-\\d{2}[^\\]]*)\\]`, 'gi');
-
-// Only a tagged line loses its tag, so a thought seen before keeps its
-// fingerprint exactly.
-const bareLine = l => {
-  const bare = l.trim().replace(/^(•|-|\d+\.|>)\s+/, '').replace(PRIORITY_TAG, '').trim();
-  return IDEA_TAG.test(bare) ? withoutIdeaTag(bare) : bare;
-};
-
-function thoughtsIn(nb) {
-  const lines = readFileSync(join(DIR, nb.file), 'utf8').split('\n');
-  const thoughts = [];
-  let section = null, parent = null;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const h = HEADING.exec(line);
-    if (h) { section = h[2].replace(/\s*\[[^\]]*\]\s*$/, '').trim(); parent = null; continue; }
-    if (!line.trim()) continue;
-    const nested = line.startsWith('\t');
-    if (!nested) parent = bareLine(line).replace(SCHEDULE_TAG_ANYWHERE, '').replace(/\s+/g, ' ').trim();
-    if (!IDEA_TAG.test(line) || DONE_TAG.test(line)) continue;
-    const main = bareLine(line).replace(SCHEDULE_TAG_ANYWHERE, '').replace(/\s+/g, ' ').trim();
-    if (!main) continue;
-    const subs = [];
-    if (!nested) for (let k = i + 1; k < lines.length && lines[k].startsWith('\t'); k++) subs.push(lines[k].trim());
-    const where = nested && parent ? `under: ${parent}` : section ? `in: ${section}` : 'at the top';
-    thoughts.push({ main, subs, where });
-  }
-  if (!thoughts.length) return null;
-  // Known by its own line and where it sits, not its subnotes: the review
-  // writes "Decided …" under an idea it has talked through, and that made the
-  // idea new again (2026-10-23). New subnotes still show in `text`. `legacy`
-  // is the fingerprint the store used before, of the whole text.
-  return thoughts.map(t => {
-    const text = (t.subs.length ? `${t.main} — ${t.subs.join('; ')}` : t.main) + ` · ${t.where}`;
-    return { text, short: `${t.main} · ${t.where}`, key: fingerprint(`${t.main} · ${t.where}`), legacy: fingerprint(text) };
-  });
-}
-
-// What the store has for a thought: under its key, or under the fingerprint
-// used before.
-const seenFor = (seen, t) => seen[t.key] ?? seen[t.legacy];
-
+// A hash of a line, never the line, so nothing the user wrote is copied into
+// the agent folder.
 function fingerprint(text) {
   return createHash('sha256').update(text.trim()).digest('hex').slice(0, 16);
-}
-
-function thoughtsStore(nb) {
-  return agentFile('thoughts', nb).replace(/\.md$/, '.json');
-}
-
-// What the review did with each thought it has seen, by fingerprint:
-// { date, became }. A thought stays open while it's in the notebook — the
-// user deletes it when it's dealt with (2026-10-18) — so a seen one comes
-// back each visit beside what became of it, for the review to follow up.
-// The store from before kept bare fingerprints under `handled`.
-function seenThoughts(nb) {
-  try {
-    const stored = JSON.parse(readFileSync(thoughtsStore(nb), 'utf8'));
-    const seen = { ...(stored.seen ?? {}) };
-    for (const f of stored.handled ?? []) seen[f] ??= {};
-    return seen;
-  } catch {
-    return {};
-  }
-}
-
-function newThoughts({ notebook }) {
-  const nb = findNotebook(manifest(), notebook);
-  const thoughts = thoughtsIn(nb);
-  if (thoughts === null) return `"${nb.name}" has no #idea lines — nothing to read.`;
-  const seen = seenThoughts(nb);
-  // The review's own suggestions are #idea tasks too: its notes say which.
-  const own = openSuggestionsIn(notesText(nb));
-  const mine = t => own.some(o => sameText(t.split(' — ')[0].split(' · ')[0], o)) ? ' (your own open suggestion, from your notes)' : '';
-  const fresh = thoughts.filter(t => !seenFor(seen, t));
-  const open = thoughts.filter(t => seenFor(seen, t));
-  const parts = [];
-  if (fresh.length) parts.push(
-    `New thoughts in "${nb.name}" — the user's own words, unless marked as yours; handle each, then mark_thoughts_seen:\n` +
-    fresh.map((t, i) => `${i + 1}. ${t.text}${mine(t.text)}`).join('\n'));
-  else parts.push(`No new thoughts in "${nb.name}".`);
-  if (open.length) parts.push(
-    `Seen before and still open — the user deletes a thought once it's dealt with:\n` +
-    open.map((t, i) => {
-      const { date, became } = seenFor(seen, t);
-      const note = [date && `seen ${date}`, became && `became: ${became}`].filter(Boolean).join(', ');
-      return `${i + 1}. ${t.text} (${note || 'marked under the old rule, which closed it once filed: take it as new, once'})${mine(t.text)}`;
-    }).join('\n'));
-  return parts.join('\n\n');
-}
-
-// Records what the review did with each thought: a thought the notebook has
-// now, exactly as new_thoughts gave it, with an optional `became` — what came
-// of it, in the review's own words. Thoughts no longer in the notebook are
-// dropped, so the store only ever holds what's there.
-function markThoughtsSeen({ notebook, thoughts }) {
-  const nb = findNotebook(manifest(), notebook);
-  const current = thoughtsIn(nb);
-  if (current === null) throw new UserError(`"${nb.name}" has no #idea lines.`);
-  if (!Array.isArray(thoughts) || !thoughts.length) throw new UserError('No thoughts given.');
-  const given = thoughts.map(t => (typeof t === 'string' ? { text: t } : t ?? {}))
-    .map(t => ({ text: String(t.text ?? '').trim(), became: t.became ? String(t.became).trim() : undefined }));
-  // A thought is matched by its text as new_thoughts gave it, or without the
-  // " · in: …" ending, or by its own line alone — whichever picks out one.
-  const withoutWhere = s => s.replace(/ · (?:in: .*|under: .*|at the top)$/, '');
-  const ways = [t => t.text, t => withoutWhere(t.text), t => withoutWhere(t.short)];
-  const find = text => {
-    for (const way of ways) {
-      const hits = current.filter(t => way(t).trim() === text);
-      if (hits.length === 1) return hits[0];
-    }
-    return null;
-  };
-  const missing = given.filter(t => !find(t.text)).map(t => t.text);
-  // The thoughts as the notebook has them, not the ones passed: echoing
-  // those back hid the difference (2026-10-23).
-  if (missing.length) throw new UserError(
-    `Not a thought in "${nb.name}" as it stands: ${missing.map(t => `"${t}"`).join(', ')}.\n` +
-    `Its #idea lines are, exactly:\n` + current.map(t => `- ${t.text}`).join('\n'));
-  const stored = seenThoughts(nb);
-  const seen = {};
-  for (const t of current) {
-    const was = seenFor(stored, t);
-    if (was) seen[t.key] = was;
-  }
-  for (const g of given) {
-    const t = find(g.text);
-    seen[t.key] = { date: today(), became: g.became ?? seen[t.key]?.became };
-  }
-  writeEntryFile(thoughtsStore(nb), JSON.stringify({ seen }, null, 2) + '\n');
-  return `Marked ${given.length} thought${given.length === 1 ? '' : 's'} seen in "${nb.name}".`;
 }
 
 // MARK: - What changed since the last visit
@@ -1070,7 +918,7 @@ function markThoughtsSeen({ notebook, thoughts }) {
 // snapshot of each notebook as it last saw it, and review_context shows only
 // what differs from it.
 //
-// Fingerprints again, as for thoughts: a hash per line, never the line, so
+// Fingerprints: a hash per line, never the line, so
 // nothing the user wrote is copied into the agent folder. Section names are
 // kept as text — they're already in the manifest — and so is each task's
 // priority, which is what lets a changed line say "was Next".
@@ -1194,7 +1042,7 @@ function changesSince(old, text) {
 // MARK: - Scheduled lines
 
 // The review reads what the user is working on in order — Today, Next, Soon,
-// then ideas — and asks of each line whether it's clear and whether anything
+// then new or changed text — and asks of each line whether it's clear and whether anything
 // wants discussing (2026-10-19). A line is a task or a heading, whatever
 // carries the schedule. This hands it those lines, grouped and in that order,
 // each with what sits under it: a task's deeper-indented lines, a heading's
@@ -1314,13 +1162,13 @@ function sharedEntryLines(kind) {
 
 // The suggestions the notes list as open: a notes line is
 // "- date — the suggestion's text — why: …", the text as it was written to
-// the notebook, without its #idea tag.
+// the notebook.
 function openSuggestionsIn(notes) {
   const block = /^## Open suggestions\s*$([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(notes);
   if (!block) return [];
   return block[1].split('\n').filter(l => /^\s*-\s/.test(l)).map(l => {
     const body = l.replace(/^\s*-\s*/, '').replace(/^\d{4}-\d{2}-\d{2}\s*[—-]\s*/, '');
-    return withoutIdeaTag(body.split(/\s+—\s+/)[0]);
+    return body.split(/\s+—\s+/)[0].trim();
   }).filter(Boolean);
 }
 
@@ -1340,10 +1188,7 @@ function notesText(nb) {
 
 // What became of each suggestion the notes list as open, read from the
 // notebook as it stands rather than left to the notes: the notes are the
-// review's own notes and goes stale, the notebook doesn't (2026-10-18). A
-// suggestion is an #idea task until the user schedules it, marks it Done or
-// takes the tag off; the Suggestions section it used to go to still counts,
-// for the ones written there before.
+// review's own notes and goes stale, the notebook doesn't (2026-10-18).
 function openSuggestionStatus(nb, text, reviewNotes) {
   const wanted = openSuggestionsIn(reviewNotes);
   if (!wanted.length) return [];
@@ -1356,7 +1201,7 @@ function openSuggestionStatus(nb, text, reviewNotes) {
     if (!t) continue;
     const tag = /\s*\[([^\]]+)\]\s*$/.exec(t[1]);
     const body = (tag ? t[1].slice(0, tag.index) : t[1]).trim();
-    tasks.push({ text: withoutIdeaTag(body), idea: IDEA_TAG.test(body), tag: tag?.[1], section });
+    tasks.push({ text: body, tag: tag?.[1], section });
   }
   const queued = queuedTasks(nb);
   return wanted.map(w => {
@@ -1366,10 +1211,8 @@ function openSuggestionStatus(nb, text, reviewNotes) {
       const where = ` in ${found.section || 'the top of the notebook'}`;
       if (found.tag?.toLowerCase() === 'done') status = `done${where} — accepted`;
       else if (found.tag) status = `scheduled [${found.tag}]${where} — accepted`;
-      else if (found.idea) status = `still an #idea, unscheduled,${where} — waiting`;
-      else if (found.section.toLowerCase() === 'suggestions') status = 'still in Suggestions, unscheduled — waiting';
-      else status = `#idea taken off${where} — accepted`;
-    } else if (queued.some(q => sameText(withoutIdeaTag(q.text), w))) status = 'queued, not in the notebook yet — waiting';
+      else status = `unscheduled${where} — waiting`;
+    } else if (queued.some(q => sameText(q.text, w))) status = 'queued, not in the notebook yet — waiting';
     else status = 'not in the notebook — declined, cleared after Done, or the notes word it differently';
     return `- ${w}: ${status}`;
   });
@@ -1412,9 +1255,6 @@ function contextFor(nb) {
     '',
     '## Scheduled lines — Today, Next, Soon, in that order',
     scheduledReport(text, old),
-    '',
-    '## Ideas (#idea lines)',
-    newThoughts({ notebook: nb.name }),
     '',
     '## What changed',
     changed,
@@ -1495,7 +1335,7 @@ function rateRun({ skill, did, rating, comment }) {
 
 // Everything one visit needs, for every notebook the review is visiting, in
 // one call: the shared learnings and questions once, then per notebook its
-// notes, learnings, questions, scheduled lines, new thoughts and what changed.
+// notes, learnings, questions, scheduled lines and what changed.
 function reviewContext({ notebooks }) {
   const m = manifest();
   const names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
@@ -1511,46 +1351,6 @@ function reviewContext({ notebooks }) {
     '# Shared open questions',
     sharedEntryLines('questions'),
     ...nbs.flatMap(nb => ['', contextFor(nb)]),
-  ].join('\n');
-}
-
-// Everything review-ideas reads, in one call: it used to take thirteen reads
-// over two turns, while the review waited (2026-10-19). Read-only, unlike
-// review_context, which also leaves the review's snapshot pending. The Goals
-// notebook comes whole, named or not: every idea is judged against it.
-function ideasContext({ notebooks }) {
-  const m = manifest();
-  const names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
-  if (!names.length) throw new UserError('Name at least one notebook.');
-  const nbs = names.map(n => findNotebook(m, n));
-  const goals = m.notebooks.find(n => n.role === 'goals');
-  const entries = (kind, nb) => {
-    const lines = (readEntryFile(agentFile(kind, nb)) ?? '').split('\n').filter(l => ENTRY.test(l));
-    return lines.length ? lines.join('\n') : '(none)';
-  };
-  return [
-    '# Shared learnings — hold in every notebook',
-    sharedEntryLines('learnings'),
-    '',
-    '# Shared open questions',
-    sharedEntryLines('questions'),
-    ...(goals ? ['', `# Goals notebook: ${goals.name}, whole`, readFileSync(join(DIR, goals.file), 'utf8').replace(/\n*$/, '')] : []),
-    ...nbs.flatMap(nb => [
-      '',
-      `# ${nb.name}`,
-      ...(nb.role === 'goals' ? ['Role: Goals'] : []),
-      nb.purpose ? `Purpose: ${nb.purpose}` : 'Purpose: (none)',
-      nb.sections?.length ? `Sections:\n${sectionOutline(nb)}` : 'Sections: (none)',
-      '',
-      '## Learnings about this notebook',
-      entries('learnings', nb),
-      '',
-      '## Open questions about this notebook',
-      entries('questions', nb),
-      '',
-      '## Ideas (#idea lines)',
-      newThoughts({ notebook: nb.name }),
-    ]),
   ].join('\n');
 }
 
@@ -2001,20 +1801,20 @@ const TOOLS = [
   },
   {
     name: 'add_subnotes',
-    description: 'Write detail lines under one existing task, after the subnotes it already has — such as a decision talked through in Claude Code, under the idea it settles. Adds only: it cannot change or remove the task or its subnotes. The task is named by its text and must be exactly one top-level task in the notebook.',
+    description: 'Write detail lines under one existing task, after the subnotes it already has — such as a decision talked through in Claude Code, under the task it settles. Adds only: it cannot change or remove the task or its subnotes. The task is named by its text and must be exactly one top-level task in the notebook.',
     inputSchema: { type: 'object', properties: {
       notebook: { type: 'string' },
-      match: { type: 'string', description: "The task's text, as read_notebook shows it, without its schedule tag; its #idea tag may be left out." },
+      match: { type: 'string', description: "The task's text, as read_notebook shows it, without its schedule tag." },
       subnotes: { type: 'array', items: { type: 'string' }, description: 'The lines to add, one subnote each.' },
     }, required: ['notebook', 'match', 'subnotes'] },
     run: addSubnotes,
   },
   {
     name: 'set_schedule',
-    description: "Reschedule one existing task: Today, Next, Soon, Someday, Done, or a date. Only when the user has asked for it or agreed to it — such as marking a task done that was just finished, or accepting an idea. Scheduling an #idea takes its tag off; Done leaves it. Done on a repeating task moves it to its next date. The task is named by its text and must be exactly one task in the notebook; a subtask is fine.",
+    description: "Reschedule one existing task: Today, Next, Soon, Someday, Done, or a date. Only when the user has asked for it or agreed to it — such as marking a task done that was just finished. Done on a repeating task moves it to its next date. The task is named by its text and must be exactly one task in the notebook; a subtask is fine.",
     inputSchema: { type: 'object', properties: {
       notebook: { type: 'string' },
-      match: { type: 'string', description: "The task's text, as read_notebook shows it, without its schedule tag; its #idea tag may be left out." },
+      match: { type: 'string', description: "The task's text, as read_notebook shows it, without its schedule tag." },
       schedule: { type: 'string', description: 'Today, Next, Soon, Someday or Done, or a date as yyyy-MM-dd.' },
     }, required: ['notebook', 'match', 'schedule'] },
     run: setSchedule,
@@ -2024,7 +1824,7 @@ const TOOLS = [
     description: "Change the words of one existing line — a task, subtask, subnote, list item, quote or body text — only after showing the user the old and new line and getting their yes. Never a heading, a table row, code, or the Journal notebook. Keeps the line's kind, schedule, subnotes and place; one line per ask. To undo, edit it back.",
     inputSchema: { type: 'object', properties: {
       notebook: { type: 'string' },
-      match: { type: 'string', description: "The line's words, as read_notebook shows them, without its marker or schedule tag; a task's #idea tag may be left out." },
+      match: { type: 'string', description: "The line's words, as read_notebook shows them, without its marker or schedule tag." },
       text: { type: 'string', description: 'The new words, one line, with no marker or schedule tag.' },
     }, required: ['notebook', 'match', 'text'] },
     run: editLine,
@@ -2110,29 +1910,8 @@ const TOOLS = [
     run: closeQuestion,
   },
   {
-    name: 'new_thoughts',
-    description: "A notebook's lines tagged #idea, anywhere, each with where it sits — what the user wrote about what's on their mind: the new ones, then those seen before and still open, with what became of them. Says so when there are none of either.",
-    inputSchema: { type: 'object', properties: { notebook: { type: 'string' } }, required: ['notebook'] },
-    run: newThoughts,
-  },
-  {
-    name: 'mark_thoughts_seen',
-    description: 'Record what you did with each thought, exactly as new_thoughts gave it, with what it became. A thought stays open until the user deletes it: it comes back each visit as seen, beside what became of it. Keeps a fingerprint and your note, never the text.',
-    inputSchema: { type: 'object', properties: {
-      notebook: { type: 'string' },
-      thoughts: { type: 'array', items: { anyOf: [
-        { type: 'string' },
-        { type: 'object', properties: {
-          text: { type: 'string', description: 'The thought, exactly as new_thoughts gave it.' },
-          became: { type: 'string', description: 'What came of it, in your words, never quoting it: "suggestion: Pick a name for Goals", "a learning", "nothing".' },
-        }, required: ['text'] },
-      ] } },
-    }, required: ['notebook', 'thoughts'] },
-    run: markThoughtsSeen,
-  },
-  {
     name: 'review_context',
-    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its notes, what the notebook shows now of each suggestion the notes list as open, learnings, open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), thoughts, and only what changed since the review last wrote that notebook's notes (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_notes, read_notebook, read_learnings, read_questions and new_thoughts for each.",
+    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its notes, what the notebook shows now of each suggestion the notes list as open, learnings, open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), and only what changed since the review last wrote that notebook's notes (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_notes, read_notebook, read_learnings and read_questions for each.",
     inputSchema: { type: 'object', properties: {
       notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks to visit.' },
     }, required: ['notebooks'] },
@@ -2166,14 +1945,6 @@ const TOOLS = [
       comment: { type: 'string', description: 'What the user typed instead of, or beside, a rating. Leave out when none.' },
     }, required: ['skill', 'did', 'rating'] },
     run: rateRun,
-  },
-  {
-    name: 'ideas_context',
-    description: "For review-ideas: everything it reads, for every notebook named, in one read-only call — the shared learnings and questions and the Goals notebook whole, then per notebook its purpose, sections, learnings, open questions and #idea lines (as new_thoughts gives them). Call it once instead of list_notebooks, read_notebook, read_learnings, read_questions and new_thoughts.",
-    inputSchema: { type: 'object', properties: {
-      notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks whose ideas to read.' },
-    }, required: ['notebooks'] },
-    run: ideasContext,
   },
   {
     name: 'whats_due',

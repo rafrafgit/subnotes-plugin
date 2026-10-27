@@ -152,13 +152,12 @@ teaches nothing.
 - **New wording for a line already there** (a goal's What, a plan line):
   show it as `− old` / `+ new`, and on a yes, `edit_line`.
 - **New lines or a heading,** which you can't write: a task at the end of
-  the section they go in, tagged `#idea` ("Add as a part of the 4k goal
-  #idea"), with the lines as subnotes and "Why: agreed in /subnotes:plan,
-  <today>" last, so the review knows it isn't its own. Not when they've
-  written it in already.
+  the section they go in ("Add as a part of the 4k goal"), with the lines
+  as subnotes and "Why: agreed in /subnotes:plan, <today>" last, so the
+  review knows it isn't its own. Not when they've written it in already.
 - **Next steps:** tasks in the first person ("Ask my manager…"), one
-  physical action each, in the section the work belongs in, without
-  `#idea`. Show them with where they go, and on a yes, `add_tasks`.
+  physical action each, in the section the work belongs in. Show them with
+  where they go, and on a yes, `add_tasks`.
 
 ## 7. Record it, then move on
 
@@ -185,7 +184,7 @@ goals not reached wait for next time.
 ```
 Goals — both goals have a number and a date
 4k by June 2027 — strategy has no route to it before June
- Agreed: retainer clients first (lines for Goals › Strategy, as an #idea)
+ Agreed: retainer clients first (lines for Goals › Strategy, as a task)
  Added: 2 tasks to Freelance › Backlog
 Portfolio live by March — plan good, on pace. No gap.
 ```

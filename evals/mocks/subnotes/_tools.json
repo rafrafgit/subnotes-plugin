@@ -24,6 +24,29 @@
    }
   },
   {
+   "name": "search_notes",
+   "description": "Find the lines that hold every word of a query, across the connected notebooks and what the skills have learned and asked: each with its notebook, section and schedule, and a subnote with the task it's under. Use it instead of read_notebook when you need what's written about something, not a whole notebook.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string",
+      "description": "Words to look for; a line matches when it holds all of them, ignoring case and accents."
+     },
+     "notebooks": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Connected notebooks to look in, with their learnings and questions. Leave out for all of them and the shared ones."
+     }
+    },
+    "required": [
+     "query"
+    ]
+   }
+  },
+  {
    "name": "add_task",
    "description": "Append one task to a connected notebook. Appends only: it cannot edit, complete, delete or reorder anything. Refuses a task the notebook already has, unless allowDuplicate is true.",
    "inputSchema": {
@@ -126,7 +149,7 @@
   },
   {
    "name": "add_subnotes",
-   "description": "Write detail lines under one existing task, after the subnotes it already has \u2014 such as a decision talked through in Claude Code, under the idea it settles. Adds only: it cannot change or remove the task or its subnotes. The task is named by its text and must be exactly one top-level task in the notebook.",
+   "description": "Write detail lines under one existing task, after the subnotes it already has \u2014 such as a decision talked through in Claude Code, under the task it settles. Adds only: it cannot change or remove the task or its subnotes. The task is named by its text and must be exactly one top-level task in the notebook.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -135,7 +158,7 @@
      },
      "match": {
       "type": "string",
-      "description": "The task's text, as read_notebook shows it, without its schedule tag; its #idea tag may be left out."
+      "description": "The task's text, as read_notebook shows it, without its schedule tag."
      },
      "subnotes": {
       "type": "array",
@@ -154,7 +177,7 @@
   },
   {
    "name": "set_schedule",
-   "description": "Reschedule one existing task: Today, Next, Soon, Someday, Done, or a date. Only when the user has asked for it or agreed to it \u2014 such as marking a task done that was just finished, or accepting an idea. Scheduling an #idea takes its tag off; Done leaves it. Done on a repeating task moves it to its next date. The task is named by its text and must be exactly one task in the notebook; a subtask is fine.",
+   "description": "Reschedule one existing task: Today, Next, Soon, Someday, Done, or a date. Only when the user has asked for it or agreed to it \u2014 such as marking a task done that was just finished. Done on a repeating task moves it to its next date. The task is named by its text and must be exactly one task in the notebook; a subtask is fine.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -163,7 +186,7 @@
      },
      "match": {
       "type": "string",
-      "description": "The task's text, as read_notebook shows it, without its schedule tag; its #idea tag may be left out."
+      "description": "The task's text, as read_notebook shows it, without its schedule tag."
      },
      "schedule": {
       "type": "string",
@@ -188,7 +211,7 @@
      },
      "match": {
       "type": "string",
-      "description": "The line's words, as read_notebook shows them, without its marker or schedule tag; a task's #idea tag may be left out."
+      "description": "The line's words, as read_notebook shows them, without its marker or schedule tag."
      },
      "text": {
       "type": "string",
@@ -236,6 +259,23 @@
      "goal": {
       "type": "string",
       "description": "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check, so /subnotes:run knows when it's next due."
+     },
+     "cites": {
+      "type": "object",
+      "description": "The line it came from, when there is one \u2014 a task, a Journal entry's line \u2014 so the prune knows when that line is gone or Done. Kept beside the learning, not in it.",
+      "properties": {
+       "line": {
+        "type": "string",
+        "description": "The line's words, as read_notebook shows them, without its marker or schedule tag."
+       },
+       "notebook": {
+        "type": "string",
+        "description": "The notebook the line is in. Leave out when it's the learning's own notebook."
+       }
+      },
+      "required": [
+       "line"
+      ]
      }
     },
     "required": [
@@ -387,65 +427,8 @@
    }
   },
   {
-   "name": "new_thoughts",
-   "description": "A notebook's lines tagged #idea, anywhere, each with where it sits \u2014 what the user wrote about what's on their mind: the new ones, then those seen before and still open, with what became of them. Says so when there are none of either.",
-   "inputSchema": {
-    "type": "object",
-    "properties": {
-     "notebook": {
-      "type": "string"
-     }
-    },
-    "required": [
-     "notebook"
-    ]
-   }
-  },
-  {
-   "name": "mark_thoughts_seen",
-   "description": "Record what you did with each thought, exactly as new_thoughts gave it, with what it became. A thought stays open until the user deletes it: it comes back each visit as seen, beside what became of it. Keeps a fingerprint and your note, never the text.",
-   "inputSchema": {
-    "type": "object",
-    "properties": {
-     "notebook": {
-      "type": "string"
-     },
-     "thoughts": {
-      "type": "array",
-      "items": {
-       "anyOf": [
-        {
-         "type": "string"
-        },
-        {
-         "type": "object",
-         "properties": {
-          "text": {
-           "type": "string",
-           "description": "The thought, exactly as new_thoughts gave it."
-          },
-          "became": {
-           "type": "string",
-           "description": "What came of it, in your words, never quoting it: \"suggestion: Pick a name for Goals\", \"a learning\", \"nothing\"."
-          }
-         },
-         "required": [
-          "text"
-         ]
-        }
-       ]
-      }
-     }
-    },
-    "required": [
-     "notebook",
-     "thoughts"
-    ]
-   }
-  },
-  {
    "name": "review_context",
-   "description": "For /subnotes:review: everything a visit needs, for every notebook named, in one call \u2014 the shared learnings and questions once, then per notebook its notes, what the notebook shows now of each suggestion the notes list as open, learnings, open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), thoughts, and only what changed since the review last wrote that notebook's notes (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_notes, read_notebook, read_learnings, read_questions and new_thoughts for each.",
+   "description": "For /subnotes:review: everything a visit needs, for every notebook named, in one call \u2014 the shared learnings and questions once, then per notebook its notes, what the notebook shows now of each suggestion the notes list as open, learnings, open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), and only what changed since the review last wrote that notebook's notes (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_notes, read_notebook, read_learnings and read_questions for each.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -471,21 +454,71 @@
    }
   },
   {
-   "name": "ideas_context",
-   "description": "For review-ideas: everything it reads, for every notebook named, in one read-only call \u2014 the shared learnings and questions and the Goals notebook whole, then per notebook its purpose, sections, learnings, open questions and #idea lines (as new_thoughts gives them). Call it once instead of list_notebooks, read_notebook, read_learnings, read_questions and new_thoughts.",
+   "name": "start_run",
+   "description": "Start the clock for one skill run by hand (review, plan, do, journal, prune, wrapup). Call it with your first calls.",
    "inputSchema": {
     "type": "object",
     "properties": {
-     "notebooks": {
-      "type": "array",
-      "items": {
-       "type": "string"
-      },
-      "description": "The connected notebooks whose ideas to read."
+     "skill": {
+      "type": "string",
+      "description": "The skill running, one word."
      }
     },
     "required": [
-     "notebooks"
+     "skill"
+    ]
+   }
+  },
+  {
+   "name": "end_run",
+   "description": "Stop the skill's clock and say how long it ran. Call it just before the summary, so the time leaves out the user's rating.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "skill": {
+      "type": "string",
+      "description": "The skill that ran, one word."
+     }
+    },
+    "required": [
+     "skill"
+    ]
+   }
+  },
+  {
+   "name": "rate_run",
+   "description": "Save the run with the user's rating to the runs log: when, how long, the rating, what it did, and any comment. Call it once they've rated it, or with Skipped when they didn't.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "skill": {
+      "type": "string",
+      "description": "The skill that ran, one word."
+     },
+     "did": {
+      "type": "string",
+      "description": "What the run did, one line: the summary shown to the user, without the time."
+     },
+     "rating": {
+      "type": "string",
+      "enum": [
+       "Great",
+       "Good",
+       "Meh",
+       "Waste of time",
+       "Skipped"
+      ],
+      "description": "The user's rating, or Skipped."
+     },
+     "comment": {
+      "type": "string",
+      "description": "What the user typed instead of, or beside, a rating. Leave out when none."
+     }
+    },
+    "required": [
+     "skill",
+     "did",
+     "rating"
     ]
    }
   },

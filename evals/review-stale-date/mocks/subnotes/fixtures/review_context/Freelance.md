@@ -1,6 +1,6 @@
 # Shared learnings — hold in every notebook
-- 2026-10-14 · review · Keep replies short: lead with the question, about 5 lines
-- 2026-10-16 · review · Wants Claude's own ideas — options, a draft — not homework
+- 2026-10-15 · review · Keep replies short: lead with the question, about 5 lines
+- 2026-10-17 · review · Wants Claude's own ideas — options, a draft — not homework
 
 # Shared open questions
 (none)
@@ -9,7 +9,7 @@
 Purpose: Win and deliver freelance design work
 
 ## Your notes
-Last visit: 2026-10-20
+Last visit: 2026-10-21
 
 ## Goal and plan
 - Goal: 4k a month by June 2027 (Goals)
@@ -25,7 +25,7 @@ Tasks proposed this week: 0
 (none)
 
 ## Observations
-- 2026-10-20 — The Dana follow-up is due 2026-10-26, scheduled Today
+- 2026-10-21 — The Dana follow-up is due 2026-10-27, scheduled Today
 
 ## Learnings about this notebook
 (none)
@@ -40,9 +40,6 @@ Tasks proposed this week: 0
 ### Soon
 • Follow up with Dana at Northwind about the menu redesign [Soon]   ← task, first visit
   	She said she'd decide after their busy season
-
-## Ideas (#idea lines)
-"Freelance" has no #idea lines — nothing to read.
 
 ## What changed
 No snapshot from an earlier visit, so here is the whole notebook:
@@ -59,4 +56,4 @@ Sent this week: 5 of 5.
 • Write the Northwind case study [Next]
 
 ## From the connector, not part of the notebook
-Last changed: 2026-10-26 10:11
+Last changed: 2026-10-27 15:03

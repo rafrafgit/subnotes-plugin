@@ -19,8 +19,6 @@ Call `list_notebooks`. Then, in one turn:
   goals and strategy across all notebooks.
 - `review_context` for Goals alone: your notes on it, its learnings and
   questions, and the shared learnings and questions that hold everywhere.
-- the `subnotes:review-ideas` skill, with Goals as its argument: it reads the
-  `#idea` lines and returns replies and questions to raise.
 
 Goals outranks any learning that disagrees with it.
 
@@ -57,8 +55,8 @@ Worth raising, if there:
 - a goal with no date yet (Today, Next, Soon or Someday, not a date)
 - Goals says one thing comes first, but the "Last changed" dates in
   `list_notebooks` show the time going elsewhere — ask, never judge
-- Goals' own `#idea` lines, as `review-ideas` returned them, and its tasks
-  due now
+- new or changed lines in Goals, where the user thinks out loud, and its
+  tasks due now
 - a vague goal, an open question other work waits on, or one open over
   three weeks
 
@@ -69,8 +67,8 @@ Talk them through one at a time: say what you noticed, give two or three
 options with the one you'd pick and why, and end on the one question that
 decides it. When one is settled, save the decision as a learning
 (`add_learning`, source `review`, Goals as the notebook) and close its
-question (`close_question`). For an `#idea`, mark it seen as `review-ideas`
-said and add the decision under it (`add_subnotes`): "Decided <today>: …".
+question (`close_question`). When it was about a task, add the decision
+under it (`add_subnotes`): "Decided <today>: …".
 
 Nothing to raise: say so in one line and go on.
 
@@ -93,8 +91,7 @@ Skipping: Recipes — no purpose
 
 - **First:** what Goals puts first, a deadline soonest, a goal behind pace.
   A notebook serves the goals that link it.
-- **Skip:** a notebook with no purpose (but review its `#idea` lines if it
-  has any); one Goals parks, pauses or names as blocked; the Journal
+- **Skip:** a notebook with no purpose; one Goals parks, pauses or names as blocked; the Journal
   notebook, which `/subnotes:journal` reads.
 
 ## 5. Save your Goals notes

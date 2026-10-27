@@ -64,10 +64,10 @@ Sent this week: 1 of 5.
 ## Portfolio
 • Write the Northwind case study [Soon]
 ## Ideas
-• Try a more playful font for my portfolio headings #idea
+• Try a more playful font for my portfolio headings
 	Like the studios I follow on Instagram
-• Switch my invoicing to a new app #idea
-• Make a Notion template to sell on the side #idea
+• Switch my invoicing to a new app
+• Make a Notion template to sell on the side
 `,
     freelanceLearnings: [`${day(-9)} · review · Applications are the plan's engine: a week under 5 is behind pace`],
   },
@@ -118,7 +118,7 @@ Sent this week: 5 of 5.
 • Send the final logo files to Northwind [Done]
 ## Pricing
 My day rate is €400. Two clients this month said yes without asking about price.
-• Should I raise my day rate for new clients? #idea
+• Should I raise my day rate for new clients?
 	Worried it scares off the job board leads
 ## Portfolio
 • Write the Northwind case study [Next]
@@ -178,8 +178,6 @@ const NAMES = ['Goals', 'Freelance', 'Goals,Freelance'];
 const perName = [
   ['read_notebook', 'name', ['Goals', 'Freelance']],
   ['review_context', 'notebooks', NAMES],
-  ['ideas_context', 'notebooks', NAMES],
-  ['new_thoughts', 'notebook', ['Goals', 'Freelance']],
   ['read_learnings', 'notebook', ['Goals', 'Freelance']],
   ['read_questions', 'notebook', ['Goals', 'Freelance']],
   ['read_notes', 'notebook', ['Goals', 'Freelance']],

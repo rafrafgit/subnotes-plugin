@@ -52,7 +52,7 @@ const init = await send('initialize', {});
 check('initialize', init.result?.serverInfo?.name === 'subnotes');
 
 const tools = await send('tools/list', {});
-check('thirty tools', tools.result.tools.length === 30,
+check('twenty-seven tools', tools.result.tools.length === 27,
       tools.result.tools.map(t => t.name).join(', '));
 
 const list = await call('list_notebooks');
@@ -60,12 +60,6 @@ check('list_notebooks', !list.isError && list.text.includes('Open tasks'));
 const first = list.text.match(/^## (.+)$/m)?.[1];
 check('a notebook is connected', !!first, first ?? '');
 console.log(`\n${list.text}\n`);
-
-const ideasCtx = await call('ideas_context', { notebooks: [first] });
-check('ideas_context: shared learnings once, then the notebook with its ideas',
-      !ideasCtx.isError && ideasCtx.text.split('# Shared learnings').length === 2
-      && ideasCtx.text.includes(`\n# ${first}\n`) && ideasCtx.text.includes('## Ideas (#idea lines)'), ideasCtx.text.slice(0, 200));
-check('ideas_context refuses an unconnected notebook', (await call('ideas_context', { notebooks: ['Definitely Not Connected'] })).isError);
 
 const read = await call('read_notebook', { name: first.toLowerCase() });
 check('read_notebook matches case-insensitively', !read.isError, `${read.text.length} chars`);
@@ -191,62 +185,6 @@ if (existsSync(questions) || existsSync(learned)) {
   rmSync(questions); rmSync(learned);
 }
 
-// #idea lines need a notebook file, so only in a fixture folder.
-if (process.env.SUBNOTES_DIR) {
-  const file = join(DIR, JSON.parse(readFileSync(join(DIR, 'manifest.json'), 'utf8')).notebooks.find(n => n.name === first).file);
-  const original = readFileSync(file, 'utf8');
-  // The notebook's own #idea lines would be read beside the test's, so their
-  // tags are renamed while this runs.
-  const bare = original.replace(/#idea(?!\w)/gi, '#notidea');
-  const store = join(DIR, 'agent', 'thoughts', `${first.replace(/[\/:\0]/g, '-')}.json`);
-  rmSync(store, { force: true });
-  writeFileSync(file, bare + '\n## Ideas test\nI wonder about one thing #idea\n\twith a detail\n• A task-like thought #idea [Next]\n## Thoughts\nnot a thought\n');
-  const fresh = await call('new_thoughts', { notebook: first });
-  check('new_thoughts lists #idea lines, subnotes joined, tags dropped, a Thoughts section ignored',
-        fresh.text.includes('1. I wonder about one thing — with a detail · in: Ideas test') && fresh.text.includes('2. A task-like thought · in: Ideas test')
-        && !fresh.text.includes('not a thought'), fresh.text);
-  const wrong = await call('mark_thoughts_seen', { notebook: first, thoughts: ['made up'] });
-  check('marking a thought the notebook lacks refuses', wrong.isError);
-  await call('mark_thoughts_seen', { notebook: first, thoughts: [{ text: 'I wonder about one thing — with a detail · in: Ideas test', became: 'suggestion: Pick one of three' }] });
-  const after = await call('new_thoughts', { notebook: first });
-  check('a seen thought is not new again, but still open with what it became',
-        after.text.includes('1. A task-like thought') && after.text.includes('still open')
-        && after.text.includes('I wonder about one thing — with a detail · in: Ideas test (seen ') && after.text.includes('became: suggestion: Pick one of three'), after.text);
-  await call('mark_thoughts_seen', { notebook: first, thoughts: ['I wonder about one thing — with a detail · in: Ideas test'] });
-  const kept = await call('new_thoughts', { notebook: first });
-  check('marking it again without a note keeps what it became', kept.text.includes('became: suggestion: Pick one of three'), kept.text);
-  check('the store holds fingerprints and notes, not the text', !readFileSync(store, 'utf8').includes('wonder'));
-  // A decision written under it, or a new schedule, doesn't make it new again.
-  writeFileSync(file, bare + '\n## Ideas test\nI wonder about one thing [Soon] #idea\n\twith a detail\n\tDecided 2026-10-23: not now\n• A task-like thought #idea [Next]\n## Thoughts\nnot a thought\n');
-  const decided = await call('new_thoughts', { notebook: first });
-  check('a seen thought stays seen after a subnote is added and its schedule changes',
-        decided.text.includes('I wonder about one thing — with a detail; Decided 2026-10-23: not now · in: Ideas test (seen ')
-        && !decided.text.includes('[Soon]'), decided.text);
-  const short = await call('mark_thoughts_seen', { notebook: first, thoughts: ['A task-like thought'] });
-  check('a thought can be marked by its own line, without where it sits', !short.isError, short.text);
-  const listed = await call('mark_thoughts_seen', { notebook: first, thoughts: ['I wonder about one thing — with a detail'] });
-  check('a refusal lists the thoughts as the notebook has them, not the one passed',
-        listed.isError && listed.text.includes('- I wonder about one thing — with a detail; Decided 2026-10-23: not now · in: Ideas test'), listed.text);
-  writeFileSync(file, bare + '\n## Ideas test\n• A task-like thought #idea [Next]\n');
-  await call('mark_thoughts_seen', { notebook: first, thoughts: ['A task-like thought · in: Ideas test'] });
-  check('a thought the user deleted leaves the store', !readFileSync(store, 'utf8').includes('Pick one of three'));
-  writeFileSync(file, bare + '\n## Ideas test\n• Make the brain visible [Someday]\n\t• What is the use case? #idea\n• A top idea #idea\n\twith a detail\n• An idea dealt with #idea [Done]\n');
-  const ideas = await call('new_thoughts', { notebook: first });
-  check('#idea lines anywhere read as thoughts, with where they sit, Done ones left out',
-        ideas.text.includes('What is the use case? · under: Make the brain visible')
-        && ideas.text.includes('A top idea — with a detail · in: Ideas test')
-        && !ideas.text.includes('dealt with') && !ideas.text.includes('#idea'), ideas.text);
-  const ctxIdeas = await call('ideas_context', { notebooks: [first] });
-  check('ideas_context gives the same ideas as new_thoughts', ctxIdeas.text.includes(ideas.text), ctxIdeas.text);
-  const markedIdea = await call('mark_thoughts_seen', { notebook: first, thoughts: ['What is the use case? · under: Make the brain visible'] });
-  check('an #idea can be marked seen', !markedIdea.isError, markedIdea.text);
-  writeFileSync(file, bare);
-  const none = await call('new_thoughts', { notebook: first });
-  check('no #idea lines says so', none.text.includes('no #idea lines'));
-  writeFileSync(file, original);
-  rmSync(store, { force: true });
-}
-
 // review_context writes a snapshot and write_notes a journal, so only in a
 // fixture folder too — and whatever journal the fixture had is put back.
 if (process.env.SUBNOTES_DIR) {
@@ -268,24 +206,22 @@ if (process.env.SUBNOTES_DIR) {
   check('write_notes keeps the pending snapshot', existsSync(snap) && !existsSync(pending));
   const same = await call('review_context', { notebooks: [first] });
   check('an unchanged notebook says so', same.text.includes('Nothing has changed since the last visit'));
-  writeFileSync(file, original.replace(/\n*$/, '\n') + '## Smoke section\n• Smoke diff task [Next]\n• Smoke idea still waiting #idea\n');
+  writeFileSync(file, original.replace(/\n*$/, '\n') + '## Smoke section\n• Smoke diff task [Next]\n• Smoke task still waiting\n');
   const diff = await call('review_context', { notebooks: [first] });
   check('a change shows only the changed section, its lines marked',
         diff.text.includes('### Smoke section (new section)') && diff.text.includes('+ • Smoke diff task [Next]   ← new task')
         && !diff.text.includes('No snapshot'), diff.text.split('## What changed')[1]);
   check('a new scheduled line comes whole under its group',
-        diff.text.split('## Scheduled lines')[1]?.split('## Ideas')[0].includes('### Next\n• Smoke diff task [Next]   ← task, new'),
-        diff.text.split('## Scheduled lines')[1]?.split('## Ideas')[0]);
+        diff.text.split('## Scheduled lines')[1]?.split('## What changed')[0].includes('### Next\n• Smoke diff task [Next]   ← task, new'),
+        diff.text.split('## Scheduled lines')[1]?.split('## What changed')[0]);
   check('a snapshot holds fingerprints, not text', !readFileSync(pending, 'utf8').includes('Smoke diff'));
   await call('write_notes', { notebook: first, content:
-    '## Open suggestions\n- 2026-10-18 — Smoke diff task — why: it is there\n- 2026-10-18 — Smoke task the user deleted — why: gone\n- 2026-10-18 — Smoke idea still waiting — why: an idea\n\n## Observations\n' });
+    '## Open suggestions\n- 2026-10-18 — Smoke diff task — why: it is there\n- 2026-10-18 — Smoke task the user deleted — why: gone\n- 2026-10-18 — Smoke task still waiting — why: unscheduled\n\n## Observations\n' });
   const status = await call('review_context', { notebooks: [first] });
   check('open suggestions come with what the notebook shows of them',
         status.text.includes('- Smoke diff task: scheduled [Next] in Smoke section — accepted')
         && status.text.includes('- Smoke task the user deleted: not in the notebook')
-        && status.text.includes('- Smoke idea still waiting: still an #idea, unscheduled, in Smoke section — waiting'), status.text.split('## Learnings')[0].slice(-400));
-  check('the review\'s own #idea suggestion is marked as its own',
-        status.text.includes('Smoke idea still waiting · in: Smoke section (your own open suggestion, from your notes)'), status.text.split('## Ideas')[1]?.slice(0, 400));
+        && status.text.includes('- Smoke task still waiting: unscheduled in Smoke section — waiting'), status.text.split('## Learnings')[0].slice(-400));
   const stray = await call('review_context', { notebooks: ['Definitely Not Connected'] });
   check('review_context refuses an unconnected notebook', stray.isError);
 
