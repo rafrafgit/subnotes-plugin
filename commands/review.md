@@ -38,6 +38,11 @@ date: `# Earn 4k a month from freelance work [2027-06-01]`. A heading under
 it is a part. The text under a goal says why and how, and links the
 notebooks that serve it (`[[Freelance]]`).
 
+A goal with a repeat is **ongoing**: something to keep doing, with no
+deadline and no number, often about the people in the user's life
+(`## See my friends [Monthly]`). It has no plan check; step 5b says how to
+review it.
+
 ## 2. Check the goals themselves
 
 Stop at the first gap, and make it your first point:
@@ -47,7 +52,8 @@ Stop at the first gap, and make it your first point:
    Without a goal, review the notebooks by their purpose (step 10) instead.
 2. **Each has a number and a date.** Today, Next, Soon or Someday is no
    date. A part can borrow its whole's number. A goal the user would rather
-   judge yes or no needs a date and a clear yes/no line, not a number.
+   judge yes or no needs a date and a clear yes/no line, not a number. An
+   ongoing goal needs neither: its repeat is its measure.
 3. **A goal's date has passed:** what comes next?
 
 Whether it's the right goal is theirs to say.
@@ -71,8 +77,9 @@ Order the goals:
 
 1. a step due today or overdue
 2. behind pace (its `plan` learning against what the notebooks show)
-3. the nearest date
-4. Goals' order
+3. an ongoing goal `whats_due` lists as due
+4. the nearest date
+5. Goals' order
 
 If a goal was named above, take only it, and run its plan check (step 5)
 whether or not it's due. If a notebook was named, take the goals it serves,
@@ -119,6 +126,28 @@ Run it too, instead of your own points, when you find the plan broken:
 no plan, no next step, behind pace, or the number can't be reached.
 
 When it hands back, go on with step 6 from what it settled.
+
+## 5b. An ongoing goal
+
+An ongoing goal takes this step in place of steps 5 to 7. `whats_due` says
+when it last happened, or what's planned. Your notes on the goal keep both
+as a `Last happened:` and a `Planned:` line (step 9), and that's where
+`whats_due` reads them, so keep them exact.
+
+Call `review_context` with the goal: it needs no linked notebook. Then
+raise one point, the way a friend would bring it up — warm, short, never a
+reproach:
+
+- **Something was planned and its date has passed:** ask whether it
+  happened. A yes is the new `Last happened`.
+- **Not known when it last happened:** ask when, in one line.
+- **It's been most of a period:** suggest one concrete thing to do, from
+  what the learnings say the user and the people in it enjoy, with a day
+  for it. Offer it as a dated task in the notebook the goal links, or the
+  one matched by purpose: "**Invite Sam and Alex for dinner on Saturday**
+  → Friends [2026-11-01]". On a yes, it's the new `Planned`.
+
+Then go on with step 8, with this one point.
 
 ## 6. Read the goal's notebooks
 
@@ -254,6 +283,18 @@ Freelance (linked), Portfolio site (matched by purpose)
   waved off — facts, not what to suggest next. Shorten old ones.
 - **Dates:** only what the notebooks don't hold: a call, a reply expected,
   an event.
+
+For an ongoing goal, put two lines right under `Last review:`, each with
+its date first, and keep them when nothing changed:
+
+```
+Last review: 2026-10-27
+Last happened: 2026-10-18 — dinner at Sam's
+Planned: 2026-11-01 — dinner here, Sam and Alex invited
+```
+
+Drop `Planned:` once it has happened or been called off; leave out
+`Last happened:` until the user says when.
 
 Nothing about a task's schedule, due date or status: it goes stale within a
 day, and `review_context` reads it fresh each time.

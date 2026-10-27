@@ -259,9 +259,29 @@ if (process.env.SUBNOTES_DIR) {
     check('an unknown goal is refused, naming the goals', (await call('review_context', { goal: 'No such goal' })).text.includes(`"${goal}"`));
     check('notes take a goal or a notebook, not both', (await call('read_notes', { goal, notebook: served.name })).isError);
 
+    // An ongoing goal: a repeat, no notebook, due by when it last happened.
+    const ongoing = 'Smoke ongoing';
+    const ongoingDir = join(DIR, 'agent', 'review', 'goals', ongoing);
+    writeFileSync(goalsFile, readFileSync(goalsFile, 'utf8') + `## ${ongoing} [Monthly]\n`);
+    const fresh = await call('whats_due', {});
+    check('whats_due lists an ongoing goal not known to have happened',
+          fresh.text.includes(`- Ongoing goal: ${ongoing} [Monthly] — not known when it last happened`), fresh.text);
+    check('an ongoing goal has no plan check', fresh.text.includes(`- ${ongoing} [Monthly] — ongoing, no plan check`), fresh.text);
+    const octx = await call('review_context', { goal: ongoing });
+    check('review_context takes an ongoing goal with no notebook', !octx.isError && octx.text.includes(`# Goal: ${ongoing} [Monthly] — ongoing`), octx.text.slice(0, 300));
+    const day = new Date().toLocaleDateString('sv');
+    await call('write_notes', { goal: ongoing, content: `Last review: ${day}\nLast happened: ${day} — smoke` });
+    const after = await call('whats_due', {});
+    check('an ongoing goal that just happened isn\'t due', after.text.includes(`last happened ${day}; raise it from`), after.text);
+    await call('write_notes', { goal: ongoing, content: `Last review: 2000-01-01\nLast happened: 2000-01-01 — smoke\nPlanned: 2000-01-15 — smoke` });
+    const missed = await call('whats_due', {});
+    check('an ongoing goal whose plan has passed asks if it happened', missed.text.includes('was planned for 2000-01-15: did it happen?'), missed.text);
+
     writeFileSync(goalsFile, original);
     rmSync(goalDir, { recursive: true, force: true });
     rmSync(`${goalDir}.md`, { force: true });
+    rmSync(ongoingDir, { recursive: true, force: true });
+    rmSync(`${ongoingDir}.md`, { force: true });
   }
 }
 

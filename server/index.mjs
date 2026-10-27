@@ -1376,7 +1376,7 @@ function reviewContext({ notebooks, goal }) {
   const g = goal ? findGoal(m, goal) : null;
   let names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
   if (g && !names.length) names = g.notebooks.map(nb => nb.name);
-  if (!names.length) throw new UserError(g
+  if (!names.length && !g?.every) throw new UserError(g
     ? `The goal "${g.name}" links no connected notebook: name the notebooks that serve it.`
     : 'Name at least one notebook, or a goal.');
   const nbs = names.map(n => findNotebook(m, n));
@@ -1389,7 +1389,7 @@ function reviewContext({ notebooks, goal }) {
     '',
     '# Shared open questions',
     sharedEntryLines('questions'),
-    ...(g ? ['', `# Goal: ${g.name}${g.date ? ` [${g.date}]` : ''}`, '',
+    ...(g ? ['', `# Goal: ${g.name}${g.every ? ` [${g.every}] — ongoing: ${ongoingState(g).st}` : g.date ? ` [${g.date}]` : ''}`, '',
       '## Your notes on this goal', goalNotesText(g.name) || 'No notes yet — this is the first review of it.'] : []),
     ...nbs.flatMap(nb => ['', contextFor(nb, g?.name ?? null)]),
   ].join('\n');
@@ -1414,8 +1414,9 @@ const SCHEDULE_PARTS = /((?:\s*\[[^\[\]]+\])+)\s*$/;
 const PLAN_CHECKS = () => join(AGENT_DIR, 'plan', 'checks.json');
 
 // Every heading in Goals with a schedule is a goal: a date, maybe with a
-// time, or Today, Next, Soon, Someday (GOALS_NOTEBOOK_SPEC.md). Its text runs
-// to the next heading, whatever the level, so a goal's parts are their own.
+// time, or Today, Next, Soon, Someday (GOALS_NOTEBOOK_SPEC.md), or a repeat,
+// which makes it ongoing (below). Its text runs to the next heading, whatever
+// the level, so a goal's parts are their own.
 function goalsIn(text) {
   const lines = text.split('\n');
   const goals = [];
@@ -1427,18 +1428,45 @@ function goalsIn(text) {
     if (parts.some(p => p.toLowerCase() === 'done')) continue;
     const date = parts.map(p => /^(\d{4}-\d{2}-\d{2})/.exec(p)?.[1]).find(Boolean) ?? null;
     const word = parts.find(p => PRIORITIES.some(x => x.toLowerCase() === p.toLowerCase())) ?? null;
+    const every = REPEATS.find(r => parts.some(p => p.toLowerCase() === r.toLowerCase())) ?? null;
     const name = h[2].slice(0, tags.index).trim();
-    if (!name || (!date && !word)) continue;
+    if (!name || (!date && !word && !every)) continue;
     const block = [lines[i]];
     for (let k = i + 1; k < lines.length && !HEADING.test(lines[k]); k++) if (lines[k].trim()) block.push(lines[k]);
     const links = [...block.slice(1).join('\n').matchAll(/\[\[([^\]]+)\]\]/g)].map(l => l[1].trim());
-    goals.push({ name, level: h[1].length, date, word, links,
+    goals.push({ name, level: h[1].length, date, word, every, links,
       hash: fingerprint(block.map(l => l.replace(/\s+$/, '')).join('\n')) });
   }
   return goals;
 }
 
 const goalKey = name => normText(name);
+
+// A goal with a repeat is ongoing (2026-10-27): something to keep doing —
+// see friends every month — not to reach by a date. It has no plan check;
+// the review raises it once most of a period has gone by since it last
+// happened, unless something is planned. The review's notes on the goal
+// keep both dates, as "Last happened: <date> — …" and "Planned: <date> — …"
+// lines. A date beside the repeat, if the app gave it one, means nothing
+// here.
+const REPEATS = ['Daily', 'Weekly', 'Biweekly', 'Monthly', 'Quarterly', 'Yearly'];
+const PERIOD_DAYS = { Daily: 1, Weekly: 7, Biweekly: 14, Monthly: 30, Quarterly: 91, Yearly: 365 };
+const addDays = (date, n) => new Date(Date.parse(date) + n * 86_400_000).toISOString().slice(0, 10);
+
+function ongoingState(g) {
+  const notes = goalNotesText(g.name);
+  const dated = label => new RegExp(`^${label}:\\s*(\\d{4}-\\d{2}-\\d{2})`, 'mi').exec(notes)?.[1] ?? null;
+  const last = dated('Last happened'), planned = dated('Planned'), reviewed = dated('Last review');
+  const nudge = Math.max(1, Math.round(PERIOD_DAYS[g.every] * 0.7));
+  const now = today();
+  let due = false, st;
+  if (planned && planned >= now) st = `planned for ${planned}`;
+  else if (planned && (!last || last < planned)) { due = true; st = `was planned for ${planned}: did it happen?`; }
+  else if (!last) { due = true; st = 'not known when it last happened'; }
+  else if (daysSince(last) >= nudge) { due = true; st = `last happened ${last}, ${daysSince(last)} days ago`; }
+  else st = `last happened ${last}; raise it from ${addDays(last, nudge)}`;
+  return { due, st, reviewed };
+}
 
 // The goals in Goals, each with the connected notebooks its own text links.
 function goalsWithNotebooks(m) {
@@ -1499,6 +1527,7 @@ function planDue(m) {
   const now = today();
   const due = [], lines = [];
   for (const g of goals) {
+    if (g.every) { lines.push(`${'  '.repeat(g.level - 1)}- ${g.name} [${g.every}] — ongoing, no plan check`); continue; }
     const c = checks[goalKey(g.name)];
     const checked = c?.checked ?? fallback;
     const whys = [];
@@ -1522,7 +1551,8 @@ function planDue(m) {
 // tomorrow: what it didn't reach waits, so the next /subnotes:run goes on to
 // Do (2026-10-24). Due tasks aren't the review's: they're Do's. A goal that
 // links no notebook isn't due here; the review matches it to notebooks by
-// purpose.
+// purpose. An ongoing goal is due by its repeat, not its notebooks'
+// changes (ongoingState), linked or not.
 function reviewDue(m) {
   const now = today();
   const state = (nb, old) => {
@@ -1534,6 +1564,13 @@ function reviewDue(m) {
   const rows = [];
   const linked = new Set();
   for (const g of goalsWithNotebooks(m)) {
+    if (g.every) {
+      const o = ongoingState(g);
+      g.notebooks.forEach(nb => linked.add(nb));
+      rows.push({ name: g.name, kind: 'ongoing', every: g.every, visited: o.reviewed, changed: o.due, st: o.st,
+        notebooks: g.notebooks.length ? g.notebooks.map(nb => nb.name) : null });
+      continue;
+    }
     if (!g.notebooks.length) { rows.push({ name: g.name, kind: 'goal', none: true }); continue; }
     const seen = g.notebooks.map(nb => { linked.add(nb); return state(nb, readSnapshot(goalSnapshotPath(g.name, nb)) || readSnapshot(snapshotPath(nb))); }).filter(Boolean);
     const visits = seen.map(r => r.visited).filter(Boolean).sort();
@@ -1548,10 +1585,12 @@ function reviewDue(m) {
   const ranToday = rows.some(r => r.visited === now);
   const due = [], lines = [];
   for (const r of rows) {
-    const label = r.kind === 'goal' ? `Goal: ${r.name}${r.notebooks ? ` (${r.notebooks.join(', ')})` : ''}` : `Notebook no goal links: ${r.name}`;
+    const label = r.kind === 'notebook' ? `Notebook no goal links: ${r.name}`
+      : `${r.kind === 'ongoing' ? `Ongoing goal: ${r.name} [${r.every}]` : `Goal: ${r.name}`}${r.notebooks ? ` (${r.notebooks.join(', ')})` : ''}`;
     if (r.none) { lines.push(`- ${label} — links no connected notebook; the review matches notebooks to it by purpose`); continue; }
     let st;
-    if (r.visited === now) st = `reviewed today${r.changed ? ', changed since' : ''}`;
+    if (r.kind === 'ongoing') st = r.visited === now ? `reviewed today, ${r.st}` : r.st;
+    else if (r.visited === now) st = `reviewed today${r.changed ? ', changed since' : ''}`;
     else if (!r.visited) st = 'never reviewed';
     else st = r.changed ? `changed since the last review, ${r.visited}` : `no change since the last review, ${r.visited}`;
     const waiting = r.changed && r.visited !== now;
@@ -1758,11 +1797,11 @@ function whatsDue() {
       : journalNew ? `"${journal.name}" has an entry since Journal last ran.` : `Nothing new in "${journal.name}" since Journal last ran.`,
     '',
     `## Review — ${review.due.length ? `due for ${review.due.join(', ')}` : plan.due.length ? 'due for its plan checks' : 'not due'}`,
-    'Due once a day, for each goal whose notebooks changed since its last review, and each notebook with a purpose no goal links.',
+    'Due once a day, for each goal whose notebooks changed since its last review, each ongoing goal (a repeat, no deadline) once most of a period has gone by since it last happened with nothing planned, and each notebook with a purpose no goal links.',
     ...review.lines,
     '',
     `## Plan checks, run inside the review — ${plan.due.length ? `due for ${plan.due.length} goal${plan.due.length > 1 ? 's' : ''}` : 'none due'}`,
-    `A goal's plan check is due ${PLAN_EVERY_DAYS} days after its last check, when its text has changed since, or when its date has passed.`,
+    `A goal's plan check is due ${PLAN_EVERY_DAYS} days after its last check, when its text has changed since, or when its date has passed. An ongoing goal has none.`,
     ...plan.lines,
     '',
     `## Prune — ${prune.due ? `due: ${prune.why}` : 'not due'}`,
@@ -2036,7 +2075,7 @@ const TOOLS = [
   },
   {
     name: 'whats_due',
-    description: "For /subnotes: what's due, read-only — each goal's last plan check, each notebook's last review visit and whether it changed since, and the tasks Do would pick up — and which to run first: Plan, Journal, Review, Prune or Do.",
+    description: "For /subnotes: what's due, read-only — each goal's last plan check, each notebook's last review visit and whether it changed since, when each ongoing goal last happened, and the tasks Do would pick up — and which to run first: Journal, Review, Prune or Do.",
     inputSchema: { type: 'object', properties: {} },
     run: whatsDue,
   },
