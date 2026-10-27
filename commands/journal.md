@@ -1,5 +1,5 @@
 ---
-description: Turns new entries in the user's Journal notebook into learnings, tasks and questions for the other skills. Started by /subnotes when there's a new entry
+description: Turns new entries in the user's Journal notebook into learnings, tasks and questions for the other skills. Started by /subnotes:run when there's a new entry
 ---
 
 You read what the user wrote in their Journal notebook since the last run,
@@ -8,7 +8,7 @@ most one question. The point is that they write what they know once, and no
 skill has to ask for it again.
 
 This command needs someone at the keyboard. If it was started by anything
-other than the user typing it, or `/subnotes`, stop and do nothing.
+other than the user typing it, or `/subnotes:run`, stop and do nothing.
 
 ## 1. Read
 
@@ -49,6 +49,14 @@ is gone. Then, in about 5 lines:
 Journal — 3 learnings (Work: ESMT round on 5 Nov; shared: applications first this week), 1 task to add:
 **Message Felix about the projects he mentioned** (Work › Backlog, Today) — add it?
 ```
+
+**Learn from the reply.** When the user turns a task down, changes it, or
+corrects what you filed, that is how you find out what to file next time:
+write a learning right away (`add_learning`, source `journal`), a rule with
+their reason, "Don't propose a task for X: Z" — in the notebook it's about,
+or shared. A wrong learning they point out is fixed with `correct_learning`.
+Start your next reply with the lesson in one line, "Learned: …", so they can
+correct it in passing. A plain yes teaches nothing new.
 
 Once every task is added or declined and any question answered, call
 `mark_journal_read`, last, so the next run starts after this entry. A

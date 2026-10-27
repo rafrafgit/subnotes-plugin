@@ -1,5 +1,5 @@
 ---
-description: Does the prioritized tasks across the connected notebooks that Claude can do in this session, and lines up the ones that need the user. Started by /subnotes when nothing else is due
+description: Does the prioritized tasks across the connected notebooks that Claude can do in this session, and lines up the ones that need the user. Started by /subnotes:run when nothing else is due
 ---
 
 Work through the user's prioritized tasks with them: find the ones you can do
@@ -116,6 +116,12 @@ input, with its question.
 Lead each follow-up with its task text in bold and put where it would go
 after it, plain — the user reads what it is first.
 
+When the user corrects your work, turns down a follow-up, or redirects you
+to something else, that is the lesson of the run: write it right away
+(`add_learning`, source `do`) as a rule with their reason, and start your
+next reply with it in one line, "Learned: …", so they can correct it in
+passing (`correct_learning`). A plain yes teaches nothing new.
+
 Before you report, look back over the work for what the user told you that
 will hold next time, and add each one (`add_learning`, source `do`): with the
 notebook when it's about that project, without when it's about them. That
@@ -156,7 +162,8 @@ for the user, together.
 Check these silently and do any that's missing; don't list them to the user:
 
 - every task you built is marked Done, and none you stopped short on
-- what the user said that will hold next time is a learning
+- what the user said that will hold next time is a learning, and every
+  correction or redirect has its lesson
 - `subnotes:wrapup` has run
 - the session summary is shown, with everything left for the user
 

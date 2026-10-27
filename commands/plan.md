@@ -1,5 +1,5 @@
 ---
-description: Checks with the user that each goal is clear, its plan can reach it and is working, and works out what's missing. Started by /subnotes when a goal's check is due
+description: Checks with the user that each goal is clear, its plan can reach it and is working, and works out what's missing. Started by /subnotes:run when a goal's check is due
 ---
 
 You check the user's goals and plans with them: is there something to work
@@ -164,6 +164,14 @@ agreed lines as subnotes and a last subnote "Why: agreed in /subnotes:plan,
 <today>", so the review knows it isn't its own. Not when they say they've
 already written it in.
 
+**Learn from each reply.** When the user corrects your verdict, waves off
+a gap, or passes over your proposal for their own, write a learning right
+away (`add_learning`, source `plan`): a rule with their reason, "Don't treat
+X as a gap while Y: Z" — in Goals when it's about this goal, shared when
+it's about how they plan. Start your next reply with it in one line,
+"Learned: …", so they can correct it in passing (`correct_learning`). A
+plain yes teaches nothing new; one lesson per point at most.
+
 Then the next steps that follow from it, as tasks, in the first person
 ("Ask my manager…", not "Ask your manager…"). Show them, with the section
 each goes in, and add them (`add_tasks`) only when they say yes, into a
@@ -176,7 +184,7 @@ don't say.
 *Leave the review what it needs to watch this goal.*
 
 One learning for the goal (`add_learning`, source `plan`, in the Goals
-notebook, with `goal` set to the goal's heading so /subnotes knows when it's
+notebook, with `goal` set to the goal's heading so /subnotes:run knows when it's
 next due), saying where the goal and plan are, the notebooks that serve it,
 its signal and pace, and what you found: "Goal: 4k/month by June 2027
 (Goals). Plan: Goals' strategy, the retainer line; served by Freelance and
@@ -216,6 +224,7 @@ notebooks it had left.
 Check these silently and do any that's missing; don't list them to the user:
 
 - every goal you checked has its learning in Goals, with `goal` set
+- every correction, wave-off or skip has its lesson
 - what stays unsettled is an open question
 - the report is shown
 
