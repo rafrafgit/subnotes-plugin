@@ -185,6 +185,12 @@ Look in this order, and stop at three:
    or changed.
 4. **Other new or changed lines** that bear on the goal. Never dig through
    the rest.
+5. **One idea of your own,** if there's room: something that would move
+   the goal and isn't in any notebook yet, from what you know of the goal,
+   the user and the field. Say it's new ("Not in your notes: …"), with the
+   task it leads to. The notebooks only hold what the user has already
+   thought of; a friend brings what they haven't. At most one per goal,
+   and only one the learnings don't rule out.
 
 Worth raising: a task too big for a day (offer a first step), a vague task
 (offer a sharper wording), something important that hasn't moved in weeks,
