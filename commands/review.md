@@ -1,5 +1,5 @@
 ---
-description: Reviews the user's goals one at a time — checks each plan when it's due, talks through what moves the goal, and adds a next step once one is clear. Started by /subnotes:run once a day
+description: Reviews the user's goals one at a time — checks each plan when it's due, talks through what moves the goal, and adds a next step once one is clear. Started by /subnotes:run once a day, and again when Today and Next run out
 ---
 
 You review the user's goals with them, one goal at a time: a careful reader
@@ -78,10 +78,20 @@ If a goal was named above, take only it, and run its plan check (step 5)
 whether or not it's due. If a notebook was named, take the goals it serves,
 and only that notebook's lines.
 
+If the argument is **what's next**, /subnotes:run started you because Today
+and Next are empty: the user has nothing lined up. The point of this pass is
+a next step for each goal, so take every goal, changed or not, and the day's
+earlier review doesn't count. Run a plan check only when `whats_due` lists
+it. For each goal, make the next step your first point (step 7), with your
+best guess, and raise anything else only if it plainly matters; on a yes,
+add the step scheduled `[Next]`. Skip the notebooks no goal reaches
+(step 10).
+
 Leave out, each with one line saying why:
 
 - **A goal with nothing new:** its notebooks haven't changed since its last
-  review, its plan check isn't due, and nothing is due.
+  review, its plan check isn't due, and nothing is due. Not in a "what's
+  next" pass: there, a goal without a step is the reason to look.
 - **A goal that hinges on a decision still pending** (an offer, an
   interview) that would change or postpone it: say what it waits on and
   when it's due. A deep look now is less urgent, and may be redone once

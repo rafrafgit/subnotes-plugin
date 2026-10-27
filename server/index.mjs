@@ -1402,7 +1402,14 @@ function reviewContext({ notebooks, goal }) {
 // REVIEW_BY_GOAL_SPEC.md), then the prune, then Do. Until the connector
 // reads rituals, default rhythms decide, from dates already kept here — a
 // goal's plan check, and each goal's last review (2026-10-24).
+//
+// Do works on Today and Next only. When both are empty, Soon tasks are moved
+// up to Next on the user's yes, if there are enough of them; if not, the
+// review runs again, even on a day it already ran, to work out what's next
+// (2026-10-27).
 const PLAN_EVERY_DAYS = 30;
+const PROMOTE_MIN_SOON = 3;
+const PROMOTE_MAX = 3;
 const SCHEDULE_PARTS = /((?:\s*\[[^\[\]]+\])+)\s*$/;
 const PLAN_CHECKS = () => join(AGENT_DIR, 'plan', 'checks.json');
 
@@ -1601,10 +1608,11 @@ function markJournalRead() {
   return `Journal read up to now (${localTime(new Date())}).`;
 }
 
-// What Do would pick up: tasks, not headings, Today or overdue, then Next,
-// and Soon when those are fewer than three.
+// What Do would pick up: tasks, not headings, Today or overdue, then Next.
+// Soon counts only tasks tagged [Soon], the ones that can be moved up to
+// Next; a task dated in the coming days is upcoming, and comes up on its date.
 function doCounts(m) {
-  let now = 0, next = 0, soon = 0;
+  let now = 0, next = 0, soon = 0, upcoming = 0;
   for (const nb of m.notebooks) {
     let text;
     try { text = readFileSync(join(DIR, nb.file), 'utf8'); } catch { continue; }
@@ -1612,10 +1620,11 @@ function doCounts(m) {
       if (s.heading || /\[Done\]\s*$/i.test(s.line)) continue;
       if (s.group === 'Today') now++;
       else if (s.group === 'Next') next++;
+      else if (s.group === 'Soon' && s.due) upcoming++;
       else if (s.group === 'Soon') soon++;
     }
   }
-  return { now, next, soon };
+  return { now, next, soon, upcoming };
 }
 
 // MARK: - Prune
@@ -1737,7 +1746,9 @@ function whatsDue() {
   const journal = journalNotebook(m);
   let journalNew = false;
   try { journalNew = !!journal && journalHasNew(journal); } catch {}
-  const run = journalNew ? 'Journal' : review.due.length || plan.due.length ? 'Review' : prune.due ? 'Prune' : 'Do';
+  const queued = work.now + work.next > 0, promote = !queued && work.soon >= PROMOTE_MIN_SOON;
+  const run = journalNew ? 'Journal' : review.due.length || plan.due.length ? 'Review' : prune.due ? 'Prune'
+    : queued ? 'Do' : promote ? 'Do, moving Soon tasks to Next first' : "Review, for what's next";
   return [
     `Today: ${today()}`,
     `Run: ${run}`,
@@ -1758,9 +1769,9 @@ function whatsDue() {
     `Due ${PRUNE_EVERY_DAYS} days after the last prune.`,
     ...prune.lines,
     '',
-    '## Do',
-    `${work.now} task${work.now === 1 ? '' : 's'} Today or overdue, ${work.next} Next, ${work.soon} Soon, across the connected notebooks.`,
-    work.now + work.next < 3 && work.soon ? 'Fewer than three Today or Next, so Do adds Soon ones.' : null,
+    `## Do — ${queued ? 'has tasks' : promote ? 'Today and Next are empty: move Soon tasks up first' : "Today and Next are empty: review for what's next"}`,
+    `${work.now} task${work.now === 1 ? '' : 's'} Today or overdue, ${work.next} Next, ${work.soon} Soon, ${work.upcoming} dated in the next ${STALL_DAYS} days, across the connected notebooks.`,
+    `Do works on Today and Next. When both are empty: with ${PROMOTE_MIN_SOON} or more Soon, Do first offers to move up to ${PROMOTE_MAX} of them to Next; with fewer, the review runs again, even if it ran today, to work out what's next.`,
   ].filter(l => l !== null).join('\n');
 }
 

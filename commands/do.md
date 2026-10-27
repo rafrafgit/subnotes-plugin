@@ -31,12 +31,18 @@ when another was named: "most useful" below means most useful against its
 goals and strategy and whatever it says comes first, and a task it parks
 goes to the third group with that reason.
 
-Take the open tasks scheduled `[Today]` or overdue, then `[Next]`, then those
-due in the next 7 days, from every notebook you read. If that gives fewer
-than three, add `[Soon]` ones and say that you did. Skip `[Done]` and
-unscheduled tasks, and headings: a scheduled heading is a project, not a
-task. A task that hangs on an open question
-goes to "with your input", naming the question.
+Take the open tasks scheduled `[Today]` or overdue, then `[Next]`, from
+every notebook you read. Skip `[Done]` and unscheduled tasks, and headings: a
+scheduled heading is a project, not a task. A task that hangs on an open
+question goes to "with your input", naming the question.
+
+**Today and Next empty:** Next is what the user has decided to work on, so
+don't take `[Soon]` tasks on your own. With 3 or more `[Soon]` tasks, offer
+up to 3 to move to Next, the ones that move the goals most, each with its
+notebook and one short reason, in one question. On a yes, move the ones they
+pick (`set_schedule`, `Next`) and take those. Leave tasks with a date alone:
+they come up on their date. With fewer than 3, or on a no, there's nothing to
+take: say so, and that `/subnotes:run` reviews the goals for what's next.
 
 ## Sort them honestly
 
