@@ -68,18 +68,20 @@ Look in this order, and stop at three:
    - If the plan sets a pace ("5 applications a week") and the notebook
      shows less (2 this week), say how far short. This comes before
      everything else.
-2. **Today, overdue and Next,** every line; then **Soon** lines that are new
+2. **The user thinking out loud:** a new or changed line, anywhere, that's
+   a question, a doubt, a hunch or "I wonder…". They write what's on their
+   mind as plain text where it belongs, to be heard; an unchanged task
+   seldom has news.
+3. **Today, overdue and Next,** every line; then **Soon** lines that are new
    or changed.
-3. **New or changed lines** in Someday or unscheduled text: the user
-   writes what's on their mind as plain text, where it belongs. Never dig
+4. **Other new or changed lines** in Someday or unscheduled text. Never dig
    through the rest.
 
 Worth raising: a task too big for a day (offer a first step), a vague task
 (offer a sharper wording), something important that hasn't moved in weeks,
-recent work that drifts from the goal (ask, don't judge), the user thinking
-out loud (a problem, a question, "blocked by"), a missing fact that would
-change what you raise (with your guess), and an open question other work
-waits on.
+recent work that drifts from the goal (ask, don't judge), a problem or
+"blocked by", a missing fact that would change what you raise (with your
+guess), and an open question other work waits on.
 
 Don't raise what was declined or skipped before (until its text changes),
 what Goals parks, what the learnings rule out or say was already talked
