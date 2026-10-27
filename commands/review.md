@@ -235,8 +235,8 @@ Don't commit unless they ask. Otherwise propose it as a task:
   step, Soon for one that waits on something, Today only when it's due
   today. Do starts from Today and Next, so a task without a schedule
   waits until the user gives it one.
-- Ask "Shall I add it?" At most two per notebook per visit, and twenty per
-  notebook a week (your notes keep count).
+- Ask "Shall I add it?" At most two per notebook per visit: each is added
+  only on a yes, so no weekly count is needed.
 
 If **kept** or **changed**, `add_task` it, without `#idea` and with the
 schedule you suggested, or the one they gave instead (a reply to the user's
@@ -265,8 +265,6 @@ Last visit: 2026-10-12
 
 ## Lessons
 - Don't raise the portfolio while a client proposal is due: the user does paid work first
-
-Tasks proposed this week: 1
 
 ## Waiting to ask
 - 2026-10-12 — Is the side project with Sam still wanted? (Status)
