@@ -11,6 +11,15 @@ This command needs someone at the keyboard. If it was started by anything
 other than the user typing it, stop and do nothing: it changes files and
 runs commands.
 
+**Started quietly** (the argument is `quiet`, not a notebook):
+`/subnotes:run` started you, and it opens the conversation. Read and sort
+as below, but don't show the groups: hand back your plan for today — the
+one to three tasks that matter most and why, the first task you'd start
+on, and what needs the user — and, if Today and Next are empty, the Soon
+tasks you'd move up, as a point. Then do the work as below once the run
+has opened, with its reports. Leave the rating to the run: skip "Rate the
+run".
+
 ## Which notebooks
 
 Call `start_run` (skill `do`) and `list_notebooks`. If a notebook was named, use only it, matching
@@ -170,11 +179,14 @@ question one line, the time and what was done:
 35 min · 2 done, 1 stopped, 1 commit · How was this run?
 ```
 
-Options: Great, Good, Meh, Waste of time. Save it with `rate_run`: the line
-without the time as `did`, and anything they typed as `comment`; no answer
-is `Skipped`. On Meh or Waste of time, ask once what would have made it
-worth it, and save the answer as a lesson (`add_learning`, shared, source
-`do`).
+Options: Great, Good, Meh, Waste of time. Then ask why, once, in one line of
+the chat: "Why was it good?" on Great or Good, "What would have made it
+worth it?" on Meh or Waste of time. The ratings are how the skills learn,
+and the why is what they learn from. Save it with `rate_run` once they've
+answered: the line without the time as `did`, the why and anything else they
+typed as `comment`; no rating is `Skipped`. Save the why as a lesson too
+(`add_learning`, shared, source `do`): what to keep doing, or what to
+change.
 
 ## Before you stop
 

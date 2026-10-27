@@ -64,11 +64,14 @@ AskUserQuestion tool, the question one line, the time and what was done:
 2 min · 1 learning, 1 task added · How was this run?
 ```
 
-Options: Great, Good, Meh, Waste of time. Save it with `rate_run`: the line
-without the time as `did`, and anything they typed as `comment`; no answer
-is `Skipped`. On Meh or Waste of time, ask once what would have made it
-worth it, and save the answer as a lesson (`add_learning`, shared, source
-`wrapup`).
+Options: Great, Good, Meh, Waste of time. Then ask why, once, in one line of
+the chat: "Why was it good?" on Great or Good, "What would have made it
+worth it?" on Meh or Waste of time. The ratings are how the skills learn,
+and the why is what they learn from. Save it with `rate_run` once they've
+answered: the line without the time as `did`, the why and anything else they
+typed as `comment`; no rating is `Skipped`. Save the why as a lesson too
+(`add_learning`, shared, source `wrapup`): what to keep doing, or what to
+change.
 
 ## Rules
 

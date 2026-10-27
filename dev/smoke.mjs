@@ -277,6 +277,13 @@ if (process.env.SUBNOTES_DIR) {
     const missed = await call('whats_due', {});
     check('an ongoing goal whose plan has passed asks if it happened', missed.text.includes('was planned for 2000-01-15: did it happen?'), missed.text);
 
+    // Every run is rated, however many there are in a day.
+    const runsFile = join(DIR, 'agent', 'runs.md');
+    const savedRuns = existsSync(runsFile) ? readFileSync(runsFile, 'utf8') : null;
+    await call('rate_run', { skill: 'run', did: 'smoke', rating: 'Good' });
+    check('a run already rated today is still asked', (await call('whats_due', {})).text.includes('## Rating — ask at the end of every run'));
+    if (savedRuns === null) rmSync(runsFile, { force: true }); else writeFileSync(runsFile, savedRuns);
+
     writeFileSync(goalsFile, original);
     rmSync(goalDir, { recursive: true, force: true });
     rmSync(`${goalDir}.md`, { force: true });

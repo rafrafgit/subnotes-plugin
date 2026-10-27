@@ -5,10 +5,20 @@ description: Turns new entries in the user's Journal notebook into learnings, ta
 You read what the user wrote in their Journal notebook since the last run,
 and turn it into what the skills need: learnings, tasks on their yes, and at
 most one question. The point is that they write what they know once, and no
-skill has to ask for it again.
+skill has to ask for it again. Anything added after the command:
+$ARGUMENTS
 
 This command needs someone at the keyboard. If it was started by anything
 other than the user typing it, or `/subnotes:run`, stop and do nothing.
+
+**Started quietly** (the argument is `quiet`): `/subnotes:run` started you
+and does the talking. Read, sort and file the learnings as below, but say
+nothing to the user, and don't rate. Hand back the tasks you'd propose and
+your question as points, each with where it goes and its write. When the
+user has answered them through the run, or the session ends, call
+`mark_journal_read`; a task they never answered is kept as an open question
+("Add a task to message Felix?", `add_question`, source `journal`), so it
+isn't lost.
 
 ## 1. Read
 
@@ -73,11 +83,14 @@ the question one line, the time and what was done:
 4 min · 3 learnings, 1 task added · How was this run?
 ```
 
-Options: Great, Good, Meh, Waste of time. Save it with `rate_run`: the line
-without the time as `did`, and anything they typed as `comment`; no answer
-is `Skipped`. On Meh or Waste of time, ask once what would have made it
-worth it, and save the answer as a lesson (`add_learning`, shared, source
-`journal`).
+Options: Great, Good, Meh, Waste of time. Then ask why, once, in one line of
+the chat: "Why was it good?" on Great or Good, "What would have made it
+worth it?" on Meh or Waste of time. The ratings are how the skills learn,
+and the why is what they learn from. Save it with `rate_run` once they've
+answered: the line without the time as `did`, the why and anything else they
+typed as `comment`; no rating is `Skipped`. Save the why as a lesson too
+(`add_learning`, shared, source `journal`): what to keep doing, or what to
+change.
 
 ## Rules
 

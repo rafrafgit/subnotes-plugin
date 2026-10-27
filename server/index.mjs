@@ -1811,6 +1811,10 @@ function whatsDue() {
     `## Do — ${queued ? 'has tasks' : promote ? 'Today and Next are empty: move Soon tasks up first' : "Today and Next are empty: review for what's next"}`,
     `${work.now} task${work.now === 1 ? '' : 's'} Today or overdue, ${work.next} Next, ${work.soon} Soon, ${work.upcoming} dated in the next ${STALL_DAYS} days, across the connected notebooks.`,
     `Do works on Today and Next. When both are empty: with ${PROMOTE_MIN_SOON} or more Soon, Do first offers to move up to ${PROMOTE_MAX} of them to Next; with fewer, the review runs again, even if it ran today, to work out what's next.`,
+    '',
+    // Every run is rated while the skills are being tuned: the feedback is
+    // worth more than the interruption (2026-10-27). Was once a day.
+    '## Rating — ask at the end of every run, and why',
   ].filter(l => l !== null).join('\n');
 }
 
@@ -2064,7 +2068,7 @@ const TOOLS = [
   },
   {
     name: 'rate_run',
-    description: "Save the run with the user's rating to the runs log: when, how long, the rating, what it did, and any comment. Call it once they've rated it, or with Skipped when they didn't.",
+    description: "Save the run with the user's rating to the runs log: when, how long, the rating, what it did, and any comment. Call it once they've rated it and said why, with Skipped when they didn't answer.",
     inputSchema: { type: 'object', properties: {
       skill: { type: 'string', description: 'The skill that ran, one word.' },
       did: { type: 'string', description: 'What the run did, one line: the summary shown to the user, without the time.' },

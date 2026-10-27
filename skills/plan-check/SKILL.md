@@ -67,7 +67,9 @@ before holds.
 
 ## 4. Verdict and points, in one reply
 
-Open with "Plan check — <goal>", then one line each:
+Open with "Plan check — <goal>" — or, when `/subnotes:run` started you,
+with the goal in the user's own words ("Your business goal, then:"), since
+there the user never hears the names of the steps — then one line each:
 
 - the plan: good, or vague and what's vague
 - will it reach the goal, and why, with the numbers

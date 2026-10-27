@@ -11,6 +11,15 @@ $ARGUMENTS
 This needs someone at the keyboard. If it was started by anything other
 than the user or `/subnotes:run`, stop and do nothing.
 
+**Started quietly** (the argument is `quiet`): `/subnotes:run` started you
+and does the talking. Read and find what no longer holds as below, then
+hand the changes back as one point, in a line the user can say yes to
+without knowing what a prune is ("I'd tidy what I remember about you: 6
+lines that no longer hold — 2 merged, 4 out of date. OK?"), with the full
+list ready if they ask. Don't rate. On their yes the writes and
+`mark_pruned` follow as below; nothing to change: call `mark_pruned` and
+hand back nothing.
+
 ## 1. Read
 
 In one turn: `start_run` (skill `prune`), `prune_context`, `list_notebooks`, and `read_notebook` for
@@ -69,11 +78,14 @@ question one line, the time and what was done:
 6 min · 6 changes, Subnotes down to 40 · How was this run?
 ```
 
-Options: Great, Good, Meh, Waste of time. Save it with `rate_run`: the line
-without the time as `did`, and anything they typed as `comment`; no answer
-is `Skipped`. On Meh or Waste of time, ask once what would have made it
-worth it, and save the answer as a lesson (`add_learning`, shared, source
-`prune`).
+Options: Great, Good, Meh, Waste of time. Then ask why, once, in one line of
+the chat: "Why was it good?" on Great or Good, "What would have made it
+worth it?" on Meh or Waste of time. The ratings are how the skills learn,
+and the why is what they learn from. Save it with `rate_run` once they've
+answered: the line without the time as `did`, the why and anything else they
+typed as `comment`; no rating is `Skipped`. Save the why as a lesson too
+(`add_learning`, shared, source `prune`): what to keep doing, or what to
+change.
 
 ## Rules
 

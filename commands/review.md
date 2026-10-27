@@ -23,6 +23,31 @@ the review runs, and every question puts it on hold until they come back.
 Ask only what needs them (a decision, or a yes to a write), and ask once per
 goal.
 
+## Started quietly
+
+When the argument starts with `quiet`, `/subnotes:run` started you, and it
+does the talking: the user hears from it about their day, not from a
+review. Do the whole review as below, as carefully as ever: the goals, each
+goal's notebooks, its plan check when due, the points that would move it,
+the learnings and notes. What changes is only who says it:
+
+- **Say nothing to the user.** No order line, no goal openings, no one-line
+  sums, no score, no rating, no `review_elapsed`. To keep the wait short,
+  call `review_context` for all the goals you'll take in one turn.
+- **A plan check due:** don't start it. Make it a point: the goal, and why
+  it needs a look, in the user's terms ("five months left, and the
+  webinars haven't started").
+- **Each goal's points** (step 7), with their picks and writes (step 8),
+  are kept for the run. Save the goal's notes (step 9) with them under
+  Waiting to ask, so none is lost if the user stops before answering.
+- **Hand back** every point, goal by goal, most important first: the
+  goal, the noticing, your pick, the writes. That ends your part; the run
+  raises them. When the user answers, step 8's rules apply as they would
+  here (learn from the answer, what a yes leads to), and the notes of each
+  goal whose points were settled are rewritten.
+
+The rest of the argument (`what's next`, a goal's name) holds as usual.
+
 # Start from Goals
 
 ## 1. Read
@@ -339,11 +364,14 @@ their own: the fewer, the better you chose. The user's bar: under 90
 seconds to each first question.
 
 Then ask "How was this run?" with the AskUserQuestion tool. Options: Great,
-Good, Meh, Waste of time. Save it with `rate_run`: the score without the
-time as `did`, and anything they typed as `comment`; no answer is
-`Skipped`. On Meh or Waste of time, ask once what would have made it worth
-it, and save the answer as a lesson (`add_learning`, shared, source
-`review`).
+Good, Meh, Waste of time. Then ask why, once, in one line of the chat: "Why
+was it good?" on Great or Good, "What would have made it worth it?" on Meh
+or Waste of time. The ratings are how the skills learn, and the why is what
+they learn from. Save it with `rate_run` once they've answered: the score
+without the time as `did`, the why and anything else they typed as
+`comment`; no rating is `Skipped`. Save the why as a lesson too
+(`add_learning`, shared, source `review`): what to keep doing, or what to
+change.
 
 ## Before you stop
 

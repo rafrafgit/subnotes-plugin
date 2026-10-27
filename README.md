@@ -59,11 +59,13 @@ Ask what is on a notebook, or what to pick up next — reading is half the point
 Say "put that on the backlog" mid-conversation and it lands in the right
 notebook and section, or name them yourself: "… in Work, under Backlog".
 
-`/subnotes:run` is the one to start from: it runs whatever is due — the
-journal when there's a new entry; once a day, a review of the goals whose
-notebooks changed, with the plan check of any goal not checked for 30 days
-or changed since; once a month, a prune of what the skills have learned —
-and otherwise `/subnotes:do`. Each still works on its own.
+`/subnotes:run` is the one to start from, as often as you like: it talks with
+you about what matters most today and works on it with you. Behind that it
+catches up quietly on whatever is due — the journal when there's a new entry;
+once a day, a review of the goals whose notebooks changed, with the plan check
+of any goal not checked for 30 days or changed since; once a month, a prune of
+what the skills have learned — and brings in only what needs you. Each still
+works on its own.
 
 `/subnotes:journal` reads what you wrote in your Journal notebook since
 its last run, and files what the other skills need to know — dates, replies,
