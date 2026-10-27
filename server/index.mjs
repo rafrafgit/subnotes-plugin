@@ -1501,7 +1501,7 @@ function ideasContext({ notebooks }) {
 
 // MARK: - What's due
 
-// /subnotes picks the skill to run from what's due (RITUALS_SPEC.md, One
+// /subnotes:run picks the skill to run from what's due (RITUALS_SPEC.md, One
 // command): a plan check, then a review, then Do. Until the connector reads
 // rituals, default rhythms decide, from dates already kept here — a goal's
 // plan check, and each notebook's last review visit (2026-10-24).
@@ -1595,7 +1595,7 @@ function planDue(m) {
 // The review is due once a day, in the notebooks that changed since their
 // last visit (RITUALS_SPEC.md). Once it has visited any notebook today it
 // isn't due again until tomorrow: a notebook skipped or not reached waits,
-// so the next /subnotes goes on to Do (2026-10-24). Due tasks aren't the
+// so the next /subnotes:run goes on to Do (2026-10-24). Due tasks aren't the
 // review's: they're Do's.
 function reviewDue(m) {
   const now = today();
@@ -1689,7 +1689,7 @@ function doCounts(m) {
 
 // MARK: - Prune
 
-// The brain is pruned once a month from /subnotes (2026-10-25), in place of
+// The brain is pruned once a month from /subnotes:run (2026-10-25), in place of
 // the Calibrate skill: counting what was kept couldn't tell a finished task
 // the user deleted from a declined one, but a run by hand found stale,
 // duplicate and contradicting learnings, and the brain of a notebook no longer
@@ -1987,7 +1987,7 @@ const TOOLS = [
       notebook: { type: 'string', description: 'The notebook it is about. Leave out when it is about the owner or holds across notebooks.' },
       text: { type: 'string', description: 'One line, plainly written: the owner may read it.' },
       source: { type: 'string', description: 'The skill writing it, one word: review, do, plan.' },
-      goal: { type: 'string', description: "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check, so /subnotes knows when it's next due." },
+      goal: { type: 'string', description: "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check, so /subnotes:run knows when it's next due." },
       cites: { type: 'object', description: "The line it came from, when there is one — a task, a Journal entry's line — so the prune knows when that line is gone or Done. Kept beside the learning, not in it.", properties: {
         line: { type: 'string', description: "The line's words, as read_notebook shows them, without its marker or schedule tag." },
         notebook: { type: 'string', description: "The notebook the line is in. Leave out when it's the learning's own notebook." },
@@ -2023,7 +2023,7 @@ const TOOLS = [
   },
   {
     name: 'mark_pruned',
-    description: 'For the monthly prune, last: records today as the last prune, so /subnotes makes it due again in 30 days.',
+    description: 'For the monthly prune, last: records today as the last prune, so /subnotes:run makes it due again in 30 days.',
     inputSchema: { type: 'object', properties: {} },
     run: markPruned,
   },

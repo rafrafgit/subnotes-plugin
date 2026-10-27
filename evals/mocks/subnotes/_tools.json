@@ -235,7 +235,7 @@
      },
      "goal": {
       "type": "string",
-      "description": "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check, so /subnotes knows when it's next due."
+      "description": "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check, so /subnotes:run knows when it's next due."
      }
     },
     "required": [
@@ -312,7 +312,7 @@
   },
   {
    "name": "mark_pruned",
-   "description": "For the monthly prune, last: records today as the last prune, so /subnotes makes it due again in 30 days.",
+   "description": "For the monthly prune, last: records today as the last prune, so /subnotes:run makes it due again in 30 days.",
    "inputSchema": {
     "type": "object",
     "properties": {}

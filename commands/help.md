@@ -23,14 +23,14 @@ they need.
 - Say "put that on the backlog" mid-conversation and it lands in the right
   notebook and section. No command needed; they can name the notebook and
   section in the same sentence to be explicit.
-- `/subnotes` — the one to start from: it runs whatever is due, a plan check,
+- `/subnotes:run` — the one to start from: it runs whatever is due, a plan check,
   a review or the monthly prune, and otherwise Do. The commands below still work on their own.
 - `/subnotes:journal` — reads what they wrote in their Journal notebook
   and files what the skills need to know, so no skill asks for it again.
 - `/subnotes:wrapup` — the same for a chat with Claude that didn't start
   from a skill: its decisions become learnings, its open tasks are proposed.
   Claude offers it when they wrap up such a chat.
-- `/subnotes:prune` — once a month from `/subnotes`: clears what's stale,
+- `/subnotes:prune` — once a month from `/subnotes:run`: clears what's stale,
   duplicated or contradicted out of what the skills have learned, on one yes.
 - `/subnotes:review` — a review agent per notebook: it reads the notebook
   against its purpose, remembers earlier visits in its notes, keeps what it

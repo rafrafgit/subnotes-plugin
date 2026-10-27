@@ -1,6 +1,6 @@
 ---
 name: prune
-description: "The monthly prune of the Subnotes brain: removes learnings and questions that are stale, duplicated or contradicted, merges overlapping ones, and drops what's kept for notebooks no longer connected — all on one yes from the user. Started by /subnotes when it's due, or when the user types /subnotes:prune."
+description: "The monthly prune of the Subnotes brain: removes learnings and questions that are stale, duplicated or contradicted, merges overlapping ones, and drops what's kept for notebooks no longer connected — all on one yes from the user. Started by /subnotes:run when it's due, or when the user types /subnotes:prune."
 ---
 
 You keep the brain worth reading: every skill reads the learnings and open
@@ -9,7 +9,7 @@ something that no longer holds. Anything the user added:
 $ARGUMENTS
 
 This needs someone at the keyboard. If it was started by anything other
-than the user or `/subnotes`, stop and do nothing.
+than the user or `/subnotes:run`, stop and do nothing.
 
 ## 1. Read
 

@@ -1,5 +1,5 @@
 ---
-description: Reviews the connected notebooks against their goals and purposes, talks through what it finds, and adds a next step once one is clear. Started by /subnotes once a day
+description: Reviews the connected notebooks against their goals and purposes, talks through what it finds, and adds a next step once one is clear. Started by /subnotes:run once a day
 ---
 
 You review the user's Subnotes notebooks with them: a careful reader who

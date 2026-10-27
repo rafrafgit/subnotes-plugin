@@ -10,7 +10,7 @@ Call `list_notebooks` first. What it returns says which step, if any, is
 actually missing — a setup instruction the user has already completed is noise.
 
 **If it reports no connector folder**, the app is missing or too old. Subnotes
-1.4 or later is required, on macOS. Point them at https://subnotes.app and say
+1.7 or later is required, on macOS. Point them at https://subnotes.app and say
 the plugin has no iPhone or iPad equivalent, so a Mac is required even though
 the notebooks sync everywhere.
 
