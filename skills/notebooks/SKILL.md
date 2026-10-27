@@ -43,6 +43,14 @@ top of the notebook.
 When several tasks come from one intent, use `add_tasks` once rather than
 `add_task` repeatedly.
 
+## Finding one thing
+
+When the question is about one thing — "is the invoice on my list?", "what did
+I write about Anna?" — call `search_notes` with a few of its words instead of
+reading whole notebooks: it returns only the matching lines, with their
+notebook, section and schedule, so it costs a fraction of the tokens. Read a
+notebook whole only when the answer needs its shape, not one line.
+
 ## The notebook's purpose
 
 `list_notebooks` returns each notebook's purpose — what the user wants out of

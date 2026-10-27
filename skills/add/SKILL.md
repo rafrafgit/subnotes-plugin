@@ -15,6 +15,10 @@ it — "… in Freelance", "… under Bugs" — matching case-insensitively agai
 and if none of them fits, ask where it belongs rather than settling for the
 least-bad one. Write it as a physical, visible action.
 
+Look for it first (`search_notes`, a few of its words): when a task like it
+is already there, say where and ask before adding a second — a reworded copy
+gets past the duplicate check, and the user would have to delete one.
+
 Then say exactly what was added, one line per task — the user does not see the
 tool's own output, and the write cannot be taken back:
 

@@ -31,7 +31,9 @@ Nothing worth keeping: say so in one line and stop.
   something works, a cause found: a learning in that notebook.
 - **Something to do** that the chat left open — a task, proposed with its
   text in bold and where it goes, in the first person; added (`add_task`)
-  only on their yes.
+  only on their yes. Look for it first (`search_notes`, a few of its
+  words): a task already there is rescheduled on their yes
+  (`set_schedule`), not added twice.
 - **Unsettled, and other work waits on it** — one question.
 - **Everything else** — nothing: what was done and is now in the code or
   the notebook, how the chat went, anything personal.
@@ -53,8 +55,8 @@ From this chat — 1 learning (Freelance: quotes go out as PDFs, not links), 1 t
 
 ## Rules
 
-- Writes only add learnings, questions and tasks, and edit one line on a
-  yes, shown as old and new (`edit_line`); never claim more.
+- Writes only add learnings, questions and tasks, reschedule a task on a
+  yes, and edit one line on a yes, shown as old and new (`edit_line`); never claim more.
 - One learning per decision, plainly written: the user and other skills
   read them.
 - Keep replies short: lead with the question, in about 5 lines.
