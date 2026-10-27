@@ -14,5 +14,5 @@ My day rate is €400. Two clients this month said yes without asking about pric
 • Write the Northwind case study [Next]
 
 — From the connector, not part of the notebook —
-Last changed: 2026-10-27 15:03
+Last changed: 2026-10-27 15:36
 

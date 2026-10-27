@@ -5,11 +5,13 @@
 # Shared open questions
 (none)
 
+# Goal: Earn 4k a month from freelance design [2027-06-01]
+
+## Your notes on this goal
+No notes yet — this is the first review of it.
+
 # Freelance
 Purpose: Win and deliver freelance design work
-
-## Your notes
-No notes yet — this is the first review of it.
 
 ## Learnings about this notebook
 - 2026-10-18 · review · Applications are the plan's engine: a week under 5 is behind pace
@@ -49,4 +51,4 @@ Sent this week: 1 of 5.
 • Make a Notion template to sell on the side
 
 ## From the connector, not part of the notebook
-Last changed: 2026-10-27 15:03
+Last changed: 2026-10-27 15:36

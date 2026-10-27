@@ -230,6 +230,41 @@ if (process.env.SUBNOTES_DIR) {
   rmSync(snap, { force: true }); rmSync(pending, { force: true });
 }
 
+// The review by goal: a goal in Goals that links a notebook, added for the
+// test and taken out after, with its notes and snapshots.
+if (process.env.SUBNOTES_DIR) {
+  const nbs = JSON.parse(readFileSync(join(DIR, 'manifest.json'), 'utf8')).notebooks;
+  const goalsNb = nbs.find(n => n.role === 'goals');
+  const served = nbs.find(n => n.role !== 'goals' && n.role !== 'journal');
+  if (goalsNb && served) {
+    const goalsFile = join(DIR, goalsNb.file);
+    const original = readFileSync(goalsFile, 'utf8');
+    const goal = 'Smoke goal';
+    const goalDir = join(DIR, 'agent', 'review', 'goals', goal);
+    const safe = served.name.replace(/[\/:\0]/g, '-');
+    writeFileSync(goalsFile, original.replace(/\n*$/, '\n') + `# ${goal} [2099-01-01]\nServed by [[${served.name}]]\n`);
+
+    const ctx = await call('review_context', { goal });
+    check('review_context with a goal reads the notebook it links, with the goal\'s notes once',
+          !ctx.isError && ctx.text.includes(`# Goal: ${goal} [2099-01-01]`) && ctx.text.includes(`\n# ${served.name}\n`)
+          && ctx.text.split('## Your notes').length === 2, ctx.text.slice(0, 300));
+    check('a goal\'s look leaves its own snapshot pending', existsSync(join(goalDir, `${safe}.pending.json`)));
+    const saved = await call('write_notes', { goal, content: 'Last review: smoke' });
+    check('write_notes for a goal keeps its snapshots', !saved.isError && existsSync(join(goalDir, `${safe}.snapshot.json`))
+          && !existsSync(join(goalDir, `${safe}.pending.json`)), saved.text);
+    const back = await call('read_notes', { goal: `${goal} [2099-01-01]` });
+    check('read_notes finds a goal named with its schedule', back.text.trim() === 'Last review: smoke', back.text);
+    const due = await call('whats_due', {});
+    check('whats_due lists the review by goal', due.text.includes(`- Goal: ${goal} (${served.name})`), due.text);
+    check('an unknown goal is refused, naming the goals', (await call('review_context', { goal: 'No such goal' })).text.includes(`"${goal}"`));
+    check('notes take a goal or a notebook, not both', (await call('read_notes', { goal, notebook: served.name })).isError);
+
+    writeFileSync(goalsFile, original);
+    rmSync(goalDir, { recursive: true, force: true });
+    rmSync(`${goalDir}.md`, { force: true });
+  }
+}
+
 proc.kill();
 console.log(failures ? `\n${failures} failed` : '\nall passed');
 process.exit(failures ? 1 : 0);

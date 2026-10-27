@@ -10,5 +10,5 @@ Sent this week: 5 of 5.
 • Write the Northwind case study [Next]
 
 — From the connector, not part of the notebook —
-Last changed: 2026-10-27 15:03
+Last changed: 2026-10-27 15:36
 

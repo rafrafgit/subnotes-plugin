@@ -2,4 +2,4 @@
 type: fixed
 ---
 
-{{file:fixtures/read_notes/{input.notebook}.md}}
+{{file:fixtures/read_notes/{input.goal}.md}}

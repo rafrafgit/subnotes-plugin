@@ -32,6 +32,7 @@ const learnings = (name, lines) => entries(`What agents have learned — ${name}
     : 'About this notebook. Anything not about it is in shared.md.', lines);
 
 // The same made-up owner in every case: a freelance designer with one goal.
+const GOAL = 'Earn 4k a month from freelance design';
 const GOALS = `⟦PURPOSE:What I'm working toward⟧
 # Earn 4k a month from freelance design [2027-06-01]
 Why: be my own boss.
@@ -145,7 +146,10 @@ function writeFixture(dir, c) {
   writeFileSync(join(dir, 'agent/learnings/Goals.md'), learnings('Goals', GOALS_LEARNINGS));
   if (c.freelanceLearnings.length)
     writeFileSync(join(dir, 'agent/learnings/Freelance.md'), learnings('Freelance', c.freelanceLearnings));
-  if (c.journal) writeFileSync(join(dir, 'agent/review/Freelance.md'), c.journal);
+  if (c.journal) {
+    mkdirSync(join(dir, 'agent/review/goals'), { recursive: true });
+    writeFileSync(join(dir, 'agent/review/goals', `${GOAL}.md`), c.journal);
+  }
 }
 
 // One server per case, asked over stdio as Claude Code would.
@@ -177,18 +181,18 @@ function ask(dir, calls) {
 const NAMES = ['Goals', 'Freelance', 'Goals,Freelance'];
 const perName = [
   ['read_notebook', 'name', ['Goals', 'Freelance']],
-  ['review_context', 'notebooks', NAMES],
+  ['review_context', 'goal', [GOAL]],
   ['read_learnings', 'notebook', ['Goals', 'Freelance']],
   ['read_questions', 'notebook', ['Goals', 'Freelance']],
-  ['read_notes', 'notebook', ['Goals', 'Freelance']],
+  ['read_notes', 'goal', [GOAL]],
 ];
-const fixed = ['list_notebooks', 'review_elapsed'];
+const fixed = ['list_notebooks', 'whats_due', 'start_run', 'review_elapsed'];
 
 for (const [name, c] of Object.entries(CASES)) {
   const dir = mkdtempSync(join(tmpdir(), `subnotes-eval-${name}-`));
   writeFixture(dir, c);
   const calls = [
-    ...fixed.map(t => [t, {}]),
+    ...fixed.map(t => [t, t === 'start_run' ? { skill: 'review' } : {}]),
     ...perName.flatMap(([t, field, names]) =>
       names.map(n => [t, { [field]: field === 'notebooks' ? n.split(',') : n }])),
   ];

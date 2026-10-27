@@ -40,15 +40,17 @@ from there instead, without adding this marketplace first.
   the prune sees when that line is gone or Done
 - `read_questions` / `add_question` / `close_question` — open questions that
   decisions depend on; an answered one becomes a learning
-- `read_notes` / `write_notes` — the review's working memory per notebook
-- `review_context` — everything a review visit needs, for several notebooks in
-  one call, with the lines scheduled Today, Next and Soon and only what
-  changed since the last visit (kept as line fingerprints, never a copy of
-  the text)
+- `read_notes` / `write_notes` — the review's working memory per goal, or per
+  notebook no goal links
+- `review_context` — everything one goal's review needs, for the notebooks
+  that serve it, in one call, with the lines scheduled Today, Next and Soon
+  and only what changed since that goal's last review (kept as line
+  fingerprints, never a copy of the text)
 - `journal_entries`, `mark_journal_read` — what's new in the Journal
   notebook since Journal last ran, and marking it read
-- `whats_due` — what `/subnotes:run` runs: each goal's last plan check, each
-  notebook's last review, the last prune, and the tasks Do would pick up
+- `whats_due` — what `/subnotes:run` runs: each goal's last review and plan
+  check, notebooks no goal links, the last prune, and the tasks Do would
+  pick up
 - `prune_context`, `remove_notebook_brain`, `mark_pruned` — the monthly
   prune: every learnings and questions file, the brain kept for a notebook
   no longer connected, and marking it done
@@ -57,11 +59,11 @@ Ask what is on a notebook, or what to pick up next — reading is half the point
 Say "put that on the backlog" mid-conversation and it lands in the right
 notebook and section, or name them yourself: "… in Work, under Backlog".
 
-`/subnotes:run` is the one to start from: it runs whatever is due — a plan check
-of a goal not checked for 30 days, or changed since; a review of a notebook
-that changed since yesterday's; once a month, a prune of what the skills
-have learned — and otherwise `/subnotes:do`. The three
-below still work on their own.
+`/subnotes:run` is the one to start from: it runs whatever is due — the
+journal when there's a new entry; once a day, a review of the goals whose
+notebooks changed, with the plan check of any goal not checked for 30 days
+or changed since; once a month, a prune of what the skills have learned —
+and otherwise `/subnotes:do`. Each still works on its own.
 
 `/subnotes:journal` reads what you wrote in your Journal notebook since
 its last run, and files what the other skills need to know — dates, replies,
@@ -76,21 +78,19 @@ open is proposed on your yes. Claude offers it when you wrap up such a chat.
 removes or merges what's stale, duplicated or contradicted by the notebooks
 as they are now, on one yes. `/subnotes:run` runs it once a month.
 
-`/subnotes:review` reads each notebook that has a purpose, remembers earlier
-visits in its notes, and talks through what it finds with you in Claude Code,
-one question at a time. When the talk shows a next step is worth doing, it
-proposes the task, and adds it to the section it belongs in only on your yes.
+`/subnotes:review [goal]` goes through your goals one at a time. For each, it
+reads the notebooks that serve it (the ones the goal links in Goals, or
+matches by purpose), raises what would move it, and adds a next step only on
+your yes. When a goal's plan check is due, every 30 days or when the goal
+changes, it checks the plan first: that the goal has a measure and a date,
+that there's a plan, and that it can get there in time, with the arithmetic
+shown. Name a goal to review just that one, with its plan check. Notebooks
+no goal links are reviewed briefly, by their purpose.
 
 For the other direction, write what's on your mind as plain text where it
 belongs — "I wonder if Sam is as committed as I am" — and the review turns
 each new or changed line into an open question, a learning, or something to
 talk about.
-
-`/subnotes:plan [notebook]` checks your goals and plans with you: that each
-goal has a measure and a date, that there's a plan for it, and that the plan
-can get there in time — with the arithmetic shown. It works out what's
-missing with you and adds the next steps you agree to. The review asks for a
-goal and a plan before it suggests anything else, and sends you here.
 
 `/subnotes:do [notebook]` goes the other way: it reads the Today, Next and
 soon-due tasks across your connected notebooks, or just the one you name,

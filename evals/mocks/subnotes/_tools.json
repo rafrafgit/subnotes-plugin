@@ -428,21 +428,22 @@
   },
   {
    "name": "review_context",
-   "description": "For /subnotes:review: everything a visit needs, for every notebook named, in one call \u2014 the shared learnings and questions once, then per notebook its notes, what the notebook shows now of each suggestion the notes list as open, learnings, open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), and only what changed since the review last wrote that notebook's notes (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_notes, read_notebook, read_learnings and read_questions for each.",
+   "description": "For /subnotes:review: everything one goal's review needs, in one call \u2014 the shared learnings and questions once, the review's notes on the goal, then per notebook what it shows now of each suggestion the notes list as open, its learnings and open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), and only what changed since this goal's last review (the whole notebook on a first one). With a goal and no notebooks, it reads the notebooks the goal links. Without a goal, for a notebook no goal links, each notebook comes with its own notes. Call it once per goal, instead of read_notes, read_notebook, read_learnings and read_questions.",
    "inputSchema": {
     "type": "object",
     "properties": {
+     "goal": {
+      "type": "string",
+      "description": "The goal to review: its heading in Goals, without its schedule."
+     },
      "notebooks": {
       "type": "array",
       "items": {
        "type": "string"
       },
-      "description": "The connected notebooks to visit."
+      "description": "The connected notebooks to read. Leave out with a goal to read the ones it links; name them to add one matched by purpose."
      }
-    },
-    "required": [
-     "notebooks"
-    ]
+    }
    }
   },
   {
@@ -548,34 +549,40 @@
   },
   {
    "name": "read_notes",
-   "description": "Read the review agent's notes for one connected notebook (/subnotes:review): its notes from earlier reviews. Says so when there is none yet.",
+   "description": "Read the review's notes for one goal, or for one connected notebook no goal links (/subnotes:review): its notes from earlier reviews. Says so when there is none yet.",
    "inputSchema": {
     "type": "object",
     "properties": {
+     "goal": {
+      "type": "string",
+      "description": "A goal's heading in Goals, without its schedule."
+     },
      "notebook": {
-      "type": "string"
+      "type": "string",
+      "description": "A connected notebook no goal links. Name a goal or a notebook, not both."
      }
-    },
-    "required": [
-     "notebook"
-    ]
+    }
    }
   },
   {
    "name": "write_notes",
-   "description": "Replace the review agent's notes for one connected notebook with new content \u2014 the whole notes file, kept short by rewriting rather than appending. Only for /subnotes:review; never the notebook itself.",
+   "description": "Replace the review's notes for one goal, or for one connected notebook no goal links, with new content \u2014 the whole notes file, kept short by rewriting rather than appending. Also marks what review_context showed for it as read, so the next review's \"what changed\" starts there. Only for /subnotes:review; never the notebook itself.",
    "inputSchema": {
     "type": "object",
     "properties": {
+     "goal": {
+      "type": "string",
+      "description": "A goal's heading in Goals, without its schedule."
+     },
      "notebook": {
-      "type": "string"
+      "type": "string",
+      "description": "A connected notebook no goal links. Name a goal or a notebook, not both."
      },
      "content": {
       "type": "string"
      }
     },
     "required": [
-     "notebook",
      "content"
     ]
    }

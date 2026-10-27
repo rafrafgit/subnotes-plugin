@@ -19,7 +19,7 @@ for Do's summary.
 In one turn: `start_run` (skill `wrapup`), `list_notebooks`, and
 `read_notebook` for the notebook marked "Role: Goals". The source is this
 conversation: what the user said and decided, and what was found — not what
-a Subnotes skill already filed in it (Journal, Review, Plan and Do write
+a Subnotes skill already filed in it (Journal, Review and Do write
 their own).
 
 Nothing worth keeping: say so in one line and stop, without a rating.

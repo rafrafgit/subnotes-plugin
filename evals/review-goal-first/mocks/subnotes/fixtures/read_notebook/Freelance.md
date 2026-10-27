@@ -17,5 +17,5 @@ Sent this week: 1 of 5.
 • Make a Notion template to sell on the side
 
 — From the connector, not part of the notebook —
-Last changed: 2026-10-27 15:03
+Last changed: 2026-10-27 15:36
 

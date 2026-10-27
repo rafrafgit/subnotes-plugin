@@ -32,21 +32,17 @@ they need.
   Claude offers it when they wrap up such a chat.
 - `/subnotes:prune` — once a month from `/subnotes:run`: clears what's stale,
   duplicated or contradicted out of what the skills have learned, on one yes.
-- `/subnotes:review` — a review agent per notebook: it reads the notebook
-  against its purpose, remembers earlier visits in its notes, keeps what it
-  learns about the notebook and about them where every skill reads it, and
-  talks through what it finds, one question at a time, adding a next step as
-  a task only once the talk shows it's worth doing. It reviews every
-  connected notebook that has a purpose.
+- `/subnotes:review [goal]` — goes through their goals one at a time: for
+  each, it reads the notebooks that serve it, raises what would move it, and
+  adds a next step as a task on their yes. When a goal's plan check is due
+  it checks the plan first: that the goal has a measure and a date, and that
+  the plan can reach it in time, with the arithmetic shown. It remembers
+  earlier reviews in its notes, and keeps what it learns where every skill
+  reads it. Notebooks no goal links are reviewed briefly, by their purpose.
 - Writing what's on their mind about a notebook — doubts, hunches,
   intentions — as plain text where it belongs is the other direction: the
   review reads new and changed lines each visit and turns them into open
   questions, learnings, or things to talk about.
-- `/subnotes:plan [notebook]` — checks with them that their goals have a
-  measure and a date, that a plan exists for each, and that the plan can reach
-  the goal in time; works out what's missing with them. The review won't
-  suggest anything else in a notebook until it has a goal and a plan, and
-  points here.
 - `/subnotes:do [notebook]` — finds the Today, Next and soon-due tasks across
   your notebooks (or the one named) that Claude can do in this session — code
   here, or a draft or write-up for any notebook — and does them, marking each

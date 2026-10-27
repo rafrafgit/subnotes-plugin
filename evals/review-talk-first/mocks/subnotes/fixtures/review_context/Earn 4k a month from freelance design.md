@@ -5,39 +5,13 @@
 # Shared open questions
 (none)
 
-# Goals
-Purpose: What I'm working toward
+# Goal: Earn 4k a month from freelance design [2027-06-01]
 
-## Your notes
+## Your notes on this goal
 No notes yet — this is the first review of it.
-
-## Learnings about this notebook
-- 2026-10-24 · plan · Goal: 4k a month from freelance design by June 2027. Plan: apply to 5 posted projects a week; a case study for every finished project. Signal: applications a week, 5 needed. Checked with the user 2026-10-24: no gap
-
-## Open questions about this notebook
-(none)
-
-## Scheduled lines — Today, Next, Soon, in that order
-No line is scheduled Today, Next or Soon.
-
-## What changed
-No snapshot from an earlier visit, so here is the whole notebook:
-
-⟦PURPOSE:What I'm working toward⟧
-# Earn 4k a month from freelance design [2027-06-01]
-Why: be my own boss.
-What: four retainer clients by June 2027.
-How: [[Freelance]] — apply to 5 posted projects a week on design job boards, and turn every finished project into a case study on my portfolio.
-
-## From the connector, not part of the notebook
-Role: Goals — what the user is working toward and how their notebooks rank. Read it before working in any notebook, and judge each notebook against it as well as its own purpose.
-Last changed: 2026-10-27 15:03
 
 # Freelance
 Purpose: Win and deliver freelance design work
-
-## Your notes
-No notes yet — this is the first review of it.
 
 ## Learnings about this notebook
 (none)
@@ -69,4 +43,4 @@ My day rate is €400. Two clients this month said yes without asking about pric
 • Write the Northwind case study [Next]
 
 ## From the connector, not part of the notebook
-Last changed: 2026-10-27 15:03
+Last changed: 2026-10-27 15:36

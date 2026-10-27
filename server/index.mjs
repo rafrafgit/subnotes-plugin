@@ -11,7 +11,7 @@
 // this ever needs sampling, resources or notifications.
 
 import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync, readdirSync, statSync, unlinkSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
 import { randomUUID, createHash } from 'node:crypto';
@@ -558,7 +558,9 @@ function editLine({ notebook, match, text }) {
 // in each a file per notebook plus shared.md for what isn't about one
 // notebook.
 //
-//   agent/review/<notebook>.md     the review's working state (its notes)
+//   agent/review/<notebook>.md     the review's notes on a notebook no goal links
+//   agent/review/goals/<goal>.md   the review's notes on a goal, and beside it
+//                                  a folder of its snapshots, one per notebook
 //   agent/learnings/<notebook>.md  what any skill has learned about a notebook
 //   agent/learnings/shared.md      what any skill has learned that isn't
 //                                  about one notebook — the user, mostly
@@ -642,28 +644,39 @@ function notesPath(nb) {
   return path;
 }
 
-function readNotes({ notebook }) {
+// The review goes goal by goal (REVIEW_BY_GOAL_SPEC.md), so its notes are
+// kept per goal, and per notebook only for a notebook no goal links.
+function notesTarget({ notebook, goal }) {
+  if (goal && notebook) throw new UserError('Name a goal or a notebook, not both.');
+  if (goal) {
+    const g = findGoal(manifest(), goal);
+    return { path: goalNotesPath(g.name), label: `the goal "${g.name}"`, keep: () => keepGoalSnapshots(g.name) };
+  }
   const nb = findNotebook(manifest(), notebook);
-  const path = notesPath(nb);
-  if (!existsSync(path)) return `No notes yet for "${nb.name}" — this is the first review of it.`;
+  return { path: notesPath(nb), label: `"${nb.name}"`, keep: () => keepSnapshot(nb) };
+}
+
+function readNotes(args) {
+  const { path, label } = notesTarget(args);
+  if (!existsSync(path)) return `No notes yet for ${label} — this is the first review of it.`;
   return readFileSync(path, 'utf8');
 }
 
 // Replaces the whole notes file: the agent keeps it short by rewriting it, not
-// by appending forever. Temp file then rename, as for the inbox.
-function writeNotes({ notebook, content }) {
-  const nb = findNotebook(manifest(), notebook);
+// by appending forever. Temp file then rename, as for the inbox. Writing them
+// also keeps what review_context showed as read.
+function writeNotes({ notebook, goal, content }) {
+  const target = notesTarget({ notebook, goal });
   const text = String(content ?? '');
   if (!text.trim()) throw new UserError('Notes need content. To start over, write a one-line note saying so.');
   if (text.length > NOTES_LIMIT) throw new UserError(
     `The notes are ${text.length} characters, over the ${NOTES_LIMIT} limit. Summarise older entries and write it again.`);
-  const path = notesPath(nb);
-  mkdirSync(dirname(path), { recursive: true });
-  const tmp = `${path}.tmp`;
+  mkdirSync(dirname(target.path), { recursive: true });
+  const tmp = `${target.path}.tmp`;
   writeFileSync(tmp, text.endsWith('\n') ? text : text + '\n');
-  renameSync(tmp, path);
-  keepSnapshot(nb);
-  return `Notes for "${nb.name}" saved (${text.length} characters).`;
+  renameSync(tmp, target.path);
+  target.keep();
+  return `Notes for ${target.label} saved (${text.length} characters).`;
 }
 
 // MARK: - Learnings and open questions
@@ -983,6 +996,23 @@ function readSnapshot(path) {
   }
 }
 
+// A goal keeps its own snapshot of each notebook it reads, so a notebook
+// serving two goals shows its changes to both. A goal's first look at a
+// notebook starts from the notebook's own snapshot, from the review by
+// notebook, rather than from the whole notebook.
+const safeName = (name, fallback) => String(name).replace(/[\/:\0]/g, '-').trim() || fallback;
+const goalDir = goal => join(AGENT_DIR, 'review', 'goals', safeName(goal, 'goal'));
+const goalNotesPath = goal => `${goalDir(goal)}.md`;
+const goalSnapshotPath = (goal, nb, pending = false) =>
+  join(goalDir(goal), basename(agentFile('review', nb)).replace(/\.md$/, pending ? '.pending.json' : '.snapshot.json'));
+
+function keepGoalSnapshots(goal) {
+  let files = [];
+  try { files = readdirSync(goalDir(goal)); } catch {}
+  for (const f of files) if (f.endsWith('.pending.json'))
+    renameSync(join(goalDir(goal), f), join(goalDir(goal), f.replace(/\.pending\.json$/, '.snapshot.json')));
+}
+
 function keepSnapshot(nb) {
   const pending = snapshotPath(nb, true);
   if (existsSync(pending)) return renameSync(pending, snapshotPath(nb));
@@ -1186,6 +1216,11 @@ function notesText(nb) {
   return existsSync(path) ? readFileSync(path, 'utf8').trim() : '';
 }
 
+function goalNotesText(goal) {
+  const path = goalNotesPath(goal);
+  return existsSync(path) ? readFileSync(path, 'utf8').trim() : '';
+}
+
 // What became of each suggestion the notes list as open, read from the
 // notebook as it stands rather than left to the notes: the notes are the
 // review's own notes and goes stale, the notebook doesn't (2026-10-18).
@@ -1218,13 +1253,13 @@ function openSuggestionStatus(nb, text, reviewNotes) {
   });
 }
 
-function contextFor(nb) {
+function contextFor(nb, goal = null) {
   const text = readFileSync(join(DIR, nb.file), 'utf8');
   const entries = kind => {
     const lines = (readEntryFile(agentFile(kind, nb)) ?? '').split('\n').filter(l => ENTRY.test(l));
     return lines.length ? lines.join('\n') : '(none)';
   };
-  const old = readSnapshot(snapshotPath(nb));
+  const old = (goal && readSnapshot(goalSnapshotPath(goal, nb))) || readSnapshot(snapshotPath(nb));
   const changes = old ? changesSince(old, text) : null;
 
   let changed;
@@ -1234,17 +1269,15 @@ function contextFor(nb) {
   else changed = `Since the last visit (${old.taken}) — "+" is a new or changed line, the rest is unchanged context:\n\n` + changes.join('\n\n');
 
   // Pending until write_notes keeps it: see the top of this section.
-  writeEntryFile(snapshotPath(nb, true), JSON.stringify(snapshotOf(text, old)) + '\n');
+  writeEntryFile(goal ? goalSnapshotPath(goal, nb, true) : snapshotPath(nb, true), JSON.stringify(snapshotOf(text, old)) + '\n');
 
   const notes = connectorNotes(nb);
-  const reviewNotes = notesText(nb);
+  const reviewNotes = goal ? goalNotesText(goal) : notesText(nb);
   const status = openSuggestionStatus(nb, text, reviewNotes);
   return [
     `# ${nb.name}`,
     ...(nb.purpose ? [`Purpose: ${nb.purpose}`] : []),
-    '',
-    '## Your notes',
-    reviewNotes || 'No notes yet — this is the first review of it.',
+    ...(goal ? [] : ['', '## Your notes', reviewNotes || 'No notes yet — this is the first review of it.']),
     ...(status.length ? ['', '## Your open suggestions, as the notebook has them now', ...status] : []),
     '',
     '## Learnings about this notebook',
@@ -1333,13 +1366,19 @@ function rateRun({ skill, did, rating, comment }) {
   return `Saved: ${line.slice(2)}`;
 }
 
-// Everything one visit needs, for every notebook the review is visiting, in
-// one call: the shared learnings and questions once, then per notebook its
-// notes, learnings, questions, scheduled lines and what changed.
-function reviewContext({ notebooks }) {
+// Everything one visit needs in one call: the shared learnings and questions
+// once, then per notebook its learnings, questions, scheduled lines and what
+// changed. For a goal: the goal's notes once, and its linked notebooks unless
+// others are named (one matched by purpose); what changed is since this
+// goal's last review. Without a goal, each notebook comes with its own notes.
+function reviewContext({ notebooks, goal }) {
   const m = manifest();
-  const names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
-  if (!names.length) throw new UserError('Name at least one notebook.');
+  const g = goal ? findGoal(m, goal) : null;
+  let names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
+  if (g && !names.length) names = g.notebooks.map(nb => nb.name);
+  if (!names.length) throw new UserError(g
+    ? `The goal "${g.name}" links no connected notebook: name the notebooks that serve it.`
+    : 'Name at least one notebook, or a goal.');
   const nbs = names.map(n => findNotebook(m, n));
   const now = Date.now();
   reviewStartedAt = now - listedAt < 120_000 ? listedAt : now;
@@ -1350,16 +1389,19 @@ function reviewContext({ notebooks }) {
     '',
     '# Shared open questions',
     sharedEntryLines('questions'),
-    ...nbs.flatMap(nb => ['', contextFor(nb)]),
+    ...(g ? ['', `# Goal: ${g.name}${g.date ? ` [${g.date}]` : ''}`, '',
+      '## Your notes on this goal', goalNotesText(g.name) || 'No notes yet — this is the first review of it.'] : []),
+    ...nbs.flatMap(nb => ['', contextFor(nb, g?.name ?? null)]),
   ].join('\n');
 }
 
 // MARK: - What's due
 
 // /subnotes:run picks the skill to run from what's due (RITUALS_SPEC.md, One
-// command): a plan check, then a review, then Do. Until the connector reads
-// rituals, default rhythms decide, from dates already kept here — a goal's
-// plan check, and each notebook's last review visit (2026-10-24).
+// command): the journal, then the review (which runs the plan checks due,
+// REVIEW_BY_GOAL_SPEC.md), then the prune, then Do. Until the connector
+// reads rituals, default rhythms decide, from dates already kept here — a
+// goal's plan check, and each goal's last review (2026-10-24).
 const PLAN_EVERY_DAYS = 30;
 const SCHEDULE_PARTS = /((?:\s*\[[^\[\]]+\])+)\s*$/;
 const PLAN_CHECKS = () => join(AGENT_DIR, 'plan', 'checks.json');
@@ -1382,13 +1424,32 @@ function goalsIn(text) {
     if (!name || (!date && !word)) continue;
     const block = [lines[i]];
     for (let k = i + 1; k < lines.length && !HEADING.test(lines[k]); k++) if (lines[k].trim()) block.push(lines[k]);
-    goals.push({ name, level: h[1].length, date, word,
+    const links = [...block.slice(1).join('\n').matchAll(/\[\[([^\]]+)\]\]/g)].map(l => l[1].trim());
+    goals.push({ name, level: h[1].length, date, word, links,
       hash: fingerprint(block.map(l => l.replace(/\s+$/, '')).join('\n')) });
   }
   return goals;
 }
 
 const goalKey = name => normText(name);
+
+// The goals in Goals, each with the connected notebooks its own text links.
+function goalsWithNotebooks(m) {
+  const goalsNb = m.notebooks.find(n => n.role === 'goals');
+  if (!goalsNb) return [];
+  const byName = name => m.notebooks.find(n => n.name.toLowerCase() === name.toLowerCase() && n !== goalsNb);
+  return goalsIn(readFileSync(join(DIR, goalsNb.file), 'utf8'))
+    .map(g => ({ ...g, notebooks: [...new Set(g.links.map(byName).filter(Boolean))] }));
+}
+
+function findGoal(m, goal) {
+  const wanted = goalKey(String(goal ?? '').replace(SCHEDULE_PARTS, ''));
+  const goals = goalsWithNotebooks(m);
+  if (!goals.length) throw new UserError('Goals has no goal yet — a heading with a schedule — or no Goals notebook is connected.');
+  const found = goals.find(g => goalKey(g.name) === wanted);
+  if (!found) throw new UserError(`No goal "${goal}" in Goals. Its goals are: ${goals.map(g => `"${g.name}"`).join(', ')}.`);
+  return found;
+}
 
 function readPlanChecks() {
   try {
@@ -1447,34 +1508,49 @@ function planDue(m) {
   return { due, lines };
 }
 
-// The review is due once a day, in the notebooks that changed since their
-// last visit (RITUALS_SPEC.md). Once it has visited any notebook today it
-// isn't due again until tomorrow: a notebook skipped or not reached waits,
-// so the next /subnotes:run goes on to Do (2026-10-24). Due tasks aren't the
-// review's: they're Do's.
+// The review goes goal by goal (REVIEW_BY_GOAL_SPEC.md): it is due once a
+// day, for each goal one of whose linked notebooks changed since that goal's
+// last review, and for each notebook with a purpose that no goal links and
+// that changed since its own. Once it has run today it isn't due again until
+// tomorrow: what it didn't reach waits, so the next /subnotes:run goes on to
+// Do (2026-10-24). Due tasks aren't the review's: they're Do's. A goal that
+// links no notebook isn't due here; the review matches it to notebooks by
+// purpose.
 function reviewDue(m) {
   const now = today();
-  const rows = [];
-  for (const nb of m.notebooks) {
-    if ((!nb.purpose && nb.role !== 'goals') || isJournal(nb)) continue;
+  const state = (nb, old) => {
     let text;
-    try { text = readFileSync(join(DIR, nb.file), 'utf8'); } catch { continue; }
-    const old = readSnapshot(snapshotPath(nb));
-    const visited = old?.taken?.slice(0, 10) ?? null;
+    try { text = readFileSync(join(DIR, nb.file), 'utf8'); } catch { return null; }
     const changes = old ? changesSince(old, text) : null;
-    rows.push({ name: nb.name, visited, changed: !old || changes === null || changes.length > 0 });
+    return { visited: old?.taken?.slice(0, 10) ?? null, changed: !old || changes === null || changes.length > 0 };
+  };
+  const rows = [];
+  const linked = new Set();
+  for (const g of goalsWithNotebooks(m)) {
+    if (!g.notebooks.length) { rows.push({ name: g.name, kind: 'goal', none: true }); continue; }
+    const seen = g.notebooks.map(nb => { linked.add(nb); return state(nb, readSnapshot(goalSnapshotPath(g.name, nb)) || readSnapshot(snapshotPath(nb))); }).filter(Boolean);
+    const visits = seen.map(r => r.visited).filter(Boolean).sort();
+    rows.push({ name: g.name, kind: 'goal', visited: visits.pop() ?? null, changed: seen.some(r => r.changed),
+      notebooks: g.notebooks.map(nb => nb.name) });
+  }
+  for (const nb of m.notebooks) {
+    if (!nb.purpose || nb.role === 'goals' || isJournal(nb) || linked.has(nb)) continue;
+    const r = state(nb, readSnapshot(snapshotPath(nb)));
+    if (r) rows.push({ name: nb.name, kind: 'notebook', ...r });
   }
   const ranToday = rows.some(r => r.visited === now);
   const due = [], lines = [];
   for (const r of rows) {
-    let state;
-    if (r.visited === now) state = `visited today${r.changed ? ', changed since' : ''}`;
-    else if (!r.visited) state = 'never reviewed';
-    else state = r.changed ? `changed since the last visit, ${r.visited}` : `no change since the last visit, ${r.visited}`;
+    const label = r.kind === 'goal' ? `Goal: ${r.name}${r.notebooks ? ` (${r.notebooks.join(', ')})` : ''}` : `Notebook no goal links: ${r.name}`;
+    if (r.none) { lines.push(`- ${label} — links no connected notebook; the review matches notebooks to it by purpose`); continue; }
+    let st;
+    if (r.visited === now) st = `reviewed today${r.changed ? ', changed since' : ''}`;
+    else if (!r.visited) st = 'never reviewed';
+    else st = r.changed ? `changed since the last review, ${r.visited}` : `no change since the last review, ${r.visited}`;
     const waiting = r.changed && r.visited !== now;
-    if (waiting && !ranToday) { state += ' — DUE'; due.push(r.name); }
-    else if (waiting) state += ' — waits until tomorrow';
-    lines.push(`- ${r.name} — ${state}`);
+    if (waiting && !ranToday) { st += ' — DUE'; due.push(r.name); }
+    else if (waiting) st += ' — waits until tomorrow';
+    lines.push(`- ${label} — ${st}`);
   }
   if (ranToday) lines.unshift('The review already ran today, so it is due again tomorrow.');
   return { due, lines };
@@ -1661,22 +1737,22 @@ function whatsDue() {
   const journal = journalNotebook(m);
   let journalNew = false;
   try { journalNew = !!journal && journalHasNew(journal); } catch {}
-  const run = plan.due.length ? 'Plan' : journalNew ? 'Journal' : review.due.length ? 'Review' : prune.due ? 'Prune' : 'Do';
+  const run = journalNew ? 'Journal' : review.due.length || plan.due.length ? 'Review' : prune.due ? 'Prune' : 'Do';
   return [
     `Today: ${today()}`,
     `Run: ${run}`,
-    '',
-    `## Plan — ${plan.due.length ? `due for ${plan.due.length} goal${plan.due.length > 1 ? 's' : ''}` : 'not due'}`,
-    `A goal is due ${PLAN_EVERY_DAYS} days after its last check, when its text has changed since, or when its date has passed.`,
-    ...plan.lines,
     '',
     `## Journal — ${journalNew ? 'due' : 'not due'}`,
     !journal ? 'No Journal notebook is connected.'
       : journalNew ? `"${journal.name}" has an entry since Journal last ran.` : `Nothing new in "${journal.name}" since Journal last ran.`,
     '',
-    `## Review — ${review.due.length ? `due in ${review.due.join(', ')}` : 'not due'}`,
-    'Due once a day, in the notebooks that changed since their last visit.',
+    `## Review — ${review.due.length ? `due for ${review.due.join(', ')}` : plan.due.length ? 'due for its plan checks' : 'not due'}`,
+    'Due once a day, for each goal whose notebooks changed since its last review, and each notebook with a purpose no goal links.',
     ...review.lines,
+    '',
+    `## Plan checks, run inside the review — ${plan.due.length ? `due for ${plan.due.length} goal${plan.due.length > 1 ? 's' : ''}` : 'none due'}`,
+    `A goal's plan check is due ${PLAN_EVERY_DAYS} days after its last check, when its text has changed since, or when its date has passed.`,
+    ...plan.lines,
     '',
     `## Prune — ${prune.due ? `due: ${prune.why}` : 'not due'}`,
     `Due ${PRUNE_EVERY_DAYS} days after the last prune.`,
@@ -1911,10 +1987,11 @@ const TOOLS = [
   },
   {
     name: 'review_context',
-    description: "For /subnotes:review: everything a visit needs, for every notebook named, in one call — the shared learnings and questions once, then per notebook its notes, what the notebook shows now of each suggestion the notes list as open, learnings, open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), and only what changed since the review last wrote that notebook's notes (the whole notebook on a first visit). Call it once with all the notebooks to visit, instead of read_notes, read_notebook, read_learnings and read_questions for each.",
+    description: "For /subnotes:review: everything one goal's review needs, in one call — the shared learnings and questions once, the review's notes on the goal, then per notebook what it shows now of each suggestion the notes list as open, its learnings and open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), and only what changed since this goal's last review (the whole notebook on a first one). With a goal and no notebooks, it reads the notebooks the goal links. Without a goal, for a notebook no goal links, each notebook comes with its own notes. Call it once per goal, instead of read_notes, read_notebook, read_learnings and read_questions.",
     inputSchema: { type: 'object', properties: {
-      notebooks: { type: 'array', items: { type: 'string' }, description: 'The connected notebooks to visit.' },
-    }, required: ['notebooks'] },
+      goal: { type: 'string', description: "The goal to review: its heading in Goals, without its schedule." },
+      notebooks: { type: 'array', items: { type: 'string' }, description: "The connected notebooks to read. Leave out with a goal to read the ones it links; name them to add one matched by purpose." },
+    } },
     run: reviewContext,
   },
   {
@@ -1966,14 +2043,21 @@ const TOOLS = [
   },
   {
     name: 'read_notes',
-    description: "Read the review agent's notes for one connected notebook (/subnotes:review): its notes from earlier reviews. Says so when there is none yet.",
-    inputSchema: { type: 'object', properties: { notebook: { type: 'string' } }, required: ['notebook'] },
+    description: "Read the review's notes for one goal, or for one connected notebook no goal links (/subnotes:review): its notes from earlier reviews. Says so when there is none yet.",
+    inputSchema: { type: 'object', properties: {
+      goal: { type: 'string', description: "A goal's heading in Goals, without its schedule." },
+      notebook: { type: 'string', description: 'A connected notebook no goal links. Name a goal or a notebook, not both.' },
+    } },
     run: readNotes,
   },
   {
     name: 'write_notes',
-    description: "Replace the review agent's notes for one connected notebook with new content — the whole notes file, kept short by rewriting rather than appending. Only for /subnotes:review; never the notebook itself.",
-    inputSchema: { type: 'object', properties: { notebook: { type: 'string' }, content: { type: 'string' } }, required: ['notebook', 'content'] },
+    description: "Replace the review's notes for one goal, or for one connected notebook no goal links, with new content — the whole notes file, kept short by rewriting rather than appending. Also marks what review_context showed for it as read, so the next review's \"what changed\" starts there. Only for /subnotes:review; never the notebook itself.",
+    inputSchema: { type: 'object', properties: {
+      goal: { type: 'string', description: "A goal's heading in Goals, without its schedule." },
+      notebook: { type: 'string', description: 'A connected notebook no goal links. Name a goal or a notebook, not both.' },
+      content: { type: 'string' },
+    }, required: ['content'] },
     run: writeNotes,
   },
 ];
