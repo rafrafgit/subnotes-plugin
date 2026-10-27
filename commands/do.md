@@ -13,7 +13,7 @@ runs commands.
 
 ## Which notebooks
 
-Call `list_notebooks`. If a notebook was named, use only it, matching
+Call `start_run` (skill `do`) and `list_notebooks`. If a notebook was named, use only it, matching
 case-insensitively. Otherwise use **every connected notebook with a
 purpose**: much of what Claude can do — a draft, research, a write-up — sits
 in notebooks that have no code. Note which one is about the
@@ -157,6 +157,21 @@ One line per task taken, with its notebook; what's committed or not; the
 learnings added; what wrapup filed (or "nothing new"); and everything left
 for the user, together.
 
+## Rate the run
+
+Call `end_run` (skill `do`), then ask with the AskUserQuestion tool, the
+question one line, the time and what was done:
+
+```
+35 min · 2 done, 1 stopped, 1 commit · How was this run?
+```
+
+Options: Great, Good, Meh, Waste of time. Save it with `rate_run`: the line
+without the time as `did`, and anything they typed as `comment`; no answer
+is `Skipped`. On Meh or Waste of time, ask once what would have made it
+worth it, and save the answer as a lesson (`add_learning`, shared, source
+`do`).
+
 ## Before you stop
 
 Check these silently and do any that's missing; don't list them to the user:
@@ -165,7 +180,8 @@ Check these silently and do any that's missing; don't list them to the user:
 - what the user said that will hold next time is a learning, and every
   correction or redirect has its lesson
 - `subnotes:wrapup` has run
-- the session summary is shown, with everything left for the user
+- the session summary is shown, with everything left for the user, and the
+  run rated (`rate_run`)
 
 ## Rules
 

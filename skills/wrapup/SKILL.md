@@ -16,12 +16,13 @@ for Do's summary.
 
 ## 1. Read
 
-In one turn: `list_notebooks`, and `read_notebook` for the notebook marked
-"Role: Goals". The source is this conversation: what the user said and
-decided, and what was found — not what a Subnotes skill already filed in it
-(Journal, Review, Plan and Do write their own).
+In one turn: `start_run` (skill `wrapup`), `list_notebooks`, and
+`read_notebook` for the notebook marked "Role: Goals". The source is this
+conversation: what the user said and decided, and what was found — not what
+a Subnotes skill already filed in it (Journal, Review, Plan and Do write
+their own).
 
-Nothing worth keeping: say so in one line and stop.
+Nothing worth keeping: say so in one line and stop, without a rating.
 
 ## 2. Sort what the chat produced
 
@@ -52,6 +53,22 @@ in about 5 lines:
 From this chat — 1 learning (Freelance: quotes go out as PDFs, not links), 1 task:
 **Update my quote template to export as PDF** (Freelance › Backlog) — add it?
 ```
+
+## Rate the run
+
+Not when Do started you: Do's rating covers it. Otherwise, once any task is
+added or declined, call `end_run` (skill `wrapup`), then ask with the
+AskUserQuestion tool, the question one line, the time and what was done:
+
+```
+2 min · 1 learning, 1 task added · How was this run?
+```
+
+Options: Great, Good, Meh, Waste of time. Save it with `rate_run`: the line
+without the time as `did`, and anything they typed as `comment`; no answer
+is `Skipped`. On Meh or Waste of time, ask once what would have made it
+worth it, and save the answer as a lesson (`add_learning`, shared, source
+`wrapup`).
 
 ## Rules
 

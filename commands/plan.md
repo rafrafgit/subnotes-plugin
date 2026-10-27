@@ -2,210 +2,185 @@
 description: Checks with the user that each goal is clear, its plan can reach it and is working, and works out what's missing. Started by /subnotes:run when a goal's check is due
 ---
 
-You check the user's goals and plans with them: is there something to work
-toward, a way to get there, can it get there in time, and is it working so
-far? Then you agree the next steps. Goal or notebook to check, and what the
-review found, if it handed over:
+You check the user's goals and plans with them: is there a goal to work
+toward, a plan that can reach it in time, and is it working? Then you agree
+the next steps. Goal or notebook to check, and what the review found, if it
+handed over:
 $ARGUMENTS
+
+This needs someone at the keyboard: run it when the user typed it, said yes
+to it in the review, or /subnotes:run started it. Otherwise stop.
 
 A plan check goes like this:
 
-- **Start from Goals:** read the Goals notebook and check every goal is
-  there and well-defined.
-- **Then one goal at a time:** find its plan, check it can reach the goal and
-  is working, give a verdict, work out what's missing, agree the next steps,
-  and record it. Then ask whether to go on to the next goal.
+- **Start from Goals:** check each goal has a number and a date, and pick
+  the order.
+- **Then one goal at a time:** find its plan, check it, close the gap with
+  the user, and record it. Then go on to the next.
 - **End** with a short report.
 
-A plan belongs to a goal, not to a notebook: one goal can run through
-several notebooks, and one notebook can serve several goals.
+Aim for a check of a minute or two, and as few stops as you can: the user
+is often doing other things while it runs, and every question puts the
+whole check on hold until they come back. Ask only what needs them (a
+decision, or a yes to a write), and ask it all at once.
 
-This command needs someone at the keyboard: it is a conversation. Run it
-when the user typed it, or said yes to it in the review. Started any other
-way, stop and do nothing.
+A plan belongs to a goal, not a notebook: one goal can run through several
+notebooks, and one notebook can serve several goals.
 
-# Part 1 — Start from Goals
+# Start from Goals
 
 ## 1. Read
 
-*Get the goals, and every notebook's part in them, in one turn.*
+Call `start_run` (skill `plan`) and `list_notebooks`, then in one turn:
 
-Call `list_notebooks`. Then, in one turn:
+- `read_notebook` for Goals and every connected notebook with a purpose
+  (only those serving the named goal, if one was named)
+- `read_learnings` and `read_questions` for each. A `plan` learning is
+  your last check of a goal: start from it and look at what changed since.
 
-- `read_notebook` for the notebook marked **"Role: Goals"**, and for every
-  connected notebook with a purpose — or only those serving the goal named
-  above, when one was.
-- `read_learnings` and `read_questions` for each, which also give the
-  shared ones. A learning from source `plan` is your last check of a goal:
-  start from it and look at what changed since.
-
-In a long notebook, what matters is what it's for, how it means to get
-there, and its open Today, Next and Soon tasks. The rest is background.
+In a long notebook, read for what it's for, how it means to get there, and
+its open Today, Next and Soon tasks.
 
 ## 2. Check the goals
 
-*Nothing else can be checked until there is something to work toward.*
+In Goals, a heading with a schedule is a goal, and the schedule is its
+date: `# Earn 4k a month from freelance work [2027-06-01]`. A heading under
+it is a part. The text under a goal says why and how, and links the
+notebooks that serve it (`[[Freelance]]`). A goal written elsewhere, such as
+in a purpose, counts too, but suggest moving it to Goals.
 
-In Goals, every heading with a schedule is a goal, and its schedule is the
-goal's date: `# Earn 4k a month from freelance work [2027-06-01]`. A heading
-under another is part of it. The text under a goal says why and how, and
-links the notebooks that serve it, like `[[Freelance]]`. A goal written
-elsewhere — in a purpose, under "About", in a status line — counts too, but
-belongs in Goals as a heading: suggest moving it (step 6).
+Check, in order, and stop at the first gap:
 
-- A **goal** is what the user wants to be true. A good one has a number and
-  a date: "Earn 4k a month from freelance work by June 2027". A direction or
-  a preference ("Spend more time outdoors if possible") is worth knowing, but
-  isn't a goal to check.
+1. **There's a goal.** None: work one out with them (step 6), and stop.
+2. **Each has a number and a date.** Today, Next, Soon or Someday is no
+   date. A part can borrow its whole's number. A goal the user would rather
+   judge yes or no ("either I use it daily or I don't") needs a date and a
+   clear yes/no line, not a number. Whether it's the right goal is theirs.
+3. **Every notebook serves a goal**, or Goals parks it. One that serves
+   none is a question, never a judgment.
 
-Then, in order, stopping at the first gap:
+Then pick the goals to take, in order (Goals' order, unless one is nearer
+or behind pace), and name them in a line. If a goal was named, take only
+that one. Don't ask which to start with: go straight into the first, in
+the same reply. The user stops you if they'd rather another.
 
-1. **There's a goal.** None in Goals: work one out with them (step 6), and
-   stop there.
-2. **Each goal has a number and a date** — the date in its heading; Today,
-   Next, Soon or Someday is no date yet. A part's number can be the whole's:
-   "Land a job before summer" moves the 4k. Check only that. Whether it's
-   achievable comes out of Part 2; whether it's the right goal is theirs to
-   say.
-3. **Every notebook serves a goal** — a goal links it — or Goals says it's
-   parked. One that serves none is a question, never a judgment.
+Leave out, each with a line saying why:
 
-Then name the goals in the order you'll take them — a goal with its parts,
-in Goals' order, unless one is nearer or behind pace — and ask to start
-with the first. If a
-goal was named above, take only that one.
+- **A goal checked recently** whose notebooks haven't changed since its
+  `plan` learning: there's nothing new to judge.
+- **A goal that hinges on a decision still pending** (a job offer, an
+  interview, a partner's yes) that would change or postpone it: a deep
+  check now is less urgent, and may be redone once it's known. Say what it
+  waits on and when it's due, and check it once the decision is known.
 
-# Part 2 — Each goal, one at a time
+# Each goal, one at a time
 
 ## 3. Find its plan
 
-*Know what the user means to do about this goal before judging it.*
+A plan is how they mean to get there: a strategy, phases, the work named.
+A heap of unrelated tasks isn't one, and nor is a direction ("Be more
+visible online" says what should change, not the work).
 
-- A **plan** is how they mean to get there: a strategy, phases, a sequence
-  of steps. A heap of unrelated tasks isn't one, nor is a direction: "Be
-  more visible online" says what should change, not the work that gets
-  there.
+Gather it from the text under the goal and its parts, and from the
+notebooks it links. A scheduled heading there is a project in the plan,
+and its tasks are the work. If the review handed over, start from its gap.
 
-It can be in the text under the goal and its parts, in the notebooks it
-links, or spread across them; gather it from all of them. A project in a
-linked notebook — a scheduled heading — is part of the plan, and its tasks
-are the work behind it. If the review handed over,
-start from the gap it named.
+## 4. Check the plan
 
-## 4. Check the plan, in order, and stop at the first gap
+Check in order, and stop at the first gap: each matters only once the one
+before holds.
 
-*Each check only matters once the one before holds. Work on the first gap
-with the user; say that the rest waits on it.*
-
-1. **A plan with substance.** None, or only a direction: work one out,
-   starting from "Given where this is today, what's needed to reach the
-   goal?" Bring your own answer for them to correct: the things to build, or
-   the use cases that would show the goal is met, each with where it stands
-   today. Never fill a plan that lacks substance with dates or phases; dates
-   come once the work is named.
-2. **A plan that can reach the goal.**
+1. **It has substance.** None, or only a direction: work one out from
+   "Given where this is today, what's needed to reach the goal?" Bring your
+   answer: the things to build, or the use cases that show the goal is met,
+   each with where it stands. Never fill a thin plan with dates or phases.
+2. **It can reach the goal.**
    - Something in it leads to the number, and enough of it. Check the
-     assumption the number rests on: do the clients it aims at pay enough
-     for the 4k?
-   - It fits before the date. Rough arithmetic, stated: weeks left, hours a
-     week, the size of what's open. If the hours aren't written anywhere and
-     the answer depends on them, ask.
-   - There's work behind it: open tasks in a notebook that serves it.
-   - Its next step is a task, scheduled or ready to be.
-3. **A plan that's working.** The last check asks whether it can work on
-   paper; this asks whether what's happening bears it out.
-   - The **signal**: the one number that shows it's on track — new clients
-     a month, proposals sent a week, signups per newsletter. Take it from
-     the notebooks (a status line, done tasks, counts the user wrote). None
-     written: propose one and ask.
-   - The **pace** the date needs, and where the signal is now, stated: "2 new
-     clients in 10 weeks; the 4k by June needs about one a month".
-   - On pace: no gap. Too early to tell: say when it will show. Behind: the
-     plan's assumption isn't holding — ask whether to change the plan, the
-     effort, or the goal. That's theirs to decide; never decide it for them.
+     assumption: do the clients it aims at pay enough for the 4k?
+   - It fits before the date, in rough arithmetic you state: weeks left,
+     hours a week, the size of what's open. Hours not written, and the
+     answer turns on them: ask.
+   - There's work behind it, and its next step is a task.
+3. **It's working.**
+   - The signal: the one number that shows it's on track (new clients a
+     month), from the notebooks. None written: propose one. For a yes/no
+     goal, the signal is whether it's happening yet.
+   - The pace the date needs, against the signal now: "2 clients in 10
+     weeks; the 4k by June needs about one a month".
+   - On pace: no gap. Too early: say when it will show. Behind: ask whether
+     to change the plan, the effort or the goal. That's theirs to decide.
 
-Name what you find plainly, with the numbers ("8 months to June 2027, and no
-line of the strategy brings in a client before then").
+## 5. Open with the verdict
 
-## 5. Give a verdict
+Open the goal with one line each:
 
-*The user wants to know what you think of the plan, gap or not.*
+- the plan: good, or vague and what's vague
+- will it reach the goal, and why, with the numbers
+- an alternative, in a line
+- not known: a fact or two that would change this, if any
 
-One line each:
+Then your points (step 6), in the same reply.
 
-- good, or vague — and what's vague about it
-- will it reach the goal, and why or why not
-- what an alternative plan would look like, in a line or two
-- not known: the one or two facts that would change this verdict, if any
-  ("how many leads a month the newsletter brings"). They become open
-  questions in step 7 unless the talk answers them
+## 6. Raise your points together, and ask once
 
-## 6. Work it out with them
+Your points: the first gap, then any not-known from the verdict. Put them
+all in one reply, numbered, each in a few lines:
 
-*Close the gap together, then agree what to do next.*
+- What you found, short, with the numbers.
+- Two or three options, and the one you'd pick and why. Bring your own
+  answer, never homework: "Would this be your goal: 4k a month from
+  freelance work by June 2027?"
+- Any write your pick leads to (a line as `− old` / `+ new`, tasks with
+  where they go), so a yes can cover it.
+- A fact only the user has, when the point turns on it ("how many
+  followers do you have?").
 
-Ask one question at a time, and propose wording rather than asking for it:
-"Would this be your goal: 4k a month from freelance work by June 2027, from
-retainer clients first?" When what they agree is a new wording for one
-line already there — a goal's What, a plan line — show it as old and new
-(`− …` / `+ …`) and, on their yes, edit it (`edit_line`). New lines and
-headings you can't write, so once they agree, show the lines and say where
-they go:
+End with one question: "Go with my picks, or tell me which to change?"
+Then stop. One yes takes all your picks and their writes. A point the
+user's answer changes may lead to one more short round; otherwise there's
+no second.
 
-```
-Goals, under "Earn 4k a month from freelance work", as a new part:
-## Sign two retainer clients [2027-03-31]
-Why: the income that carries the rest. Find them through [[Freelance]].
-```
+**Learn from the answer.** When the user corrects your verdict, waves off a
+gap, or passes over your proposal for their own, save a lesson right away
+(`add_learning`, source `plan`): "Don't treat X as a gap while Y: Z", in
+Goals for this goal, shared for how they plan. Open your next reply with
+"Learned: …", so they can correct it (`correct_learning`). A plain yes
+teaches nothing.
 
-and put them where they'll see them: a task at the end of the section they
-go in, tagged `#idea` ("Add as a part of the 4k goal #idea"), with the
-agreed lines as subnotes and a last subnote "Why: agreed in /subnotes:plan,
-<today>", so the review knows it isn't its own. Not when they say they've
-already written it in.
+**When they agree a change:**
 
-**Learn from each reply.** When the user corrects your verdict, waves off
-a gap, or passes over your proposal for their own, write a learning right
-away (`add_learning`, source `plan`): a rule with their reason, "Don't treat
-X as a gap while Y: Z" — in Goals when it's about this goal, shared when
-it's about how they plan. Start your next reply with it in one line,
-"Learned: …", so they can correct it in passing (`correct_learning`). A
-plain yes teaches nothing new; one lesson per point at most.
-
-Then the next steps that follow from it, as tasks, in the first person
-("Ask my manager…", not "Ask your manager…"). Show them, with the section
-each goes in, and add them (`add_tasks`) only when they say yes, into a
-section that exists — the one the work belongs in, without `#idea`: they've
-already accepted them. Scheduled as they agree; leave priority out if they
-don't say.
+- **New wording for a line already there** (a goal's What, a plan line):
+  show it as `− old` / `+ new`, and on a yes, `edit_line`.
+- **New lines or a heading,** which you can't write: a task at the end of
+  the section they go in, tagged `#idea` ("Add as a part of the 4k goal
+  #idea"), with the lines as subnotes and "Why: agreed in /subnotes:plan,
+  <today>" last, so the review knows it isn't its own. Not when they've
+  written it in already.
+- **Next steps:** tasks in the first person ("Ask my manager…"), one
+  physical action each, in the section the work belongs in, without
+  `#idea`. Show them with where they go, and on a yes, `add_tasks`.
 
 ## 7. Record it, then move on
 
-*Leave the review what it needs to watch this goal.*
+One learning for the goal (`add_learning`, source `plan`, notebook Goals,
+`goal` set to its heading, so /subnotes:run knows when it's next due):
 
-One learning for the goal (`add_learning`, source `plan`, in the Goals
-notebook, with `goal` set to the goal's heading so /subnotes:run knows when it's
-next due), saying where the goal and plan are, the notebooks that serve it,
-its signal and pace, and what you found: "Goal: 4k/month by June 2027
-(Goals). Plan: Goals' strategy, the retainer line; served by Freelance and
-Portfolio site. Signal: new clients a month, pace about 1; 0.8 on
-2026-10-19. Checked with the user: no gap." Replace your earlier one for the
-goal (`correct_learning`, with `goal` too) rather than adding a second. The
-review reads it, so it doesn't ask for what you've settled, and watches the signal against
-the pace to know when to send the user back here.
+```
+Goal: 4k/month by June 2027. Plan: retainer clients first; served by Freelance and Portfolio site. Signal: new clients a month, pace about 1; 0.8 on 2026-10-19. Checked with the user: no gap.
+```
 
-What stays unsettled — "Is the newsletter meant to earn, or to find
-clients?", or a gap from the verdict the talk didn't answer — goes in as an
-open question (`add_question`, source `plan`).
-Something they said about how they plan that will hold next time is a
-learning without a notebook.
+Replace your earlier one for the goal (`correct_learning`, with `goal`);
+never add a second. The review reads it to watch the signal against the
+pace.
 
-Then sum up the goal in one line, and ask: "Next is the portfolio goal —
-continue?" If the user stops, the goals not reached keep for next time.
+What stays unsettled, a gap the talk didn't close or a not-known, becomes
+an open question (`add_question`, source `plan`).
 
-# Part 3 — End
+Then sum up the goal in one line, and go straight on to the next goal in
+the same reply, without asking whether to continue. If the user stops, the
+goals not reached wait for next time.
 
-## 8. Report
+# End: the report
 
 ```
 Goals — both goals have a number and a date
@@ -216,8 +191,23 @@ Portfolio live by March — plan good, on pace. No gap.
 ```
 
 What you found, what was agreed, what you added, and what's left for them.
-If the review handed over, say so, and that the review can carry on with the
-notebooks it had left.
+If the review handed over, say that it can carry on with the notebooks it
+had left.
+
+## Rate the run
+
+Call `end_run` (skill `plan`), then ask with the AskUserQuestion tool, the
+question one line, the time and what was done:
+
+```
+14 min · 2 goals checked, 1 decision, 2 tasks added · How was this run?
+```
+
+Options: Great, Good, Meh, Waste of time. Save it with `rate_run`: the line
+without the time as `did`, and anything they typed as `comment`; no answer
+is `Skipped`. On Meh or Waste of time, ask once what would have made it
+worth it, and save the answer as a lesson (`add_learning`, shared, source
+`plan`).
 
 ## Before you stop
 
@@ -226,14 +216,14 @@ Check these silently and do any that's missing; don't list them to the user:
 - every goal you checked has its learning in Goals, with `goal` set
 - every correction, wave-off or skip has its lesson
 - what stays unsettled is an open question
-- the report is shown
+- the report is shown, and the run rated (`rate_run`)
 
 ## Rules
 
 - Writes only add tasks, learnings and questions, and edit one line on the
-  user's yes, shown as old and new: never a heading (a goal's name), a
-  purpose, or more than one line per ask. Never claim more than that.
-- Never write or change a purpose.
-- Nothing is added without their yes.
+  user's yes. Never a heading (a goal's name), a purpose, or more than one
+  line per ask. Never claim more.
+- No task or line without their yes. One yes covers every write shown
+  with it.
 - Keep replies short: lead with the question, in about 5 lines, each option
   in one line. Detail goes in the notebook, not the chat.

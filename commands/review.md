@@ -9,15 +9,15 @@ $ARGUMENTS
 
 A review goes like this:
 
-- **Start from Goals:** start the `subnotes:review-goals` skill with the
-  Skill tool, with the named notebook (if any) as its argument. It reads
+- **Start from Goals:** call `start_run` (skill `review`), then start the
+  `subnotes:review-goals` skill with the Skill tool, with the named notebook (if any) as its argument. It reads
   Goals, raises anything in it, agrees the order to review the notebooks in,
   and saves your Goals notes. If it stops the review — no goal or plan yet,
   or a named notebook with no purpose — stop too.
 - **Then one notebook at a time,** in that order: read it, find what's worth
   talking about, talk it through, add any tasks that come out of it, and
   save your notes. Then ask whether to go on to the next.
-- **End** with the score.
+- **End** with the score, and ask the user to rate the run.
 
 The user waits for the first question in each notebook: keep it under 90
 seconds.
@@ -26,245 +26,135 @@ seconds.
 
 ## 1. Read the notebook
 
-*Get what this notebook needs, and nothing from the others.*
-
-In one turn:
+Call these two together:
 
 - `review_context` for this notebook: your notes from last time, its
-  learnings and open questions, its `#idea` lines, and its lines:
+  learnings and open questions, and what has changed since your last visit.
+- `subnotes:review-ideas` for this notebook: what its `#idea` lines say.
 
-  | Part of the notebook | What you get |
-  |---|---|
-  | Today, Next | every line whole, changed or not, with its notes and whether it has moved |
-  | Soon | whole when new or changed; otherwise only named |
-  | Someday and unscheduled text | only the lines that changed |
+If nothing changed, say "No change since last visit" and go on to the next
+notebook. Review it anyway if a task is due today or overdue, or a date in
+your notes has come.
 
-  On a first visit you get the whole notebook.
-- `subnotes:review-ideas` with this notebook as its argument.
+Your notes can be out of date. If a line in them names something the
+notebook no longer has, drop that line.
 
-Read the notebook whole (`read_notebook`) only when what changed isn't
-enough to judge it.
+## 2. Say the goal and plan
 
-**When nothing changed,** say "no change since last visit", leave its
-notes alone, and move to the next notebook without asking — unless one of
-these is true, in which case review it:
-
-- a task is due today or overdue
-- a date in your notes' Dates section has come
-- a stall your notes name has gone 7 days unchanged
-
-**The notebook beats your notes.** Your notes go
-stale. Before acting on a line in them, check the notebook still has what it
-names; if not, drop the line.
-
-## 2. Follow up on the last visit
-
-*Use what the last talk taught you before you pick anything to raise.*
-
-You learn from the talk itself (step 6), not from what happens to tasks
-afterwards: a task is added only once the user agrees to it, so a deleted
-one usually means done or no longer needed, and says nothing about why.
-
-Read your notes' Lessons, the learnings you wrote at the last visit, and
-let them shape what you raise in step 4. If the notebook now shows one
-didn't hold — the user did what a lesson said they wouldn't — fix it with
-`correct_learning`. Any `Why …:` subnote is the user's reason for a
-decision: learn from it too (`add_learning`, source `review`, with `cites`
-for its line). If a point last time asked for context and the notebook now
-has the answer, save it, so you never ask twice. If a file passes 40
-entries, merge or drop the weakest.
-
-## 3. Check this notebook's goal and plan
-
-*Make sure there's a goal and a workable plan before anything else.*
-
-The notebook's goal is its purpose, any goal it states, and any goal in
-Goals it serves. Its plan can be in the notebook, or in what Goals' strategy
-says about it.
-
-- **No plan:** raise only that ("There's no plan for Freelance yet — shall we
-  run /subnotes:plan?"), plus its `#idea` lines and any deadline in the next
-  14 days. Ask once; if it's declined, don't ask again until the goal or
-  plan changes.
-- **The plan is weak** — it names no work, or nothing in it leads to the
-  goal's number, or it can't fit before the date — or **the goal has no
-  number or date**: make "shall we run /subnotes:plan?" the first point,
-  saying what's missing. Skip this if the user's last plan check of that
-  goal (a learning from source `plan`, in Goals' learnings) is newer than
-  the last change to the goal or plan.
-- **The goal or plan changed** since that check (more than rewording):
-  suggest /subnotes:plan once.
-- **The plan is behind pace.** The goal's plan learning names a signal and
-  pace, like "new clients a month, about 1 needed". If the notebook shows it
-  falling behind, or a month has passed since the plan check, suggest
-  /subnotes:plan once, with the numbers. Don't judge the strategy yourself.
-
-**When the user says yes to /subnotes:plan,** hand over:
-
-1. Write what's settled so far — this notebook's learnings and questions,
-   and its notes, with the plan check under Waiting to ask until Plan has
-   run.
-2. Say which notebooks are left to review after Plan.
-3. Start it with the Skill tool (`subnotes:plan`), with the goal and the gap
-   as its argument: "4k by June 2027 — no line of the strategy brings in a
-   client before June". Plan starts from there, not from scratch.
-
-When Plan is done, offer to carry on with the notebooks that were left.
-
-## 4. Find what's worth talking about
-
-*Pick up to three points the user would want to discuss. Often there is
-nothing, and that's a good result: a needless point costs attention and
-trust.*
-
-Look in this order, and stop at about three:
-
-1. **The plan's next step.** Is there a task for what the plan needs next,
-   scheduled Today, Next, Soon or on a date? If not, ask "What's the next
-   step on X?" with your best guess. A project heading isn't a step; its
-   next step is a task under it. If the step sits in Soon and nothing in the
-   notebook is Today or Next, offer to move it to Next, so Do has something
-   to start. Then the pace: when the plan names a number for a period ("5
-   applications a week") and the notebook shows it short, say how far short
-   and lead with that, before anything off the plan. Tasks waiting in Next
-   aren't the work done.
-2. **Today and overdue,** then **Next** — every line, changed or not — then
-   **Soon** (new or changed lines only).
-3. **`#idea` lines,** as `review-ideas` returned them: its replies are your
-   lean, its questions come with options.
-4. **New lines in Someday or unscheduled text** — only lines marked `+` in
-   what changed. Never dig through the rest.
-
-For each line, ask: is it clear, and is anything here worth discussing?
-Things worth raising:
-
-- **No next step** toward the purpose
-- **Too big for a day:** a Today or Next task that can't be done in a day —
-  offer a first step that can
-- **A stall:** something important that hasn't moved in weeks — is it still
-  wanted?
-- **A vague task:** offer a sharper wording, as one visible action, to
-  edit in on a yes (see Rules)
-- **A gap:** an important section with nothing to do in it
-- **Drift:** recent work that doesn't serve the purpose or Goals — ask,
-  don't judge
-- **The user thinking out loud:** a Good/Bad list, a problem, a question, a
-  "blocked by" in the notes — even with no `#idea` tag
-- **Missing context** you need, such as where things stand or what "done"
-  looks like — with your best guess. Only if the answer changes what you'd
-  raise, and one such question at a time
-- **An open question** that other work waits on — or that's been open over
-  three weeks
-
-Don't raise:
-
-- anything declined, ignored, or skipped at an earlier review, until its
-  text changes
-- anything Goals parks, or the learnings say the user doesn't want
-- a point your notes or learnings say was already talked through
-- reorganising what's already there
-
-## 5. Record and report
-
-*Save what doesn't depend on the user's answers, then say what you found.*
-
-In one turn: add your questions (`add_question`, source `review`) and any
-learnings, close answered questions, and call `review_elapsed` last. Wait
-with the notes and with marking ideas seen until after the talk.
-
-Then one line — what there is to talk about, never a task:
+Work out, in one line, what this notebook is for and how it gets there: the
+goal it serves (its purpose, or the goal in Goals that links it), the plan,
+the next step, and the pace if the plan learning names one. You open the
+notebook with this line (step 4), so the user can correct it:
 
 ```
-Freelance — 2 things to talk about: the Acme proposal is due today; the plan check for the 4k
+Freelance → 4k a month by June 2027. Plan: retainer clients first. Next step: the Acme proposal. Pace: 1 client a month, on track.
 ```
 
-If `review-ideas` failed, add "ideas not read" and leave them for next time.
+If you can't fill a part in — there's no plan, no date, nothing leads to the
+number, or it's behind pace — say so in the line, and make "Shall we run
+/subnotes:plan?" your first point. On a yes, save your notes, say which
+notebooks are left, and start `subnotes:plan` with the goal and the gap as
+its argument. When it's done, offer to go on with the rest.
 
-## 6. Talk it through, one point at a time
+## 3. Find what's worth talking about
 
-*Discuss first; a task comes only when the talk shows something should be
-done.*
+Pick up to three points the user would want to discuss. None is a good
+result: a needless point costs their attention and trust.
 
-Start with your notes' Waiting to ask, then this visit's points in step
-4's order. For each point:
+Look in this order, and stop at three:
+
+1. **The next step you named in step 2:**
+   - If there's no task for it, ask what the next step is, and give your
+     best guess.
+   - If its task is scheduled Soon and nothing in the notebook is Today or
+     Next, offer to move it to Next, so /subnotes:do picks it up.
+   - If the plan sets a pace ("5 applications a week") and the notebook
+     shows less (2 this week), say how far short. This comes before
+     everything else.
+2. **Today, overdue and Next,** every line; then **Soon** lines that are new
+   or changed.
+3. **`#idea` lines,** with `review-ideas`' replies as your lean.
+4. **New lines** in Someday or unscheduled text. Never dig through the rest.
+
+Worth raising: a task too big for a day (offer a first step), a vague task
+(offer a sharper wording), something important that hasn't moved in weeks,
+recent work that drifts from the goal (ask, don't judge), the user thinking
+out loud (a problem, a question, "blocked by"), a missing fact that would
+change what you raise (with your guess), and an open question other work
+waits on.
+
+Don't raise what was declined or skipped before (until its text changes),
+what Goals parks, what the learnings rule out or say was already talked
+through, or reorganising what's there.
+
+Save without raising: a `Why …:` subnote is the user's reason for a
+decision, so add it as a learning (`add_learning`, source `review`, with
+`cites` for its line); and if something you asked last time is now answered
+in the notebook, save the answer, so you never ask twice.
+
+## 4. Talk it through, one point at a time
+
+Call `review_elapsed` (it times the score), then open with the goal line
+and what there is to talk about:
+
+```
+Freelance → 4k a month by June 2027. Plan: retainer clients first. Next step: the Acme proposal. Pace: 1 client a month, on track.
+2 things to talk about: the Acme proposal is due today; the newsletter idea
+```
+
+Add "ideas not read" if `review-ideas` failed. Start with any point you
+didn't get to last time (your notes list them under Waiting to ask), then
+the new ones in the order step 3 found them. For each point, in one reply:
 
 - Say what you noticed, short and plain.
-- Give two or three options, what each costs and gains, and which you'd pick
-  and why. Bring your own answer — a draft, a list, wording — never
-  homework. A simple question ("Is the side project with Sam still wanted?") just needs
-  your best guess.
-- Ask the one question that decides it, and say how many points are left.
-  End the reply there. The reply that raises a point names no task — not
-  offered, not previewed ("If c, I'd add…") — and no "Shall I do it now?",
-  even for the option you'd pick: the user's answer decides whether anything
-  is worth doing.
+- Give two or three options, and which you'd pick and why. Bring your own
+  answer — a draft, a list, wording — never homework.
+- Ask the one question that decides it, say how many points are left, and
+  stop. Don't offer a task or to do anything yet: the answer decides
+  whether anything is worth doing.
 
-**Learn from each reply.** The user's answer is how you find out what good
-looks like; they won't give feedback any other way. When they correct you,
-wave a point off, or skip your point to raise something else, write a
-learning right away (`add_learning`, source `review`): a rule with their
-reason, "Don't raise X while Y: Z". A skip is the strongest signal — you
-raised the wrong thing — so say what you raised and what mattered to them
-instead. About this notebook, file it there; about how the user works,
-shared. Start your next reply with it in one line, "Learned: …", so they can
-correct it in passing; a correction goes in with `correct_learning`. A plain
-yes teaches nothing new; one lesson per point at most.
+**Learn from the answer.** When the user corrects you, waves the point off,
+or skips it for something else, save a lesson right away (`add_learning`,
+source `review`): a rule with their reason, "Don't raise X while Y: Z" — in
+this notebook, or shared when it's about how they work. A skip means you
+raised the wrong thing, so say what mattered instead. Open your next reply
+with "Learned: …", so they can correct it (`correct_learning`). A plain yes
+teaches nothing.
 
-**When a point is settled,** write: a learning for the decision, and
-`close_question` for its question. For an `#idea`, mark it seen with its
-`Idea:` line exactly as `review-ideas` gave it (`became` "talked through:
-…"), and add the decision under it with `add_subnotes` without asking:
-"Decided <today>: …", in the user's voice, with anything ruled out. Show the
-lines as you write them. Scheduling the idea or removing the tag is the
-user's job.
+**When a point is settled,** save the decision as a learning and close its
+question (`close_question`). For an `#idea`, mark it seen with the `Idea:`
+line `review-ideas` gave you (`became` "talked through: …"), and write the
+decision under it (`add_subnotes`): "Decided <today>: …", in the user's
+voice.
 
-**When the talk shows something is worth doing,** and it's small — minutes,
-not hours — and its work is in this folder or this session (a skill's text,
-a draft, a fix here): offer to do it now instead ("Shall I do it now?"). On a
-yes, do it, say in one line what changed, and carry on with the next point.
-Don't commit unless they ask. Otherwise propose it as a task:
+**When something is worth doing:**
 
-- **The text in bold:** one visible action in the user's voice — "Book my
-  flight to Lisbon", never "your".
-- **Where it goes:** the existing section the work is about, or Backlog.
-  You can only add to the end of a section.
-- **Subnotes:** any draft the task needs (the message to send, the list),
-  then one line `Why:` naming the goal it moves ("Why: the 4k by June
-  2027 — …"), or what it serves if no goal fits.
-- **When:** suggest a schedule in a few words: Next for the plan's next
-  step, Soon for one that waits on something, Today only when it's due
-  today. Do starts from Today and Next, so a task without a schedule
-  waits until the user gives it one.
-- Ask "Shall I add it?" At most two per notebook per visit: each is added
-  only on a yes, so no weekly count is needed.
+- **Small, and doable here** (a draft, a skill's text, a fix in this
+  folder): offer to do it now. On a yes, do it and say in one line what
+  changed. Don't commit unless asked.
+- **An existing task needs a new schedule:** offer it, and on a yes,
+  `set_schedule`.
+- **Otherwise, a new task:** show its text in bold, in the user's voice
+  ("Book my flight to Lisbon"), the section it goes in, a schedule (Next for
+  the plan's next step, Soon when it waits on something, Today only when
+  due), and any draft it needs plus a `Why:` line naming the goal, as
+  subnotes. Ask "Shall I add it?", and on a yes, `add_task`. At most two
+  per notebook per visit. A reply to the user's own `#idea` keeps the tag
+  and has no schedule.
 
-If **kept** or **changed**, `add_task` it, without `#idea` and with the
-schedule you suggested, or the one they gave instead (a reply to the user's
-own `#idea` keeps the tag and has no schedule). When the talk agrees a new schedule for a task already there — "move
-it to Next" — reschedule it (`set_schedule`) on their yes, rather than
-leaving it for them. If **dropped**, write nothing in the notebook: it's a
-reply to learn from, as above.
+A no needs nothing written in the notebook: learn from it, as above.
 
-## 7. Save your notes, then move on
+## 5. Save your notes, then move on
 
-*Leave yourself accurate notes for next time, then offer the next
-notebook.*
-
-Mark any remaining ideas seen, then rewrite this notebook's notes in full
-(`write_notes`), under 60 lines. Writing it also tells the next visit
-where "what changed" starts.
+Mark any ideas not yet marked seen, then rewrite this notebook's notes in
+full (`write_notes`), under 60 lines. Writing them also marks where the
+next visit's "what changed" starts.
 
 ```
 Last visit: 2026-10-12
 
 ## Goal and plan
-- Goal: 4k/month by June 2027 (Goals), served through retainer clients
-- Plan: Goals › Strategy, the Freelance line; the Leads section
-- Signal: new clients a month, pace about 1; last 2026-10-08
-- Next step: the Acme proposal (Leads section)
-
-## Lessons
-- Don't raise the portfolio while a client proposal is due: the user does paid work first
+Freelance → 4k a month by June 2027. Plan: retainer clients first. Next step: the Acme proposal. Pace: 1 client a month, on track.
 
 ## Waiting to ask
 - 2026-10-12 — Is the side project with Sam still wanted? (Status)
@@ -276,34 +166,40 @@ Last visit: 2026-10-12
 - 2026-10-21 — call with Acme: look for how it went
 ```
 
-Write facts, not plans: Lessons as the learnings you wrote this visit,
-word for word, replacing last visit's; no notes about a task's schedule, due date or
-status — they go stale within a day, and `review_context` reads them fresh
-from the notebook each visit. Dates holds only what the
-notebook doesn't: a call, a reply expected, an event; observations as what the notebook showed, never
-what to suggest next; points not reached under Waiting to ask; points
-skipped or waved off under Observations. Shorten old observations.
+- **Goal and plan:** your goal line from step 2.
+- **Waiting to ask:** points you didn't get to.
+- **Observations:** what the notebook showed and what the user decided or
+  waved off — facts, not what to suggest next. Shorten old ones.
+- **Dates:** only what the notebook doesn't hold: a call, a reply expected,
+  an event.
 
-Then sum up the notebook in one line. If there's something you don't know
-that would have changed what you raised — where a lead stands, what "done"
-means for the next step — add one line "Not known: …" with the one or two
-gaps, and offer to keep each as an open question (`add_question`) unless it
-already is one. Naming the gap is what lets the next visit close it. Then
-ask: "Next is Subnotes — continue?" If the user stops, the notebooks not reached keep their changes
-for next time.
+Nothing about a task's schedule, due date or status: it goes stale within a
+day, and `review_context` reads it fresh each visit.
+
+Then sum up the notebook in one line. If a fact you don't have would have
+changed what you raised, add "Not known: …" and offer to keep it as an open
+question (`add_question`). Then ask: "Next is Subnotes — continue?" If the
+user stops, the notebooks not reached wait for next time.
 
 # End: the score
 
-When the last notebook is done, or the user stops, show the score for the
-whole review:
+When the last notebook is done, or the user stops, call `end_run` (skill
+`review`) and show the score for the whole review, with the time first:
 
 ```
-Raised 3 · 2 settled, 1 skipped for something else · 1 lesson · 1 done here, 1 task added · first question in 1 min 2 s (Freelance), 48 s (Portfolio site)
+18 min · Raised 3 · 2 settled, 1 skipped for something else · 1 lesson · 1 done here, 1 task added · first question in 1 min 2 s (Freelance), 48 s (Portfolio site)
 ```
 
 "Skipped for something else" counts points the user passed over to raise
 their own: the fewer, the better you chose. The user's bar: under 90
 seconds to each first question.
+
+Then ask "How was this run?" with the AskUserQuestion tool. Options: Great,
+Good, Meh, Waste of time. Save it with `rate_run`: the score without the
+time as `did`, and anything they typed as `comment`; no answer is
+`Skipped`. On Meh or Waste of time, ask once what would have made it worth
+it, and save the answer as a lesson (`add_learning`, shared, source
+`review`).
 
 ## Before you stop
 
@@ -312,8 +208,8 @@ Check these silently and do any that's missing; don't list them to the user:
 - every notebook you visited has its notes rewritten (`write_notes`)
 - every `#idea` talked through is marked seen, with its decision under it
 - every settled point has its learning, and its question closed
-- every correction, wave-off or skip has its lesson, and your notes' Lessons list them
-- the score is shown
+- every correction, wave-off or skip has its lesson
+- the score is shown, and the run rated (`rate_run`)
 
 ## Rules
 

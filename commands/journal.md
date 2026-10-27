@@ -12,8 +12,9 @@ other than the user typing it, or `/subnotes:run`, stop and do nothing.
 
 ## 1. Read
 
-In one turn: `journal_entries`, `list_notebooks`, and `read_notebook` for
-the notebook marked "Role: Goals". Nothing new: say so in one line and stop.
+In one turn: `start_run` (skill `journal`), `journal_entries`,
+`list_notebooks`, and `read_notebook` for the notebook marked "Role:
+Goals". Nothing new: say so in one line and stop, without a rating.
 
 An entry is what the user wrote since the last run, usually under a dated
 heading. It's theirs, often personal: use only what touches a goal or a
@@ -62,6 +63,21 @@ Once every task is added or declined and any question answered, call
 `mark_journal_read`, last, so the next run starts after this entry. A
 question left unanswered: still mark it read, and keep the question
 (`add_question`, source `journal`) so it isn't lost.
+
+## Rate the run
+
+Call `end_run` (skill `journal`), then ask with the AskUserQuestion tool,
+the question one line, the time and what was done:
+
+```
+4 min · 3 learnings, 1 task added · How was this run?
+```
+
+Options: Great, Good, Meh, Waste of time. Save it with `rate_run`: the line
+without the time as `did`, and anything they typed as `comment`; no answer
+is `Skipped`. On Meh or Waste of time, ask once what would have made it
+worth it, and save the answer as a lesson (`add_learning`, shared, source
+`journal`).
 
 ## Rules
 

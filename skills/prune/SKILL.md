@@ -13,7 +13,7 @@ than the user or `/subnotes:run`, stop and do nothing.
 
 ## 1. Read
 
-In one turn: `prune_context`, `list_notebooks`, and `read_notebook` for
+In one turn: `start_run` (skill `prune`), `prune_context`, `list_notebooks`, and `read_notebook` for
 every connected notebook — a learning is checked against the notebook as it
 stands now, not against other learnings alone.
 
@@ -57,8 +57,23 @@ On a yes, write them: `correct_learning` with `prune: true` for a change or
 merge (`text` the new line; for a merge, correct one and remove the other),
 without `text` to remove one, `remove_notebook_brain` for a notebook not
 connected. The user can take any out ("not the Goals one"). Then call
-`mark_pruned`, last, and say in one line what changed. Nothing to change:
-say so in one line and still call `mark_pruned`.
+`mark_pruned`, and say in one line what changed. Nothing to change:
+say so in one line and still call `mark_pruned`, without a rating.
+
+## Rate the run
+
+Call `end_run` (skill `prune`), then ask with the AskUserQuestion tool, the
+question one line, the time and what was done:
+
+```
+6 min · 6 changes, Subnotes down to 40 · How was this run?
+```
+
+Options: Great, Good, Meh, Waste of time. Save it with `rate_run`: the line
+without the time as `did`, and anything they typed as `comment`; no answer
+is `Skipped`. On Meh or Waste of time, ask once what would have made it
+worth it, and save the answer as a lesson (`add_learning`, shared, source
+`prune`).
 
 ## Rules
 

@@ -100,7 +100,7 @@ Skipping: Recipes — no purpose
 ## 5. Save your Goals notes
 
 Rewrite the Goals notes in full (`write_notes`, Goals), under 60 lines, in
-the review's notes format: Last visit, Goal and plan, Lessons,
+the review's notes format: Last visit, Goal and plan,
 Waiting to ask, Observations — with what you saw of where the time is going
 across notebooks. Facts, not plans; nothing about a task's schedule or due
 date.

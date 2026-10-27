@@ -1438,6 +1438,61 @@ function reviewElapsed() {
   return `${secs >= 60 ? `${Math.floor(secs / 60)} min ${secs % 60} s` : `${secs} s`} since the review started.`;
 }
 
+// MARK: - Runs and ratings
+
+// Each skill run by hand ends with how long it took, what it did, and the
+// user's rating of it (2026-10-27): ratings of real runs are the eval the
+// skills can afford, where the eval suite cost too many tokens. start_run
+// starts the clock, end_run stops it before the summary, so the time leaves
+// out the user's rating, and rate_run writes the run to agent/runs.md, one
+// line each, for the user and the tune step to read. Clocks are kept per
+// skill, since one skill can start another (Do starts wrapup).
+const RUNS_PATH = join(AGENT_DIR, 'runs.md');
+const RATINGS = ['Great', 'Good', 'Meh', 'Waste of time', 'Skipped'];
+const runClocks = new Map();
+
+function runSkill(skill) {
+  const name = String(skill ?? '').trim().toLowerCase();
+  if (!/^[a-z][a-z-]{0,23}$/.test(name)) throw new UserError(
+    'This needs `skill`: the skill that ran, as one word — "review", "do", "plan".');
+  return name;
+}
+
+function minutesText(ms) {
+  const mins = Math.round(ms / 60_000);
+  return mins < 1 ? 'under 1 min' : `${mins} min`;
+}
+
+function startRun({ skill }) {
+  const name = runSkill(skill);
+  runClocks.set(name, { startedAt: Date.now() });
+  return `Clock started for ${name}.`;
+}
+
+function endRun({ skill }) {
+  const name = runSkill(skill);
+  const clock = runClocks.get(name);
+  if (!clock) return `${name} wasn't started with start_run in this session, so it isn't timed: leave the time out of the summary.`;
+  clock.ms ??= Date.now() - clock.startedAt;
+  return `${minutesText(clock.ms)} since ${name} started.`;
+}
+
+function rateRun({ skill, did, rating, comment }) {
+  const name = runSkill(skill);
+  const r = RATINGS.find(x => x.toLowerCase() === String(rating ?? '').trim().toLowerCase());
+  if (!r) throw new UserError(`\`rating\` is one of: ${RATINGS.join(', ')}.`);
+  const what = oneLine(did, 'summary');
+  const note = String(comment ?? '').trim() ? oneLine(comment, 'comment') : '';
+  const clock = runClocks.get(name);
+  const time = clock ? minutesText(clock.ms ?? Date.now() - clock.startedAt) : 'not timed';
+  runClocks.delete(name);
+  const line = `- ${today()} · ${name} · ${time} · ${r} · ${what}${note ? ` — "${note}"` : ''}`;
+  const current = readEntryFile(RUNS_PATH) ??
+    '# Runs and ratings\n\nEach skill run by hand: when, how long, how the user rated it, and what it did.\n\n';
+  writeEntryFile(RUNS_PATH, current.replace(/\n*$/, current.includes('\n- ') ? '\n' : '\n\n') + line + '\n');
+  return `Saved: ${line.slice(2)}`;
+}
+
 // Everything one visit needs, for every notebook the review is visiting, in
 // one call: the shared learnings and questions once, then per notebook its
 // notes, learnings, questions, scheduled lines, new thoughts and what changed.
@@ -2088,6 +2143,29 @@ const TOOLS = [
     description: "For /subnotes:review run by hand: how long since the review started (its list_notebooks, or review_context). Call it last before showing the report, so the time leaves out the user's answer.",
     inputSchema: { type: 'object', properties: {} },
     run: reviewElapsed,
+  },
+  {
+    name: 'start_run',
+    description: 'Start the clock for one skill run by hand (review, plan, do, journal, prune, wrapup). Call it with your first calls.',
+    inputSchema: { type: 'object', properties: { skill: { type: 'string', description: 'The skill running, one word.' } }, required: ['skill'] },
+    run: startRun,
+  },
+  {
+    name: 'end_run',
+    description: "Stop the skill's clock and say how long it ran. Call it just before the summary, so the time leaves out the user's rating.",
+    inputSchema: { type: 'object', properties: { skill: { type: 'string', description: 'The skill that ran, one word.' } }, required: ['skill'] },
+    run: endRun,
+  },
+  {
+    name: 'rate_run',
+    description: "Save the run with the user's rating to the runs log: when, how long, the rating, what it did, and any comment. Call it once they've rated it, or with Skipped when they didn't.",
+    inputSchema: { type: 'object', properties: {
+      skill: { type: 'string', description: 'The skill that ran, one word.' },
+      did: { type: 'string', description: 'What the run did, one line: the summary shown to the user, without the time.' },
+      rating: { type: 'string', enum: RATINGS, description: "The user's rating, or Skipped." },
+      comment: { type: 'string', description: 'What the user typed instead of, or beside, a rating. Leave out when none.' },
+    }, required: ['skill', 'did', 'rating'] },
+    run: rateRun,
   },
   {
     name: 'ideas_context',
