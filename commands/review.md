@@ -32,8 +32,11 @@ goal's notebooks, its plan check when due, the points that would move it,
 the learnings and notes. What changes is only who says it:
 
 - **Say nothing to the user.** No order line, no goal openings, no one-line
-  sums, no score, no rating, no `review_elapsed`. To keep the wait short,
-  call `review_context` for all the goals you'll take in one turn.
+  sums, no score, no rating, no `review_elapsed`.
+- **Keep the wait short:** the user is waiting for the run. It has already
+  called `whats_due` and `list_notebooks`, so step 1 is one turn:
+  `start_run`, the three Goals reads, and `review_context` with `goals` set
+  to every goal you'll take (`whats_due` names them). Then the points.
 - **A plan check due:** don't start it. Make it a point: the goal, and why
   it needs a look, in the user's terms ("five months left, and the
   webinars haven't started").

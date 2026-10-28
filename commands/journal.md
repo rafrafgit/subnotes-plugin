@@ -20,6 +20,10 @@ user has answered them through the run, or the session ends, call
 ("Add a task to message Felix?", `add_question`, source `journal`), so it
 isn't lost.
 
+Quietly, the run already has the notebooks and Goals, so step 1 is only
+`start_run` and `journal_entries`, and `read_learnings` only for a notebook
+you'll file a learning in. An entry with nothing to file takes one turn.
+
 ## 1. Read
 
 In one turn: `start_run` (skill `journal`), `journal_entries`,

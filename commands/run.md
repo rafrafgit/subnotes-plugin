@@ -34,15 +34,23 @@ never cut them short. But the user never sees the machinery.
 ## 1. Catch up, quietly
 
 Call `whats_due`. Its `Run:` line says where to start, and the sections
-below it what else is due.
+below it what else is due. It also names the tasks due today, overdue,
+Next and coming up, and shows a new journal entry. If the Subnotes tools
+are deferred, load every one this run may need in one search, not one at a
+time: each round makes the user wait.
 
 If the user added something after the command ("just the Acme proposal",
 "look at my business goal"), that wins: do it, using the skill it needs.
 
-If the journal, the review or the prune is due, say one short line so the
-user knows you're on it ("Catching up on your notes…"), then start each one
-that's due, in this order, with the Skill tool and `quiet` as its
-argument:
+**Say something real at once.** Before any catch-up, in the same turn as
+the next tool call, give the user one or two lines from `whats_due` alone:
+what's on today, and a word on a new journal entry ("Saw your note about
+the drive — I'll have ideas for those two hours in a moment"). Over a
+minute of silence before the first real reply is too long; the catch-up
+runs while they read.
+
+If the journal, the review or the prune is due, start each one that's due,
+in this order, with the Skill tool and `quiet` as its argument:
 
 1. `subnotes:journal`, if the journal is due.
 2. `subnotes:review`, if the review is due, or `quiet, what's next` when
@@ -54,6 +62,9 @@ but doesn't talk to the user: it hands you its **points**, the things that
 need the user, each with its pick and the writes a yes leads to. Keep them
 all. None is dropped because the list is long: one not raised now waits for
 the next time, at the top.
+
+Catch up fast: read only what the skills ask for, and leave any other
+check (git, the web, a search to confirm a hunch) until the points are out.
 
 ## 2. Find what matters today
 
@@ -68,7 +79,8 @@ tasks it would move up, as a point.
 One reply, in this order:
 
 1. **What matters most today,** one to three things, each in one line with
-   why it matters, from the plan and the goals.
+   why it matters, from the plan and the goals. Don't repeat your first
+   lines: say only what the catch-up changed.
 2. **What needs them,** the points, numbered, most important first: at most
    three in this reply. A plan check that's due always makes the three: say
    plainly which goal you'd like to look at and why, in their terms ("Your

@@ -1371,7 +1371,18 @@ function rateRun({ skill, did, rating, comment }) {
 // changed. For a goal: the goal's notes once, and its linked notebooks unless
 // others are named (one matched by purpose); what changed is since this
 // goal's last review. Without a goal, each notebook comes with its own notes.
-function reviewContext({ notebooks, goal }) {
+function reviewContext({ notebooks, goal, goals }) {
+  // Several goals in one call (2026-10-28): the quiet review reads every goal
+  // it takes at once, and the shared learnings come once instead of per goal.
+  const many = (Array.isArray(goals) ? goals : goals ? [goals] : []).filter(n => String(n ?? '').trim());
+  if (many.length) {
+    const parts = many.map(n => {
+      try { return reviewContext({ goal: n }); }
+      catch (e) { if (e instanceof UserError) return `\n# Goal: ${n}\n\n${e.message}`; throw e; }
+    });
+    const goalPart = text => text.slice(text.indexOf('\n# Goal: ') + 1);
+    return [parts[0], ...parts.slice(1).map(goalPart)].join('\n\n');
+  }
   const m = manifest();
   const g = goal ? findGoal(m, goal) : null;
   let names = (Array.isArray(notebooks) ? notebooks : [notebooks]).filter(n => String(n ?? '').trim());
@@ -1408,6 +1419,8 @@ function reviewContext({ notebooks, goal }) {
 // review runs again, even on a day it already ran, to work out what's next
 // (2026-10-27).
 const PLAN_EVERY_DAYS = 30;
+const NAMED_TASKS = 12;
+const JOURNAL_PREVIEW_LINES = 40;
 const PROMOTE_MIN_SOON = 3;
 const PROMOTE_MAX = 3;
 const SCHEDULE_PARTS = /((?:\s*\[[^\[\]]+\])+)\s*$/;
@@ -1652,6 +1665,7 @@ function markJournalRead() {
 // Next; a task dated in the coming days is upcoming, and comes up on its date.
 function doCounts(m) {
   let now = 0, next = 0, soon = 0, upcoming = 0;
+  const named = [];
   for (const nb of m.notebooks) {
     let text;
     try { text = readFileSync(join(DIR, nb.file), 'utf8'); } catch { continue; }
@@ -1660,10 +1674,13 @@ function doCounts(m) {
       if (s.group === 'Today') now++;
       else if (s.group === 'Next') next++;
       else if (s.group === 'Soon' && s.due) upcoming++;
-      else if (s.group === 'Soon') soon++;
+      else if (s.group === 'Soon') { soon++; continue; }
+      named.push({ when: s.group === 'Soon' ? s.due : s.due && s.due < today() ? `overdue, ${s.due}` : s.group,
+        name: s.name, notebook: nb.name, order: s.group === 'Today' ? 0 : s.group === 'Next' ? 1 : 2 });
     }
   }
-  return { now, next, soon, upcoming };
+  named.sort((a, b) => a.order - b.order || String(a.when).localeCompare(String(b.when)));
+  return { now, next, soon, upcoming, named };
 }
 
 // MARK: - Prune
@@ -1788,6 +1805,15 @@ function whatsDue() {
   const queued = work.now + work.next > 0, promote = !queued && work.soon >= PROMOTE_MIN_SOON;
   const run = journalNew ? 'Journal' : review.due.length || plan.due.length ? 'Review' : prune.due ? 'Prune'
     : queued ? 'Do' : promote ? 'Do, moving Soon tasks to Next first' : "Review, for what's next";
+  const named = work.named.slice(0, NAMED_TASKS).map(t => `- ${t.name} (${t.notebook}, ${t.when})`);
+  if (work.named.length > NAMED_TASKS) named.push(`- …and ${work.named.length - NAMED_TASKS} more`);
+  let entry = [];
+  if (journalNew) {
+    try {
+      const lines = journalEntries().split('\n').slice(1).filter(l => l.trim());
+      entry = ['', ...lines.slice(0, JOURNAL_PREVIEW_LINES), ...(lines.length > JOURNAL_PREVIEW_LINES ? ['(more in journal_entries)'] : [])];
+    } catch {}
+  }
   return [
     `Today: ${today()}`,
     `Run: ${run}`,
@@ -1795,6 +1821,7 @@ function whatsDue() {
     `## Journal — ${journalNew ? 'due' : 'not due'}`,
     !journal ? 'No Journal notebook is connected.'
       : journalNew ? `"${journal.name}" has an entry since Journal last ran.` : `Nothing new in "${journal.name}" since Journal last ran.`,
+    ...entry,
     '',
     `## Review — ${review.due.length ? `due for ${review.due.join(', ')}` : plan.due.length ? 'due for its plan checks' : 'not due'}`,
     'Due once a day, for each goal whose notebooks changed since its last review, each ongoing goal (a repeat, no deadline) once most of a period has gone by since it last happened with nothing planned, and each notebook with a purpose no goal links.',
@@ -1810,6 +1837,7 @@ function whatsDue() {
     '',
     `## Do — ${queued ? 'has tasks' : promote ? 'Today and Next are empty: move Soon tasks up first' : "Today and Next are empty: review for what's next"}`,
     `${work.now} task${work.now === 1 ? '' : 's'} Today or overdue, ${work.next} Next, ${work.soon} Soon, ${work.upcoming} dated in the next ${STALL_DAYS} days, across the connected notebooks.`,
+    ...named,
     `Do works on Today and Next. When both are empty: with ${PROMOTE_MIN_SOON} or more Soon, Do first offers to move up to ${PROMOTE_MAX} of them to Next; with fewer, the review runs again, even if it ran today, to work out what's next.`,
     '',
     // Every run is rated while the skills are being tuned: the feedback is
@@ -2044,6 +2072,7 @@ const TOOLS = [
     description: "For /subnotes:review: everything one goal's review needs, in one call — the shared learnings and questions once, the review's notes on the goal, then per notebook what it shows now of each suggestion the notes list as open, its learnings and open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), and only what changed since this goal's last review (the whole notebook on a first one). With a goal and no notebooks, it reads the notebooks the goal links. Without a goal, for a notebook no goal links, each notebook comes with its own notes. Call it once per goal, instead of read_notes, read_notebook, read_learnings and read_questions.",
     inputSchema: { type: 'object', properties: {
       goal: { type: 'string', description: "The goal to review: its heading in Goals, without its schedule." },
+      goals: { type: 'array', items: { type: 'string' }, description: "Several goals at once, each read as `goal` would be, with the shared learnings once. Use instead of `goal` to read every goal a review takes in one call." },
       notebooks: { type: 'array', items: { type: 'string' }, description: "The connected notebooks to read. Leave out with a goal to read the ones it links; name them to add one matched by purpose." },
     } },
     run: reviewContext,

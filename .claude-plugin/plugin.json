@@ -1,7 +1,7 @@
 {
   "name": "subnotes",
   "description": "Read the Subnotes notebooks you connect and add tasks to them — so \"put that on the backlog\" lands in your notebook, not the transcript. Needs the Subnotes app, macOS only.",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "author": {
     "name": "rafrafgit",
     "url": "https://subnotes.app"
