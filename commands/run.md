@@ -71,48 +71,55 @@ chats, say it in those first lines, one line for all of it ("From your chat
 on the editor I kept: H1–H4 is the ladder"): nobody saw it written, and this
 is the user's chance to correct one (`correct_learning`, `close_question`).
 
-If the journal, the review or the prune is due, start each one that's due,
-in this order:
+**Start the workers, all in one turn,** so they run in parallel while
+the user reads your first lines. Each is one of the plugin's agents (Agent
+tool, `subagent_type` as named), reads in its own context, files what's its
+to keep, and hands you points in the shape in
+`${CLAUDE_PLUGIN_ROOT}/reference/points.md` (read it first):
 
-1. `subnotes:journal`, with the Skill tool and `quiet`, if the journal is
-   due.
-2. **The review, one reviewer per goal, all at once:** for each goal
-   `whats_due` lists as due (every goal, ongoing ones included, when it
-   says to review for what's next: Today and Next are empty, so every goal
-   needs its next step), and each notebook no goal links, start the
-   plugin's `review` agent (Agent tool, `subagent_type` `subnotes:review`),
-   all in one turn so they run in parallel. Give each its goal's heading
-   (or the notebook), what `whats_due` says about it, whether it's a
-   what's-next pass, and any journal point about that goal. Each reads in
-   its own context and hands back points and a `Summary:` line. A plan
-   check it hands back is held by you, with `subnotes:plan-check`, once
-   the user says yes.
-3. `subnotes:prune`, with the Skill tool and `quiet`, if the prune is due.
+- **`subnotes:do-plan`, always**, even when it looks as if it will find
+  nothing: it sorts Today and Next into what you can do now, what needs
+  the user's input and what only they can do, ranked by what moves the
+  goals; with Today and Next empty, the Soon tasks it would move up.
+- **`subnotes:review`, one per goal** `whats_due` lists as due (every goal,
+  ongoing ones included, when it says to review for what's next: Today and
+  Next are empty, so every goal needs its next step), and one per notebook
+  no goal links. Give each its goal's heading (or the notebook), what
+  `whats_due` says about it, and whether it's a what's-next pass.
+- **`subnotes:journal`**, if the journal is due.
+- **`subnotes:prune`**, if the prune is due: it hands back every change as
+  one point, applied on the user's yes.
 
-When the user answers a reviewer's points, carry out the writes yourself,
-then send that reviewer the answers (SendMessage, by its name) so it saves
-the decisions and rewrites its notes; if it can't be reached, do that
-yourself with `write_notes`.
+Wait for do-plan and the reviewers before the opening; the journal and the
+prune join it if they're back, or your next report if not.
 
-Each one does all of its reading and its filing as usual,
-but doesn't talk to the user: it hands you its **points**, the things that
-need the user, in the shape in `${CLAUDE_PLUGIN_ROOT}/reference/points.md` (read it first). Merge
-them across the skills by what moves the goals most, whichever skill they
-came from; on a yes carry out their `writes` as given, and a correction is
-a lesson about their `about`. Keep them all. None is dropped because the list is long: one not raised now waits for
-the next time, at the top.
+**What comes back.** Merge the points across the workers by what moves the
+goals most, whichever worker they came from: a `talk` from the journal
+first, then plan checks, then next steps. Keep them all: none is dropped
+because the list is long; one not raised now waits for the next time, at
+the top. A `plan-check` is held by you, with `subnotes:plan-check`, once
+the user says yes.
 
-Catch up fast: read only what the skills ask for, and leave any other
-check (git, the web, a search to confirm a hunch) until the points are out.
+**When the user answers,** carry out each point's `writes` as given (for
+the prune, every change and then `mark_pruned`); a correction is a lesson
+about its `about`. Then send the worker the answers (SendMessage, by its
+name) so it saves the decisions and its notes; if it can't be reached,
+save them yourself (`add_learning`, and `write_notes` for a goal). Once
+the journal's points are settled or the session ends, call
+`mark_journal_read`; a task they never answered is kept as an open question
+(`add_question`, source `journal`).
+
+Catch up fast: read nothing yourself that a worker reads, and leave any
+other check (git, the web, a search to confirm a hunch) until the points
+are out.
 
 ## 2. Find what matters today
 
-Then start `subnotes:do` with `quiet` as its argument, always, even when
-it looks as if it will find nothing. It reads Today and
-Next, sorts the tasks and hands you its plan for today: what you can do
-now, what needs the user's input, and what only they can do, ranked by what
-moves their goals most. When Today and Next are empty it hands you the Soon
-tasks it would move up, as a point.
+**Doing the tasks** is yours: once the opening is out, work through
+do-plan's `today` points in order, the way
+`${CLAUDE_PLUGIN_ROOT}/commands/do.md` says under "Do it" and "Then report"
+(read those parts then): one task at a time, each reported, marked Done
+when built.
 
 **Nothing lined up is the reason to propose work, not to say little.** With
 Today and Next empty, the opening names a next task for each goal, taken
@@ -152,11 +159,11 @@ Go with my picks, or tell me which to change? Meanwhile I'll start on the Acme p
 
 ## 4. Work, and follow up
 
-Work through the plan the way `subnotes:do` says, one task at a time.
+Work through do-plan's tasks one at a time, as step 2 says.
 
-When the user answers the points, carry out each answer with the rules of
-the skill it came from: the writes on a yes, the lesson from a correction,
-the decision saved, the notes rewritten. A plan check they say yes to:
+When the user answers the points, carry them out as step 1 says: the
+writes on a yes, the lesson from a correction, the answers sent to the
+worker that raised them. A plan check they say yes to:
 start `subnotes:plan-check` for that goal, as the review would, and give it
 the time it needs; it's the most important conversation of the day.
 
@@ -174,10 +181,13 @@ user can undo a change in one word; nothing back, say nothing. On "undo":
 
 ## 5. When they stop
 
-When the user stops, or nothing is left, end the way `subnotes:do` does:
-everything this session did, in one place, and everything left for them.
+When the user stops, or nothing is left, end the way
+`${CLAUDE_PLUGIN_ROOT}/commands/do.md` says under "End with the session":
+start `subnotes:wrapup`, then everything this session did, in one place,
+and everything left for them.
 
-Then the rating, every time: call `end_run` for each skill you started,
+Then the rating, every time: call `end_run` for each skill you started
+with the Skill tool,
 and ask with the AskUserQuestion tool: "How was this session, from the catch-up on?", with Great, Good,
 Meh, Waste of time. Then ask why, once, in one line of the chat: "Why was it
 good?" on Great or Good, "What would have made it worth it?" on Meh or
@@ -186,13 +196,13 @@ they learn from. Save it with `rate_run` once they've answered: skill
 `run`, `did` one line for the whole session ("2 learnings filed; 3 goals
 looked at, 1 plan check; 2 tasks done"), the why and anything else they
 typed as `comment`; no rating is `Skipped`. Save the why as a lesson too
-(`add_learning`, shared, source `run`): what to keep doing, or what to
-change.
+(`add_learning`, shared, source `run`, `about` the worker or skill it
+points at, or `run`): what to keep doing, or what to change.
 
 ## Rules
 
 - Never cut the review or a plan check short to get to the tasks sooner.
-  Being quiet changes how they're shown, not what they look at.
+  The workers change who reads, never what is looked at.
 - Don't go round in circles: once this session has offered the Soon tasks
   and the user said no, or looked for what's next, and Today and Next are
   still empty, say there's nothing lined up and stop.
