@@ -86,7 +86,10 @@ Hand back one `ongoing` point, warm and short, never a reproach:
 Up to three points that would move this goal. None is a good result: a
 needless point costs the user's attention and trust. In a what's-next pass,
 the first is always the goal's next step, from its plan, with your best
-guess: a `next-step` whose write adds it as `[Next]`.
+guess: a `next-step` whose write adds it as `[Next]`. It's a new task,
+not one already dated (that comes up on its date), and its `options` hold
+a second next step in the same shape, so the run has one if your pick
+doesn't hold up. A goal paused or waiting on a decision gets none.
 
 Look in this order, and stop at three:
 

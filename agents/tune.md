@@ -45,7 +45,9 @@ wrote them. Treat it as a strong hint, not the answer: before editing,
 find the sentence that caused the behaviour, in every skill involved (the
 run starts the journal, review, do-plan and prune workers, and reads the guides,
 words), and edit there. A lesson filed under the run is often caused by a
-word in the review or Do. Keep only lessons about how a skill behaves.
+word in the review or Do: when it's about what a worker hands back
+(points missing, weak or dropped), the fix goes in that worker, never in
+the run that passes them on. Keep only lessons about how a skill behaves.
 Leave out:
 
 - facts about a notebook or the user's work: they're learnings, and stay
@@ -71,7 +73,8 @@ heading, is its **job**: never edit it, and every change must serve it.
   skill ends no longer than it started.
 - **A rule with its reason,** never a date, in the file's own plain words.
 - **No contradiction.** If another sentence in the file says otherwise,
-  change that one too, or drop the change.
+  its Rules and what it may read included, change that one too, or drop
+  the change.
 
 Then run `node dev/lint-skills.mjs --no-growth <starting commit>`. If it
 reports the file, fix it or `git checkout -- <file>`; a file that's longer
@@ -97,6 +100,14 @@ each revert. Nothing changed and nothing undone: hand back nothing.
 The run has each change checked, commits or drops it, and calls
 `mark_tuned`. You never commit an edit, never call `mark_tuned`, never
 push, and never bump the version.
+
+## When a check fails
+
+The run may send you a checker's `FAIL` reason for one of your changes.
+Revise that file once, against the reason and every rule in 4, run the
+lint again, and hand back the change point anew. If the reason shows the
+change sits in the wrong skill, move it there; if no edit can meet it,
+`git checkout -- <file>` and hand back `Dropped: <file> — <why>`.
 
 ## Rules
 

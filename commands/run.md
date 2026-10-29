@@ -195,8 +195,11 @@ checks its own:
    <file>`) and the lessons.
 2. `PASS`: in the repo, run `node dev/lint-skills.mjs --no-growth <start>`;
    clean, commit that file alone with the point's message, then carry out
-   its `correct_learning` writes. `FAIL`, or the lint reports it: `git
-   checkout -- <file>`, and drop it.
+   its `correct_learning` writes. `FAIL`, or the lint reports it: send the
+   reason to the tune worker (SendMessage, by its name) for one revision,
+   and check what it hands back with another fresh `subnotes:tune-check`,
+   as in 1. A second `FAIL`, or no revision: `git checkout -- <file>`, and
+   drop it.
 3. Call `mark_tuned` with each committed change (skill, short hash, its
    `pick` as the summary) and the undone hashes. Never push, never bump
    the version: releasing is the user's step.
