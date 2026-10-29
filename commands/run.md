@@ -148,6 +148,14 @@ With every report, if a point is still open, add one line at the end:
 "Still waiting on you: 2 — dinner on Saturday?" Raise the points not shown
 yet once the first ones are settled, at most three at a time.
 
+**The skills improve themselves.** When `whats_due` says the skill update
+is due, start it once your opening is out, in the background so the user
+never waits on it: the Agent tool, general-purpose, asked to run the Skill
+`subnotes:tune` with `quiet` and give back its hand-back lines as they are.
+When it returns, add its lines to your next report as they are, so the
+user can undo a change in one word; nothing back, say nothing. On "undo":
+`git revert` that commit in the plugin repo, and save why as a lesson.
+
 ## 5. When they stop
 
 When the user stops, or nothing is left, end the way `subnotes:do` does:

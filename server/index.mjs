@@ -1820,6 +1820,146 @@ function markPruned() {
   return `Pruned ${today()}; due again in ${PRUNE_EVERY_DAYS} days.`;
 }
 
+// MARK: - Tune
+
+// The skills improve themselves from what the runs taught, the way Hermes
+// agents edit their own skills (decided 2026-10-29): once a week the run
+// starts /subnotes:tune, which edits the skill text from the week's lessons,
+// has a second agent check each change, and commits it. Only where the plugin
+// is installed from a git checkout: the skill text is the plugin's, and a
+// user installing from GitHub has nothing here to edit. Releasing stays the
+// user's step.
+const TUNE_EVERY_DAYS = 7;
+const TUNED = () => join(AGENT_DIR, 'tune.json');
+const TUNE_LOG = () => join(AGENT_DIR, 'tuned.md');
+const FIRST_TUNE_DAYS = 14;
+const UNDO_AFTER = 3; // ratings after a change before it's judged
+const SCORES = { Great: 4, Good: 3, Meh: 2, 'Waste of time': 1 };
+const RUN_LINE = /^- (\d{4}-\d{2}-\d{2}) · ([a-z-]+) · [^·]+ · (Great|Good|Meh|Waste of time|Skipped) · (.*)$/;
+const TUNE_LINE = /^- (\d{4}-\d{2}-\d{2}) · ([a-z-]+) · ([0-9a-f]{7,40}) · (.*?)( · undone \d{4}-\d{2}-\d{2})?$/;
+
+// The plugin's own checkout: the folder this server runs from when it is a
+// git repo (claude --plugin-dir), else a directory marketplace that is one.
+function sourceRepo() {
+  const isRepo = p => existsSync(join(p, '.git')) && existsSync(join(p, '.claude-plugin', 'plugin.json'));
+  const here = join(dirname(fileURLToPath(import.meta.url)), '..');
+  if (isRepo(here)) return here;
+  try {
+    const known = JSON.parse(readFileSync(join(homedir(), '.claude', 'plugins', 'known_marketplaces.json'), 'utf8'));
+    for (const m of Object.values(known)) {
+      const p = m?.source?.source === 'directory' ? m.source.path : null;
+      if (!p || !isRepo(p)) continue;
+      const name = JSON.parse(readFileSync(join(p, '.claude-plugin', 'plugin.json'), 'utf8')).name;
+      if (name === 'subnotes') return p;
+    }
+  } catch {}
+  return null;
+}
+
+// Each skill's text, by the name runs are rated under.
+function skillFiles(repo) {
+  const out = {};
+  try { for (const f of readdirSync(join(repo, 'commands'))) if (f.endsWith('.md')) out[f.slice(0, -3)] = `commands/${f}`; } catch {}
+  try { for (const d of readdirSync(join(repo, 'skills'))) if (existsSync(join(repo, 'skills', d, 'SKILL.md'))) out[d] = `skills/${d}/SKILL.md`; } catch {}
+  return out;
+}
+
+function lastTuned() {
+  try { return JSON.parse(readFileSync(TUNED(), 'utf8')).tuned ?? null; } catch { return null; }
+}
+
+function ratedRuns() {
+  return (readEntryFile(RUNS_PATH) ?? '').split('\n').map(l => RUN_LINE.exec(l)).filter(Boolean)
+    .map(([line, date, skill, rating]) => ({ line: line.slice(2), date, skill, rating }));
+}
+
+function tuneChanges() {
+  return (readEntryFile(TUNE_LOG()) ?? '').split('\n').map(l => TUNE_LINE.exec(l)).filter(Boolean)
+    .map(([, date, skill, commit, summary, undone]) => ({ date, skill, commit, summary, undone: !!undone }));
+}
+
+// A change whose skill rated worse in its next three runs than in the three
+// before it: undo it. Skipped runs say nothing either way.
+function changesToUndo() {
+  const runs = ratedRuns().filter(r => r.rating !== 'Skipped');
+  const mean = rs => rs.reduce((s, r) => s + SCORES[r.rating], 0) / rs.length;
+  return tuneChanges().filter(c => !c.undone).filter(c => {
+    const mine = runs.filter(r => r.skill === c.skill);
+    const after = mine.filter(r => r.date > c.date).slice(0, UNDO_AFTER);
+    const before = mine.filter(r => r.date <= c.date).slice(-UNDO_AFTER);
+    return after.length === UNDO_AFTER && before.length > 0 && mean(after) < mean(before);
+  });
+}
+
+function tuneDue() {
+  const repo = sourceRepo();
+  if (!repo) return { due: false, lines: ['The plugin is not installed from a checkout of its own repo: nothing to tune here.'] };
+  const last = lastTuned(), undo = changesToUndo();
+  const whys = [];
+  if (undo.length) whys.push(`undo ${undo.length} change${undo.length > 1 ? 's' : ''} rated worse since`);
+  if (!last) whys.push('never tuned');
+  else if (daysSince(last) >= TUNE_EVERY_DAYS) whys.push(`last tuned ${last}, ${daysSince(last)} days ago`);
+  return { due: whys.length > 0, why: whys.join('; '),
+    lines: [last ? `Last tuned ${last}.` : 'Never tuned.', ...undo.map(c => `Rated worse since: ${c.skill} ${c.commit} — ${c.summary}`)] };
+}
+
+// Everything a tune needs in one call: where the skills are, the runs and
+// ratings since the last tune, the lessons written since, and the changes
+// made before with any to undo.
+function tuneContext() {
+  const repo = sourceRepo();
+  if (!repo) throw new UserError('The plugin is not installed from a checkout of its own repo, so there is no skill text to tune.');
+  // A first tune reads the last two weeks, not the whole history: older
+  // lessons have had their chance to land in the skills by hand.
+  const last = lastTuned();
+  const since = last ?? localTime(new Date(Date.parse(today()) - FIRST_TUNE_DAYS * 86_400_000)).slice(0, 10);
+  const after = d => d >= since;
+  const out = [`Today: ${today()}`, `Repo: ${repo}`, `Last tuned: ${last ?? 'never'}`, '', '## Skills — the name runs are rated under, and its file'];
+  for (const [name, file] of Object.entries(skillFiles(repo))) out.push(`- ${name}: ${file}`);
+  out.push('', `## Rated runs since ${since}`);
+  const runs = ratedRuns().filter(r => after(r.date));
+  out.push(...(runs.length ? runs.map(r => `- ${r.line}`) : ['(none)']));
+  for (const kind of ['learnings', 'questions']) {
+    out.push('', `## ${kind} written since ${since} — file, then the entry`);
+    let files = [];
+    try { files = readdirSync(join(AGENT_DIR, kind)).filter(f => f.endsWith('.md')).sort(); } catch {}
+    let any = false;
+    for (const f of files) for (const l of readFileSync(join(AGENT_DIR, kind, f), 'utf8').split('\n')) {
+      const e = ENTRY.exec(l);
+      if (e && after(e[1])) { out.push(`- ${f.slice(0, -3)} | ${l.slice(2)}`); any = true; }
+    }
+    if (!any) out.push('(none)');
+  }
+  const changes = tuneChanges(), undo = new Set(changesToUndo().map(c => c.commit));
+  out.push('', '## Changes made by earlier tunes');
+  out.push(...(changes.length ? changes.map(c =>
+    `- ${c.date} · ${c.skill} · ${c.commit} · ${c.summary}${c.undone ? ' · undone' : undo.has(c.commit) ? ' · RATED WORSE SINCE: undo it' : ''}`) : ['(none)']));
+  return out.join('\n');
+}
+
+function markTuned({ changes, undone }) {
+  const list = Array.isArray(changes) ? changes : [];
+  const lines = list.map(c => {
+    const skill = runSkill(c?.skill);
+    const commit = String(c?.commit ?? '').trim();
+    if (!/^[0-9a-f]{7,40}$/.test(commit)) throw new UserError(`Each change needs its commit hash; got "${commit}".`);
+    return `- ${today()} · ${skill} · ${commit} · ${oneLine(c?.summary, 'change summary')}`;
+  });
+  let text = readEntryFile(TUNE_LOG()) ??
+    '# Skill changes by /subnotes:tune\n\nEach change the tune made to a skill, its commit, and whether it was undone.\n\n';
+  for (const commit of (Array.isArray(undone) ? undone : [])) {
+    const c = String(commit).trim();
+    text = text.split('\n').map(l => {
+      const m = TUNE_LINE.exec(l);
+      return m && !m[5] && (m[3].startsWith(c) || c.startsWith(m[3])) ? `${l} · undone ${today()}` : l;
+    }).join('\n');
+  }
+  if (lines.length) text = (text.includes('\n- ') ? text.replace(/\n*$/, '\n') : text) + lines.join('\n') + '\n';
+  writeEntryFile(TUNE_LOG(), text);
+  writeEntryFile(TUNED(), JSON.stringify({ tuned: today() }, null, 2) + '\n');
+  return `Tuned ${today()}: ${lines.length} change${lines.length === 1 ? '' : 's'} logged; due again in ${TUNE_EVERY_DAYS} days.`;
+}
+
 function caughtSection() {
   const caught = caughtSinceLastRun();
   if (!caught.length) return [];
@@ -1832,6 +1972,7 @@ function whatsDue() {
   const m = manifest();
   if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,).";
   const plan = planDue(m), review = reviewDue(m), prune = pruneDue(m), work = doCounts(m);
+  const tune = tuneDue();
   const journal = journalNotebook(m);
   let journalNew = false;
   try { journalNew = !!journal && journalHasNew(journal); } catch {}
@@ -1867,6 +2008,10 @@ function whatsDue() {
     `## Prune — ${prune.due ? `due: ${prune.why}` : 'not due'}`,
     `Due ${PRUNE_EVERY_DAYS} days after the last prune.`,
     ...prune.lines,
+    '',
+    `## Skill update — ${tune.due ? `due: ${tune.why}` : 'not due'}`,
+    `Due ${TUNE_EVERY_DAYS} days after the last, or when a change made by it rated worse since. The run starts it in the background, after its opening.`,
+    ...tune.lines,
     '',
     `## Do — ${queued ? 'has tasks' : promote ? 'Today and Next are empty: move Soon tasks up first' : "Today and Next are empty: review for what's next"}`,
     `${work.now} task${work.now === 1 ? '' : 's'} Today or overdue, ${work.next} Next, ${work.soon} Soon, ${work.upcoming} dated in the next ${STALL_DAYS} days, across the connected notebooks.`,
@@ -2073,6 +2218,25 @@ const TOOLS = [
     description: 'For the monthly prune, last: records today as the last prune, so /subnotes:run makes it due again in 30 days.',
     inputSchema: { type: 'object', properties: {} },
     run: markPruned,
+  },
+  {
+    name: 'tune_context',
+    description: "For /subnotes:tune: where the plugin's skills are, the rated runs and the learnings and questions written since the last tune, and the changes earlier tunes made, with any rated worse since. Read-only.",
+    inputSchema: { type: 'object', properties: {} },
+    run: tuneContext,
+  },
+  {
+    name: 'mark_tuned',
+    description: 'For /subnotes:tune, last: logs each change it committed and each it undid, and records today as the last tune, so /subnotes:run makes it due again in 7 days.',
+    inputSchema: { type: 'object', properties: {
+      changes: { type: 'array', description: 'Each change committed this tune.', items: { type: 'object', properties: {
+        skill: { type: 'string', description: 'The skill changed, as runs are rated under it: review, run, do.' },
+        commit: { type: 'string', description: 'Its commit hash.' },
+        summary: { type: 'string', description: 'One plain line: what the skill does differently now, and from how many lessons.' },
+      }, required: ['skill', 'commit', 'summary'] } },
+      undone: { type: 'array', items: { type: 'string' }, description: 'Commit hashes of earlier changes reverted this tune.' },
+    } },
+    run: markTuned,
   },
   {
     name: 'read_questions',
