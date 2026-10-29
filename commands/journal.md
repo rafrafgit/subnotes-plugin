@@ -14,7 +14,8 @@ other than the user typing it, or `/subnotes:run`, stop and do nothing.
 **Started quietly** (the argument is `quiet`): `/subnotes:run` started you
 and does the talking. Read, sort and file the learnings as below, but say
 nothing to the user, and don't rate. Hand back the tasks you'd propose and
-your question as points, each with where it goes and its write. When the
+your question as points, each with where it goes and its write, and any
+problem to talk through (step 2) first, with your ideas. When the
 user has answered them through the run, or the session ends, call
 `mark_journal_read`; a task they never answered is kept as an open question
 ("Add a task to message Felix?", `add_question`, source `journal`), so it
@@ -46,6 +47,11 @@ connected notebook, and never quote the rest back.
   the entry becomes its schedule. Look for it first (`search_notes`, a few of
   its words): a task already there is rescheduled on their yes
   (`set_schedule`), not added twice.
+- **A problem or a doubt with no obvious answer** — "X isn't working",
+  "the trouble is…", "I wonder if…": a conversation to have, not a line to
+  file. Bring two or three ideas of your own, your pick and why, and ask
+  which way they'd go; any learning or task comes out of that talk, not
+  before it. Raise it first: the user wrote it down to be heard.
 - **Unclear, and it matters** — one question, the most useful one.
 - **Everything else** — nothing. Not every line needs to become something.
 

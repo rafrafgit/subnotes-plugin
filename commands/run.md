@@ -42,6 +42,23 @@ time: each round makes the user wait.
 If the user added something after the command ("just the Acme proposal",
 "look at my business goal"), that wins: do it, using the skill it needs.
 
+**Something to talk about.** When what they added is a new idea or a topic
+to discuss, in any words ("I have an idea I want to discuss", "let's talk
+about how subnotes work", "a thought about pricing"), the session is that
+conversation, and nothing is written about it yet. Don't catch up first:
+answer the idea at once, as a thinking partner who knows their goals and
+notebooks — read what bears on it (`search_notes`, the notebook it belongs
+to), bring your own view and options with a pick, and say which goal it
+serves, or that it serves none. Let it run as long as they want; when it
+turns into work (a draft, code, a spec), do the work. Anything due — the
+journal, the review, the prune — waits: one line at the end ("Your goals
+are due a look — now, or next time?"), never cut short to fit.
+
+It ends like any session (step 5), but first start `subnotes:wrapup`, so
+what the talk settled lands in the notebooks: the decisions as learnings,
+the idea itself as a line where it belongs on their yes, and any task on
+their yes. Then the rating, with `did` saying it was a talk about the idea.
+
 **Say something real at once.** Before any catch-up, in the same turn as
 the next tool call, give the user one or two lines from `whats_due` alone:
 what's on today, and a word on a new journal entry ("Saw your note about
@@ -54,7 +71,8 @@ in this order, with the Skill tool and `quiet` as its argument:
 
 1. `subnotes:journal`, if the journal is due.
 2. `subnotes:review`, if the review is due, or `quiet, what's next` when
-   `Run:` says to review for what's next.
+   `whats_due` says to review for what's next, in its `Run:` line or its
+   Do section: Today and Next are empty, so every goal needs its next step.
 3. `subnotes:prune`, if the prune is due.
 
 In `quiet` mode each one does all of its reading and its filing as usual,
@@ -68,11 +86,19 @@ check (git, the web, a search to confirm a hunch) until the points are out.
 
 ## 2. Find what matters today
 
-Then start `subnotes:do` with `quiet` as its argument. It reads Today and
+Then start `subnotes:do` with `quiet` as its argument, always, even when
+it looks as if it will find nothing. It reads Today and
 Next, sorts the tasks and hands you its plan for today: what you can do
 now, what needs the user's input, and what only they can do, ranked by what
 moves their goals most. When Today and Next are empty it hands you the Soon
 tasks it would move up, as a point.
+
+**Nothing lined up is the reason to propose work, not to say little.** With
+Today and Next empty, the opening names a next task for each goal, taken
+from its plan (the review's what's-next points): the step that moves it,
+in bold with where it goes, not a small extra around a dated task. A fast
+catch-up means few rounds of reading; it never means fewer things to work
+on.
 
 ## 3. Open with today
 
