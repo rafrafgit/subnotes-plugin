@@ -5,12 +5,14 @@
 // the evals check what the skills do.
 //
 //   node dev/lint-skills.mjs
+//   node dev/lint-skills.mjs --no-growth <commit>   (the skill update: no file longer than at <commit>)
 //
 // https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const files = [
@@ -75,6 +77,23 @@ for (const file of files) {
     const ref = join(dirname(file), m[1]);
     if (!existsSync(ref)) { report(file, 0, `links to ${m[1]}, which doesn't exist`); continue; }
     if (/\]\(([^)#\s]+\.md)\)/.test(readFileSync(ref, 'utf8'))) report(ref, 0, 'a referenced file links on to another: keep references one level deep');
+  }
+}
+
+// The skill update may edit a skill but never lengthen it: each lesson
+// added as one more rule is how skills drift from their job, and an
+// instruction to edit rather than add loosens over time. A file new since
+// the commit has nothing to compare with, so the update can't add one.
+const at = process.argv.indexOf('--no-growth');
+if (at !== -1) {
+  const base = process.argv[at + 1];
+  if (!base) { console.log('--no-growth needs the commit to compare with'); process.exit(2); }
+  for (const file of files) {
+    let before;
+    try { before = execFileSync('git', ['show', `${base}:${relative(root, file)}`], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); }
+    catch { report(file, 0, `not in ${base}: the skill update can't add a skill`); continue; }
+    const was = before.split('\n').length, now = readFileSync(file, 'utf8').split('\n').length;
+    if (now > was) report(file, 0, `${now} lines, ${now - was} more than at ${base}: cut as much as was added`);
   }
 }
 

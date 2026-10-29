@@ -28,7 +28,8 @@ command and edit below is there.
 
 If the repo has changes nobody committed (`git status --porcelain`), stop:
 someone is working in it. Call `mark_tuned` with nothing, and hand back
-nothing.
+nothing. Otherwise note the starting commit (`git rev-parse HEAD`): no
+skill may end the tune longer than it was there.
 
 ## 2. Undo first
 
@@ -61,15 +62,16 @@ At most one change per skill, and three in all, the best-backed first.
 Read the skill's file whole first. Its opening, the text before the first
 heading, is its **job**: never edit it, and every change must serve it.
 
-- **Edit before adding.** Find the sentence the lessons are about and
-  change it. A new sentence is fine only if the file grows by three lines
-  at most; otherwise cut or tighten one that says less.
+- **Never longer.** Find the sentence the lessons are about and change it.
+  A line added means a line cut: tighten or drop one that says less, so the
+  skill ends no longer than it started.
 - **A rule with its reason,** never a date, in the file's own plain words.
 - **No contradiction.** If another sentence in the file says otherwise,
   change that one too, or drop the change.
 
-Then run `node dev/lint-skills.mjs`. If it reports the file, fix it or
-`git checkout -- <file>`.
+Then run `node dev/lint-skills.mjs --no-growth <starting commit>`. If it
+reports the file, fix it or `git checkout -- <file>`; a file that's longer
+is never committed.
 
 ## 5. A second agent checks it
 
