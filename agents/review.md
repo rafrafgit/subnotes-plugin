@@ -52,10 +52,13 @@ it's the shape you hand back in.
   broken: no plan, no next step, behind pace, a number it can't reach):
   a `plan-check` point, in the user's terms ("five months left, and the
   webinars haven't started"). Due only because the goal's text changed and
-  its `plan` learning still describes it: that was rewording, so no point.
-- **Waiting on a decision** that would change or postpone the goal (an
-  offer, an interview): say what it waits on and when in your notes, and
-  hand back nothing else unless it's due.
+  its `plan` learning still describes it: that was rewording, so no point;
+  save your notes with `planUnchanged: true`, so it stops being due.
+- **Paused, or waiting on a decision** that would change or postpone the
+  goal (an offer, an interview): put a `Waiting until: <date> — <what>`
+  line under Last review in your notes, the date it can move again, and
+  hand back nothing else unless it's due. Until that date it gets no
+  reviewer unless its notebooks change; drop the line once it moves.
 
 Reviewing a notebook no goal links, rather than a goal, its `Goal:` line
 is in the user's own words, if it has one:

@@ -666,7 +666,7 @@ function readNotes(args) {
 // Replaces the whole notes file: the agent keeps it short by rewriting it, not
 // by appending forever. Temp file then rename, as for the inbox. Writing them
 // also keeps what review_context showed as read.
-function writeNotes({ notebook, goal, content }) {
+function writeNotes({ notebook, goal, content, planUnchanged }) {
   const target = notesTarget({ notebook, goal });
   const text = String(content ?? '');
   if (!text.trim()) throw new UserError('Notes need content. To start over, write a one-line note saying so.');
@@ -677,7 +677,27 @@ function writeNotes({ notebook, goal, content }) {
   writeFileSync(tmp, text.endsWith('\n') ? text : text + '\n');
   renameSync(tmp, target.path);
   target.keep();
-  return `Notes for ${target.label} saved (${text.length} characters).`;
+  const kept = goal && planUnchanged ? keepPlanCheck(goal) : '';
+  return `Notes for ${target.label} saved (${text.length} characters).${kept}`;
+}
+
+// The review judged a goal's changed text to be rewording, its last plan
+// check still describing the plan (2026-10-29): take the text as it is now,
+// so the change stops making the check due, and keep the check's date, since
+// no check ran.
+function keepPlanCheck(goal) {
+  const m = manifest();
+  const goalsNb = m.notebooks.find(n => n.role === 'goals');
+  if (!goalsNb) return '';
+  const found = goalsIn(readFileSync(join(DIR, goalsNb.file), 'utf8')).find(g => goalKey(g.name) === goalKey(goal));
+  if (!found) return '';
+  const checks = readPlanChecks();
+  const c = checks[goalKey(found.name)];
+  const checked = c?.checked ?? newestPlanLearning(goalsNb);
+  if (!checked) return ' No plan check to keep: it has never had one.';
+  checks[goalKey(found.name)] = { name: found.name, checked, hash: found.hash };
+  writeEntryFile(PLAN_CHECKS(), JSON.stringify(checks, null, 2) + '\n');
+  return ` Its plan check of ${checked} still stands for the reworded text.`;
 }
 
 // MARK: - Learnings and open questions
@@ -1743,20 +1763,24 @@ function reviewDue(m) {
   const rows = [];
   const linked = new Set();
   const { done } = notebookGoals(m);
-  for (const g of goalsWithNotebooks(m)) {
+  const goals = goalsWithNotebooks(m);
+  goals.forEach((g, i) => {
+    const seen = g.notebooks.map(nb => { linked.add(nb); return state(nb, readSnapshot(goalSnapshotPath(g.name, nb)) || readSnapshot(snapshotPath(nb))); }).filter(Boolean);
+    const notebooksChanged = seen.some(r => r.changed);
+    // A goal with goals under it: its parts have reviewers of their own.
+    const parent = goals[i + 1]?.level > g.level;
+    const waiting = new RegExp('^Waiting until:\\s*(\\d{4}-\\d{2}-\\d{2})', 'mi').exec(goalNotesText(g.name))?.[1] ?? null;
     if (g.every) {
       const o = ongoingState(g);
-      g.notebooks.forEach(nb => linked.add(nb));
       rows.push({ name: g.name, kind: 'ongoing', every: g.every, visited: o.reviewed, changed: o.due, st: o.st,
-        notebooks: g.notebooks.length ? g.notebooks.map(nb => nb.name) : null });
-      continue;
+        notebooksChanged, notebooks: g.notebooks.length ? g.notebooks.map(nb => nb.name) : null });
+      return;
     }
-    if (!g.notebooks.length) { rows.push({ name: g.name, kind: 'goal', none: true }); continue; }
-    const seen = g.notebooks.map(nb => { linked.add(nb); return state(nb, readSnapshot(goalSnapshotPath(g.name, nb)) || readSnapshot(snapshotPath(nb))); }).filter(Boolean);
+    if (!g.notebooks.length) { rows.push({ name: g.name, kind: 'goal', none: true, parent, waiting }); return; }
     const visits = seen.map(r => r.visited).filter(Boolean).sort();
-    rows.push({ name: g.name, kind: 'goal', visited: visits.pop() ?? null, changed: seen.some(r => r.changed),
-      notebooks: g.notebooks.map(nb => nb.name) });
-  }
+    rows.push({ name: g.name, kind: 'goal', visited: visits.pop() ?? null, changed: notebooksChanged,
+      notebooksChanged, parent, waiting, notebooks: g.notebooks.map(nb => nb.name) });
+  });
   for (const nb of m.notebooks) {
     if ((!nb.purpose && !done.has(nb.name.toLowerCase())) || nb.role === 'goals' || isJournal(nb) || linked.has(nb)) continue;
     const r = state(nb, readSnapshot(snapshotPath(nb)));
@@ -1779,7 +1803,29 @@ function reviewDue(m) {
     lines.push(`- ${label} — ${st}`);
   }
   if (ranToday) lines.unshift('The review already ran today, so it is due again tomorrow.');
-  return { due, lines };
+  return { due, lines, rows };
+}
+
+// Which goals get a reviewer in a what's-next pass, when Today and Next are
+// empty (2026-10-29): only those that can bring a next step now. Skipped: an
+// ongoing goal before its time, a goal waiting until a date its review
+// notes give, a goal whose parts have their own reviewers, a notebook no goal
+// links that hasn't changed — each unless its notebooks changed since its
+// last review, or its plan check is due. Every skip says why.
+function whatsNextReviewers(review, plan) {
+  const now = today();
+  const planDue = new Set(plan.due.map(d => d.name));
+  const start = [], skip = [];
+  for (const r of review.rows) {
+    const why = planDue.has(r.name) || r.notebooksChanged ? null
+      : r.kind === 'ongoing' ? (r.changed ? null : r.st)
+      : r.kind === 'notebook' ? (r.changed ? null : 'no change since its last review')
+      : r.waiting && r.waiting > now ? `waiting until ${r.waiting}`
+      : r.parent ? 'its parts have reviewers of their own'
+      : null;
+    (why ? skip : start).push(why ? `${r.name} (${why})` : r.name);
+  }
+  return { start, skip };
 }
 
 // The Journal notebook, marked by role as Goals is (2026-10-25), so a rename
@@ -2129,6 +2175,11 @@ function whatsDue() {
   let journalNew = false;
   try { journalNew = !!journal && journalHasNew(journal); } catch {}
   const queued = work.now + work.next > 0, promote = !queued && work.soon >= PROMOTE_MIN_SOON;
+  // The reviewers the run starts: the due reviews and plan checks; in a
+  // what's-next pass, every goal that can bring a next step now.
+  const next = !queued && !promote ? whatsNextReviewers(review, plan) : null;
+  const reviewers = next ? next.start
+    : [...new Set([...review.due, ...plan.due.map(d => d.name).filter(n => n !== '(none)')])];
   const run = journalNew ? 'Journal' : review.due.length || plan.due.length ? 'Review' : prune.due ? 'Prune'
     : queued ? 'Do' : promote ? 'Do, moving Soon tasks to Next first' : "Review, for what's next";
   const named = work.named.slice(0, NAMED_TASKS).map(t => `- ${t.name} (${t.notebook}, ${t.when})`);
@@ -2150,6 +2201,8 @@ function whatsDue() {
     ...entry,
     '',
     `## Review — ${review.due.length ? `due for ${review.due.join(', ')}` : plan.due.length ? 'due for its plan checks' : 'not due'}`,
+    `Reviewers to start: ${reviewers.length ? reviewers.join('; ') : 'none'}${next ? " — a what's-next pass" : ''}`,
+    ...(next?.skip.length ? [`Not this time: ${next.skip.join('; ')}`] : []),
     'Due once a day, for each goal whose notebooks changed since its last review, each ongoing goal (a repeat, no deadline) once most of a period has gone by since it last happened with nothing planned, and each notebook no goal in Goals links that has a goal in its own words, or whose goal in Goals is done.',
     ...review.lines,
     '',
@@ -2492,6 +2545,7 @@ const TOOLS = [
       goal: { type: 'string', description: "A goal's heading in Goals, without its schedule." },
       notebook: { type: 'string', description: 'A connected notebook no goal links. Name a goal or a notebook, not both.' },
       content: { type: 'string' },
+      planUnchanged: { type: 'boolean', description: "With a goal: its text changed since its plan check, but only in wording, and the check still describes the plan. Keeps that check for the text as it is now, so the change stops making it due." },
     }, required: ['content'] },
     run: writeNotes,
   },

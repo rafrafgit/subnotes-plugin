@@ -92,17 +92,23 @@ to keep, and hands you points in the shape in
   nothing: it sorts Today and Next into what you can do now, what needs
   the user's input and what only they can do, ranked by what moves the
   goals; with Today and Next empty, the Soon tasks it would move up.
-- **`subnotes:review`, one per goal** `whats_due` lists as due (every goal,
-  ongoing ones included, when it says to review for what's next: Today and
-  Next are empty, so every goal needs its next step), and one per notebook
-  no goal links. Give each its goal's heading (or the notebook), what
-  `whats_due` says about it, and whether it's a what's-next pass.
+- **`subnotes:review`, one per name** `whats_due` lists under **Reviewers
+  to start**: a goal, or a notebook no goal links. It has already left out
+  the ones that can't bring anything now (Not this time, with why). Give
+  each its goal's heading (or the notebook), what `whats_due` says about
+  it, and whether it's a what's-next pass.
 - **`subnotes:journal`**, if the journal is due.
-- **`subnotes:prune`**, if the prune is due: it hands back every change as
-  one point, applied on the user's yes.
 
-Wait for do-plan and the reviewers before the opening; the journal and the
-prune join it if they're back, or your next report if not.
+**Quiet while they work.** Say nothing as each worker comes back: no line
+per worker. Your next words after the first lines are the opening, once
+do-plan and the reviewers are all back; the journal joins it if it's back,
+or your next report if not.
+
+**Upkeep after the opening.** Tidying what you remember and the skill
+update don't change today, so they never hold up the opening or interrupt
+it: once the opening is out, start `subnotes:prune` (if the prune is due)
+and `subnotes:tune` (step 4) in the background. What they hand back waits
+for the session summary (step 5), never a message of its own.
 
 **What comes back.** Merge the points across the workers by what moves the
 goals most, whichever worker they came from: a `talk` from the journal
@@ -204,8 +210,8 @@ checks its own:
    `pick` as the summary) and the undone hashes. Never push, never bump
    the version: releasing is the user's step.
 
-Add one line per committed change and per undo to your next report, so the
-user can undo a change in one word; nothing kept, say nothing. On "undo":
+Add one line per committed change and per undo to the session summary, so
+the user can undo a change in one word; nothing kept, say nothing. On "undo":
 `git revert` that commit in the plugin repo, and save why as a lesson.
 
 ## 5. When they stop
@@ -213,7 +219,9 @@ user can undo a change in one word; nothing kept, say nothing. On "undo":
 When the user stops, or nothing is left, end the way
 `${CLAUDE_PLUGIN_ROOT}/reference/do-guide.md` says under "End with the session":
 start `subnotes:wrapup`, then everything this session did, in one place,
-and everything left for them.
+and everything left for them. The upkeep comes in here, in a line or two:
+the prune's tidy-up as one question ("I'd tidy 31 things I remember — all
+right?", applied on a yes), and the skill update's kept changes.
 
 Then the rating, every time: call `end_run` for each skill you started
 with the Skill tool,
