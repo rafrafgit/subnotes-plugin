@@ -139,7 +139,7 @@ const GOALS_ROLE = 'Role: Goals — what the user is working toward and how thei
   'Read it before working in any notebook, and judge each notebook against it as well as its own purpose.';
 // The Journal notebook likewise (JOURNAL_NOTEBOOK_SPEC.md in the app's repo).
 const JOURNAL_ROLE = "Role: Journal — the user's own entries on how their goals are going. " +
-  '/subnotes:journal reads it and files what matters; no other skill reviews it or writes in it.';
+  '/subnotes:run\'s journal worker reads it and files what matters; no other skill reviews it or writes in it.';
 
 function listNotebooks() {
   listedAt = Date.now();
@@ -870,6 +870,7 @@ const SKILL_NAMES = (() => {
   const names = new Set();
   try { for (const f of readdirSync(join(root, 'commands'))) if (f.endsWith('.md')) names.add(f.slice(0, -3)); } catch {}
   try { for (const d of readdirSync(join(root, 'skills'))) if (existsSync(join(root, 'skills', d, 'SKILL.md'))) names.add(d); } catch {}
+  try { for (const f of readdirSync(join(root, 'agents'))) if (f.endsWith('.md')) names.add(f.slice(0, -3)); } catch {}
   return names;
 })();
 
@@ -1917,6 +1918,7 @@ function skillFiles(repo) {
   const out = {};
   try { for (const f of readdirSync(join(repo, 'commands'))) if (f.endsWith('.md')) out[f.slice(0, -3)] = `commands/${f}`; } catch {}
   try { for (const d of readdirSync(join(repo, 'skills'))) if (existsSync(join(repo, 'skills', d, 'SKILL.md'))) out[d] = `skills/${d}/SKILL.md`; } catch {}
+  try { for (const f of readdirSync(join(repo, 'agents'))) if (f.endsWith('.md')) out[f.slice(0, -3)] = `agents/${f}`; } catch {}
   return out;
 }
 
@@ -2330,7 +2332,7 @@ const TOOLS = [
   },
   {
     name: 'review_context',
-    description: "For /subnotes:review: everything one goal's review needs, in one call — the shared learnings and questions once, the review's notes on the goal, then per notebook what it shows now of each suggestion the notes list as open, its learnings and open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), and only what changed since this goal's last review (the whole notebook on a first one). With a goal and no notebooks, it reads the notebooks the goal links. Without a goal, for a notebook no goal links, each notebook comes with its own notes. Call it once per goal, instead of read_notes, read_notebook, read_learnings and read_questions.",
+    description: "For a goal's reviewer (started by /subnotes:run): everything one goal's review needs, in one call — the shared learnings and questions once, the review's notes on the goal, then per notebook what it shows now of each suggestion the notes list as open, its learnings and open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), and only what changed since this goal's last review (the whole notebook on a first one). With a goal and no notebooks, it reads the notebooks the goal links. Without a goal, for a notebook no goal links, each notebook comes with its own notes. Call it once per goal, instead of read_notes, read_notebook, read_learnings and read_questions.",
     inputSchema: { type: 'object', properties: {
       goal: { type: 'string', description: "The goal to review: its heading in Goals, without its schedule." },
       goals: { type: 'array', items: { type: 'string' }, description: "Several goals at once, each read as `goal` would be, with the shared learnings once. Use instead of `goal` to read every goal a review takes in one call." },
@@ -2340,7 +2342,7 @@ const TOOLS = [
   },
   {
     name: 'review_elapsed',
-    description: "For /subnotes:review run by hand: how long since the review started (its list_notebooks, or review_context). Call it last before showing the report, so the time leaves out the user's answer.",
+    description: "For a review run by hand: how long since the review started (its list_notebooks, or review_context). Call it last before showing the report, so the time leaves out the user's answer.",
     inputSchema: { type: 'object', properties: {} },
     run: reviewElapsed,
   },
@@ -2388,7 +2390,7 @@ const TOOLS = [
   },
   {
     name: 'read_notes',
-    description: "Read the review's notes for one goal, or for one connected notebook no goal links (/subnotes:review): its notes from earlier reviews. Says so when there is none yet.",
+    description: "Read the review's notes for one goal, or for one connected notebook no goal links (the goal reviewers): its notes from earlier reviews. Says so when there is none yet.",
     inputSchema: { type: 'object', properties: {
       goal: { type: 'string', description: "A goal's heading in Goals, without its schedule." },
       notebook: { type: 'string', description: 'A connected notebook no goal links. Name a goal or a notebook, not both.' },

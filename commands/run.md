@@ -39,8 +39,16 @@ Next and coming up, and shows a new journal entry. If the Subnotes tools
 are deferred, load every one this run may need in one search, not one at a
 time: each round makes the user wait.
 
-If the user added something after the command ("just the Acme proposal",
-"look at my business goal"), that wins: do it, using the skill it needs.
+If the user added something after the command, that wins: it's the one
+way to ask for a single job, since there are no separate commands. Start
+only the workers it needs, as step 1 says:
+
+- **A goal** ("look at my business goal"): a reviewer for that goal alone,
+  told to run its plan check even if it isn't due.
+- **A notebook or a task** ("just the Acme proposal", "work on Freelance"):
+  do-plan, told to take only that notebook or task.
+- **"prune", "tidy what you remember"**: the prune worker, due or not.
+- **"journal", "read my journal"**: the journal worker.
 
 **Something to talk about.** When what they added is a new idea or a topic
 to discuss, in any words ("I have an idea I want to discuss", "let's talk
@@ -117,7 +125,7 @@ are out.
 
 **Doing the tasks** is yours: once the opening is out, work through
 do-plan's `today` points in order, the way
-`${CLAUDE_PLUGIN_ROOT}/commands/do.md` says under "Do it" and "Then report"
+`${CLAUDE_PLUGIN_ROOT}/reference/do-guide.md` says under "Do it" and "Then report"
 (read those parts then): one task at a time, each reported, marked Done
 when built.
 
@@ -182,7 +190,7 @@ user can undo a change in one word; nothing back, say nothing. On "undo":
 ## 5. When they stop
 
 When the user stops, or nothing is left, end the way
-`${CLAUDE_PLUGIN_ROOT}/commands/do.md` says under "End with the session":
+`${CLAUDE_PLUGIN_ROOT}/reference/do-guide.md` says under "End with the session":
 start `subnotes:wrapup`, then everything this session did, in one place,
 and everything left for them.
 

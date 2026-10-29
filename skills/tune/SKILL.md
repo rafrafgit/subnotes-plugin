@@ -45,7 +45,7 @@ the skill they're about: the `about` their writer named (a learning's
 `about`, a run's `[about: …]`), else the one they name, else the one that
 wrote them. Treat it as a strong hint, not the answer: before editing,
 find the sentence that caused the behaviour, in every skill involved (the
-run starts the journal, review, Do and prune, and each reads the others'
+run starts the journal, review, do-plan and prune workers, and reads the guides,
 words), and edit there. A lesson filed under the run is often caused by a
 word in the review or Do. Keep only lessons about how a skill behaves.
 Leave out:
@@ -130,6 +130,7 @@ skill's name.
 
 - Writes: the skill files, commits and reverts in the plugin repo, and
   retiring the lessons a change holds. Nothing in the notebooks.
-- Never edit a skill's opening, this skill, or anything outside `commands/`
+- Never edit a skill's opening, this skill, or anything outside `commands/`,
+  `agents/`, `reference/`
   and `skills/`.
 - No rating: the run's covers it.

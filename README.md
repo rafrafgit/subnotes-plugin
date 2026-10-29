@@ -59,48 +59,37 @@ Ask what is on a notebook, or what to pick up next — reading is half the point
 Say "put that on the backlog" mid-conversation and it lands in the right
 notebook and section, or name them yourself: "… in Work, under Backlog".
 
-`/subnotes:run` is the one to start from, as often as you like: it talks with
-you about what matters most today and works on it with you. Behind that it
-catches up quietly on whatever is due — the journal when there's a new entry;
-once a day, a review of the goals whose notebooks changed, with the plan check
-of any goal not checked for 30 days or changed since; once a month, a prune of
-what the skills have learned — and brings in only what needs you. Each still
-works on its own.
+`/subnotes:run` is the one command, to start from as often as you like: it
+talks with you about what matters most today and works on it with you —
+code in this folder, or a draft or write-up it writes under the task. Behind
+that it catches up on whatever is due, with workers that each do one job in
+their own context, at the same time, and never talk to you themselves:
 
-`/subnotes:journal` reads what you wrote in your Journal notebook since
-its last run, and files what the other skills need to know — dates, replies,
-decisions — as learnings, with any task proposed on your yes. `/subnotes:run`
-runs it when there's a new entry.
+- **the journal**, when there's a new entry: what you wrote becomes
+  learnings, and any task it leads to is proposed;
+- **one look per goal**, once a day for each goal whose notebooks changed:
+  what would move it, and a next step when it has none. When a goal's plan
+  check is due, every 30 days or when the goal changes, the run checks the
+  plan with you: that the goal has a measure and a date, and that the plan
+  can get there in time, with the arithmetic shown;
+- **today's tasks**, sorted into what Claude can do now, what needs your
+  input, and what only you can do;
+- **a monthly tidy-up** of what the skills have learned, on one yes.
 
-`/subnotes:wrapup` does the same for a chat with Claude that didn't start
-from a skill: what it decided or found becomes learnings, and any task left
-open is proposed on your yes. Claude offers it when you wrap up such a chat.
-
-`/subnotes:prune` goes through everything the skills have learned and
-removes or merges what's stale, duplicated or contradicted by the notebooks
-as they are now, on one yes. `/subnotes:run` runs it once a month.
-
-`/subnotes:review [goal]` goes through your goals one at a time. For each, it
-reads the notebooks that serve it (the ones the goal links in Goals, or
-matches by purpose), raises what would move it, and adds a next step only on
-your yes. When a goal's plan check is due, every 30 days or when the goal
-changes, it checks the plan first: that the goal has a measure and a date,
-that there's a plan, and that it can get there in time, with the arithmetic
-shown. Name a goal to review just that one, with its plan check. Notebooks
-no goal links are reviewed briefly, by their purpose.
+Only what needs you comes up, three things at a time, and one rating at the
+end. Words after the command ask for one job: `/subnotes:run look at my
+business goal`, `/subnotes:run prune`, `/subnotes:run let's talk about
+pricing`.
 
 For the other direction, write what's on your mind as plain text where it
-belongs — "I wonder if Sam is as committed as I am" — and the review turns
-each new or changed line into an open question, a learning, or something to
-talk about.
+belongs — "I wonder if Sam is as committed as I am" — and the goal's look
+turns each new or changed line into an open question, a learning, or
+something to talk about.
 
-`/subnotes:do [notebook]` goes the other way: it reads the Today, Next and
-soon-due tasks across your connected notebooks, or just the one you name,
-ranked by your Goals notebook. It sorts them into what Claude can do in this
-session — code in this folder, or a draft or write-up, which it writes under
-the task — what needs your input first, and what only you can do, then works
-through the first group, with your usual permission prompts. A task it finishes and checks is marked Done;
-one that still needs you to try it is left for you to mark.
+`/subnotes:wrapup` files what a chat with Claude that didn't start from
+`/subnotes:run` decided, as learnings, with any task left open proposed on
+your yes. Claude offers it when you wrap up such a chat, and a chat that
+ends without it is filed when the session closes.
 
 ## Two rules that shape everything
 

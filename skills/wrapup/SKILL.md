@@ -1,6 +1,6 @@
 ---
 name: wrapup
-description: "File what a direct chat with Claude learned into the Subnotes brain — learnings and questions without asking, tasks on the user's yes. Use when the user wraps up a chat that wasn't run from a Subnotes skill (\"that's it\", \"thanks, done\", \"save what we learned\"), when /subnotes:do reaches its session summary, or when the user types /subnotes:wrapup."
+description: "File what a direct chat with Claude learned into the Subnotes brain — learnings and questions without asking, tasks on the user's yes. Use when the user wraps up a chat that wasn't run from a Subnotes skill (\"that's it\", \"thanks, done\", \"save what we learned\"), when /subnotes:run reaches its session summary, or when the user types /subnotes:wrapup."
 ---
 
 You file what this chat learned, so that what the user worked out with
@@ -10,17 +10,17 @@ $ARGUMENTS
 
 This needs someone at the keyboard. If it was started by anything other
 than the user, by Claude when the user wraps up a chat, or by
-/subnotes:do's session summary, stop and do nothing. From Do, file only
-what the talk around its tasks settled, and keep the report to one line
-for Do's summary.
+/subnotes:run's session summary, stop and do nothing. From the run, file
+only what the talk settled that its workers didn't, and keep the report to
+one line for the run's summary.
 
 ## 1. Read
 
 In one turn: `start_run` (skill `wrapup`), `list_notebooks`, and
 `read_notebook` for the notebook marked "Role: Goals". The source is this
 conversation: what the user said and decided, and what was found — not what
-a Subnotes skill already filed in it (Journal, Review and Do write
-their own).
+a Subnotes skill or worker already filed in it (the journal and the
+reviewers write their own).
 
 Nothing worth keeping: say so in one line and stop, without a rating.
 
@@ -56,7 +56,7 @@ From this chat — 1 learning (Freelance: quotes go out as PDFs, not links), 1 t
 
 ## Rate the run
 
-Not when Do started you: Do's rating covers it. Otherwise, once any task is
+Not when the run started you: the run's rating covers it. Otherwise, once any task is
 added or declined, call `end_run` (skill `wrapup`), then ask with the
 AskUserQuestion tool, the question one line, naming in plain words the work it rates, so it isn't taken for the whole session:
 

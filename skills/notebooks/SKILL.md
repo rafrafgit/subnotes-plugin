@@ -162,8 +162,8 @@ learnings before judging a notebook's next step, and close a question
 
 ## Review notes and learnings
 
-`read_notes` and `write_notes` are the review agent's working memory
-(`/subnotes:review`). Use them only for that review, never to store anything
+`read_notes` and `write_notes` are the goal reviewers' working memory
+(started by `/subnotes:run`). Use them only for that review, never to store anything
 else, and never treat review notes as the notebook itself.
 
 `read_learnings`, `add_learning` and `correct_learning` are what Subnotes'

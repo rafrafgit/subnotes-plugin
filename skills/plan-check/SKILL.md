@@ -1,24 +1,25 @@
 ---
 name: plan-check
-description: "For /subnotes:review only — checks one goal's plan with the user: is there a plan, can it reach the goal before its date, and is it working. Run inside the review when the goal's check is due or its plan looks broken."
+description: "For /subnotes:run only — checks one goal's plan with the user: is there a plan, can it reach the goal before its date, and is it working. Started by the run on the user's yes when a reviewer hands back that a goal's check is due or its plan looks broken."
 user-invocable: false
 ---
 
-You check one goal's plan with the user, inside a review: can the plan
-reach the goal in time, and is it working? The review then carries on from
-what you settle. The goal, why its check is due (or the gap the review
+You check one goal's plan with the user, inside the run: can the plan
+reach the goal in time, and is it working? The run then carries on from
+what you settle. The goal, why its check is due (or the gap its reviewer
 found), and the notebooks that serve it:
 $ARGUMENTS
 
-The review asks "is the plan moving this week?"; you ask the slower
-question, "can this plan get there at all?". Keep to it: the week's tasks
-are the review's.
+The goal's reviewer asks "is the plan moving this week?"; you ask the
+slower question, "can this plan get there at all?". Keep to it: the week's
+tasks are the reviewer's.
 
 ## 1. Read
 
-The review has already read Goals, the goal's notebooks and the shared
-learnings in this conversation: use them. Read only what's missing, in one
-turn: `read_learnings` for Goals (the goal's last `plan` learning is your
+The goal's reviewer read its notebooks in a context of its own, so read
+what you need here, in one turn: `review_context` with the goal (its
+notebooks, their learnings and the shared ones), `read_notebook` for Goals,
+`read_learnings` for Goals (the goal's last `plan` learning is your
 last check: start from it and look at what changed since), and
 `read_questions` for Goals.
 
@@ -67,9 +68,8 @@ before holds.
 
 ## 4. Verdict and points, in one reply
 
-Open with "Plan check — <goal>" — or, when `/subnotes:run` started you,
-with the goal in the user's own words ("Your business goal, then:"), since
-there the user never hears the names of the steps — then one line each:
+Open with the goal in the user's own words ("Your business goal, then:"):
+the user never hears the names of the steps. Then one line each:
 
 - the plan: good, or vague and what's vague
 - will it reach the goal, and why, with the numbers
@@ -77,7 +77,7 @@ there the user never hears the names of the steps — then one line each:
 - not known: a fact or two that would change this, if any
 
 No gap and nothing not known: say so in a line, record it (step 6) and
-hand back to the review without asking anything.
+hand back to the run without asking anything.
 
 Otherwise your points: the first gap, then any not-known. All in the same
 reply, numbered, each in a few lines:
@@ -92,7 +92,7 @@ reply, numbered, each in a few lines:
 
 End with one question: "Go with my picks, or tell me which to change?"
 Then stop. The user is often doing other things while this runs, and every
-question puts the whole review on hold. One yes takes all your picks and
+question puts the whole run on hold. One yes takes all your picks and
 their writes. A point their answer changes may lead to one more short
 round; otherwise there's no second.
 
@@ -119,7 +119,7 @@ teaches nothing.
 ## 6. Record it, and hand back
 
 One learning for the goal (source `plan`, notebook Goals, `goal` set to
-its heading, so the review knows when it's next due):
+its heading, so the run knows when it's next due):
 
 ```
 Goal: 4k/month by June 2027. Plan: retainer clients first; served by Freelance and Portfolio site. Signal: new clients a month, pace about 1; 0.8 on 2026-10-19. Checked with the user: no gap.
@@ -131,9 +131,9 @@ if there's none, `add_learning` with `goal`. Never a second.
 What stays unsettled, a gap the talk didn't close or a not-known, becomes
 an open question (`add_question`, source `plan`).
 
-Then hand back to the review with one line: the verdict and what was
+Then hand back to the run with one line: the verdict and what was
 agreed ("Plan check: posts as the one channel, first reading after the
-first post"). The review goes on with the goal from there.
+first post"). The run goes on with the goal from there.
 
 ## Rules
 

@@ -18,6 +18,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const files = [
   ...readdirSync(join(root, 'commands')).filter(f => f.endsWith('.md')).map(f => join(root, 'commands', f)),
   ...readdirSync(join(root, 'skills')).map(d => join(root, 'skills', d, 'SKILL.md')).filter(existsSync),
+  ...(existsSync(join(root, 'agents')) ? readdirSync(join(root, 'agents')).filter(f => f.endsWith('.md')).map(f => join(root, 'agents', f)) : []),
 ];
 
 const problems = [];
