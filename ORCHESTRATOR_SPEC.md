@@ -1,6 +1,6 @@
 # One voice: Run as conductor, the skills as workers
 
-**Status: spec, not built.** Written 2026-10-29.
+**Status: built 2026-10-29, steps 1–5; not yet tested in a full run.** Written 2026-10-29.
 
 ## Why
 

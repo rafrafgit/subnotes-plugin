@@ -180,11 +180,26 @@ With every report, if a point is still open, add one line at the end:
 yet once the first ones are settled, at most three at a time.
 
 **The skills improve themselves.** When `whats_due` says the skill update
-is due, start it once your opening is out, in the background so the user
-never waits on it: the Agent tool, general-purpose, asked to run the Skill
-`subnotes:tune` with `quiet` and give back its hand-back lines as they are.
-When it returns, add its lines to your next report as they are, so the
-user can undo a change in one word; nothing back, say nothing. On "undo":
+is due, start the `subnotes:tune` worker once your opening is out, in the
+background so the user never waits on it. It writes its changes in the
+plugin repo `tune_context` names, uncommitted, one file each, and hands
+back a `change` point per change, its starting commit, and any earlier
+change it undid. You see each change checked, since the writer never
+checks its own:
+
+1. For every change, in one turn, start a fresh `subnotes:tune-check`
+   worker with the file, the skill's opening, the diff (`git diff --
+   <file>`) and the lessons.
+2. `PASS`: in the repo, run `node dev/lint-skills.mjs --no-growth <start>`;
+   clean, commit that file alone with the point's message, then carry out
+   its `correct_learning` writes. `FAIL`, or the lint reports it: `git
+   checkout -- <file>`, and drop it.
+3. Call `mark_tuned` with each committed change (skill, short hash, its
+   `pick` as the summary) and the undone hashes. Never push, never bump
+   the version: releasing is the user's step.
+
+Add one line per committed change and per undo to your next report, so the
+user can undo a change in one word; nothing kept, say nothing. On "undo":
 `git revert` that commit in the plugin repo, and save why as a lesson.
 
 ## 5. When they stop

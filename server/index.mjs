@@ -2292,7 +2292,7 @@ const TOOLS = [
   },
   {
     name: 'mark_tuned',
-    description: 'For /subnotes:tune, last: logs each change it committed and each it undid, and records today as the last tune, so /subnotes:run makes it due again in 7 days.',
+    description: 'For /subnotes:run, after a tune\'s changes are checked and committed: logs each change committed and each the tune undid, and records today as the last tune, so /subnotes:run makes it due again in 7 days.',
     inputSchema: { type: 'object', properties: {
       changes: { type: 'array', description: 'Each change committed this tune.', items: { type: 'object', properties: {
         skill: { type: 'string', description: 'The skill changed, as runs are rated under it: review, run, do.' },
