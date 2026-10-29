@@ -594,7 +594,7 @@ function agentFile(folder, nb) {
 // nothing here ever stops a read: at worst the brain stays where it was.
 const RENAMED_FILES = [
   ['review', '.md'], ['review', '.snapshot.json'], ['review', '.pending.json'],
-  ['learnings', '.md'], ['learnings', '.cites.json'], ['questions', '.md'],
+  ['learnings', '.md'], ['learnings', '.cites.json'], ['learnings', '.about.json'], ['questions', '.md'],
   ['journal', '.snapshot.json'],
 ];
 
@@ -851,10 +851,47 @@ function citeStatus(cite, m, texts) {
   return null;
 }
 
+// Which skill a learning is about, named by whoever wrote it, when they had
+// the most context: the skill that wrote a lesson, or was rated, is often not
+// the one whose text caused it, and /subnotes:tune edits that one. Required,
+// with "none" for a fact about a notebook or the owner, so every writer
+// decides rather than forgets. Kept beside the learnings like the cites.
+const aboutPath = file => file.replace(/\.md$/, '.about.json');
+const SKILL_NAMES = (() => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const names = new Set();
+  try { for (const f of readdirSync(join(root, 'commands'))) if (f.endsWith('.md')) names.add(f.slice(0, -3)); } catch {}
+  try { for (const d of readdirSync(join(root, 'skills'))) if (existsSync(join(root, 'skills', d, 'SKILL.md'))) names.add(d); } catch {}
+  return names;
+})();
+
+function aboutSkill(about) {
+  const name = String(about ?? '').trim().toLowerCase();
+  if (name === 'none' || SKILL_NAMES.has(name)) return name;
+  throw new UserError(`\`about\` is the skill whose behaviour this is about — ${[...SKILL_NAMES].sort().join(', ')} — or "none" for a fact about a notebook or the owner.`);
+}
+
+function readAbouts(file) {
+  try { return JSON.parse(readFileSync(aboutPath(file), 'utf8')); } catch { return {}; }
+}
+
+function writeAbouts(file, abouts) {
+  const path = aboutPath(file);
+  if (Object.keys(abouts).length) writeEntryFile(path, JSON.stringify(abouts, null, 2) + '\n');
+  else if (existsSync(path)) unlinkSync(path);
+}
+
 const readLearnings = ({ notebook }) => readEntries('learnings', notebook);
 const addLearning = args => {
   const cite = resolveCite(args.cites, args.notebook);
+  const about = aboutSkill(args.about);
   const done = addEntry('learnings', args);
+  if (about !== 'none') {
+    const { path } = entryTarget('learnings', args.notebook);
+    const abouts = readAbouts(path);
+    abouts[citeKey(oneLine(args.text, 'learning'))] = about;
+    writeAbouts(path, abouts);
+  }
   if (cite) {
     const { path } = entryTarget('learnings', args.notebook);
     const cites = readCites(path);
@@ -891,6 +928,13 @@ function correctLearning({ notebook, match, text, reason, source, goal, prune })
     delete cites[citeKey(found.text)];
     if (replacement) cites[citeKey(ENTRY.exec(found.lines[found.i])[3])] = cite;
     writeCites(found.path, cites);
+  }
+  const abouts = readAbouts(found.path);
+  const about = abouts[citeKey(found.text)];
+  if (about) {
+    delete abouts[citeKey(found.text)];
+    if (replacement) abouts[citeKey(ENTRY.exec(found.lines[found.i])[3])] = about;
+    writeAbouts(found.path, abouts);
   }
   if (replacement) recordPlanCheck({ notebook, source, goal });
   return replacement ? `Corrected, in ${found.label}: ${replacement}` : `Removed from ${found.label}: ${found.old}`;
@@ -1375,8 +1419,9 @@ function endRun({ skill }) {
   return `${minutesText(clock.ms)} since ${name} started.`;
 }
 
-function rateRun({ skill, did, rating, comment }) {
+function rateRun({ skill, did, rating, comment, about }) {
   const name = runSkill(skill);
+  const cause = aboutSkill(about);
   const r = RATINGS.find(x => x.toLowerCase() === String(rating ?? '').trim().toLowerCase());
   if (!r) throw new UserError(`\`rating\` is one of: ${RATINGS.join(', ')}.`);
   const what = oneLine(did, 'summary');
@@ -1384,7 +1429,7 @@ function rateRun({ skill, did, rating, comment }) {
   const clock = runClocks.get(name);
   const time = clock ? minutesText(clock.ms ?? Date.now() - clock.startedAt) : 'not timed';
   runClocks.delete(name);
-  const line = `- ${today()} · ${name} · ${time} · ${r} · ${what}${note ? ` — "${note}"` : ''}`;
+  const line = `- ${today()} · ${name} · ${time} · ${r} · ${what}${note ? ` — "${note}"` : ''}${cause !== 'none' && cause !== name ? ` [about: ${cause}]` : ''}`;
   const current = readEntryFile(RUNS_PATH) ??
     '# Runs and ratings\n\nEach skill run by hand: when, how long, how the user rated it, and what it did.\n\n';
   writeEntryFile(RUNS_PATH, current.replace(/\n*$/, current.includes('\n- ') ? '\n' : '\n\n') + line + '\n');
@@ -1920,13 +1965,19 @@ function tuneContext() {
   const runs = ratedRuns().filter(r => after(r.date));
   out.push(...(runs.length ? runs.map(r => `- ${r.line}`) : ['(none)']));
   for (const kind of ['learnings', 'questions']) {
-    out.push('', `## ${kind} written since ${since} — file, then the entry`);
+    out.push('', `## ${kind} written since ${since} — file, the skill it's about when its writer named one, then the entry`);
     let files = [];
     try { files = readdirSync(join(AGENT_DIR, kind)).filter(f => f.endsWith('.md')).sort(); } catch {}
     let any = false;
-    for (const f of files) for (const l of readFileSync(join(AGENT_DIR, kind, f), 'utf8').split('\n')) {
-      const e = ENTRY.exec(l);
-      if (e && after(e[1])) { out.push(`- ${f.slice(0, -3)} | ${l.slice(2)}`); any = true; }
+    for (const f of files) {
+      const abouts = kind === 'learnings' ? readAbouts(join(AGENT_DIR, kind, f)) : {};
+      for (const l of readFileSync(join(AGENT_DIR, kind, f), 'utf8').split('\n')) {
+        const e = ENTRY.exec(l);
+        if (!e || !after(e[1])) continue;
+        const about = abouts[citeKey(e[3])];
+        out.push(`- ${f.slice(0, -3)} | ${about ? `about ${about} | ` : ''}${l.slice(2)}`);
+        any = true;
+      }
     }
     if (!any) out.push('(none)');
   }
@@ -2180,11 +2231,12 @@ const TOOLS = [
       text: { type: 'string', description: 'One line, plainly written: the owner may read it.' },
       source: { type: 'string', description: 'The skill writing it, one word: review, do, plan.' },
       goal: { type: 'string', description: "For a plan check's learning in Goals: the goal's heading, without its schedule. Records the check, so /subnotes:run knows when it's next due." },
+      about: { type: 'string', description: 'The skill whose behaviour this lesson is about — the one whose text would change, which may not be the one writing it: a run\'s lesson that tasks were missing is about review or do. "none" for a fact about a notebook or the owner. Kept beside the learning, for /subnotes:tune.' },
       cites: { type: 'object', description: "The line it came from, when there is one — a task, a Journal entry's line — so the prune knows when that line is gone or Done. Kept beside the learning, not in it.", properties: {
         line: { type: 'string', description: "The line's words, as read_notebook shows them, without its marker or schedule tag." },
         notebook: { type: 'string', description: "The notebook the line is in. Leave out when it's the learning's own notebook." },
       }, required: ['line'] },
-    }, required: ['text', 'source'] },
+    }, required: ['text', 'source', 'about'] },
     run: addLearning,
   },
   {
@@ -2301,7 +2353,8 @@ const TOOLS = [
       did: { type: 'string', description: 'What the run did, one line: the summary shown to the user, without the time.' },
       rating: { type: 'string', enum: RATINGS, description: "The user's rating, or Skipped." },
       comment: { type: 'string', description: 'What the user typed instead of, or beside, a rating. Leave out when none.' },
-    }, required: ['skill', 'did', 'rating'] },
+      about: { type: 'string', description: 'The skill the why is really about — the one whose text caused what the user liked or missed, which may be one the run started (review, do) rather than the run itself; the rated skill when it was its own doing; "none" when there is no why. For /subnotes:tune.' },
+    }, required: ['skill', 'did', 'rating', 'about'] },
     run: rateRun,
   },
   {

@@ -66,7 +66,7 @@ const prompt = `You file what a direct chat between the user and Claude learned 
    - something unsettled that other work waits on: one question.
    Leave out what was simply done and is now in the code or a notebook, how the chat went, anything personal, and any task.
 3. Before adding to a notebook, call read_learnings (and read_questions) for it, and skip anything already there in other words.
-4. Write each with add_learning or add_question, source "caught", one plain line the user may read, ending with "(chat, <date>)". Nothing worth keeping is a fine result: then write nothing.
+4. Write each with add_learning or add_question, source "caught", one plain line the user may read, ending with "(chat, <date>)". Set a learning's "about" to the Subnotes skill whose behaviour it's about (the one whose text would change), or "none" for a fact about a notebook or the user. Nothing worth keeping is a fine result: then write nothing.
 
 Today is ${new Date().toISOString().slice(0, 10)}. The chat ran in ${input.cwd ?? 'an unknown folder'}.
 

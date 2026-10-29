@@ -41,8 +41,14 @@ leave it, saying so in your hand-back. Undone ones go in `mark_tuned`'s
 ## 3. Find what to change
 
 Sort the lessons (learnings, and the "why" in each rated run's comment) by
-the skill they're about: the one that wrote them, the one they name, or
-the run they rate. Keep only lessons about how a skill behaves. Leave out:
+the skill they're about: the `about` their writer named (a learning's
+`about`, a run's `[about: …]`), else the one they name, else the one that
+wrote them. Treat it as a strong hint, not the answer: before editing,
+find the sentence that caused the behaviour, in every skill involved (the
+run starts the journal, review, Do and prune, and each reads the others'
+words), and edit there. A lesson filed under the run is often caused by a
+word in the review or Do. Keep only lessons about how a skill behaves.
+Leave out:
 
 - facts about a notebook or the user's work: they're learnings, and stay
   so;
