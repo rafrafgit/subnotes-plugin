@@ -82,8 +82,10 @@ in this order, with the Skill tool and `quiet` as its argument:
 
 In `quiet` mode each one does all of its reading and its filing as usual,
 but doesn't talk to the user: it hands you its **points**, the things that
-need the user, each with its pick and the writes a yes leads to. Keep them
-all. None is dropped because the list is long: one not raised now waits for
+need the user, in the shape in `${CLAUDE_PLUGIN_ROOT}/reference/points.md` (read it first). Merge
+them across the skills by what moves the goals most, whichever skill they
+came from; on a yes carry out their `writes` as given, and a correction is
+a lesson about their `about`. Keep them all. None is dropped because the list is long: one not raised now waits for
 the next time, at the top.
 
 Catch up fast: read only what the skills ask for, and leave any other

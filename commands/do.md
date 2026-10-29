@@ -13,10 +13,11 @@ runs commands.
 
 **Started quietly** (the argument is `quiet`, not a notebook):
 `/subnotes:run` started you, and it opens the conversation. Read and sort
-as below, but don't show the groups: hand back your plan for today — the
-one to three tasks that matter most and why, the first task you'd start
-on, and what needs the user — and, if Today and Next are empty, the Soon
-tasks you'd move up, as a point. Then do the work as below once the run
+as below, but don't show the groups: hand back your plan for today in the
+shape in `${CLAUDE_PLUGIN_ROOT}/reference/points.md` (read it unless it is already in this conversation), `about: do` — the one to three
+tasks that matter most as `today` points, ranked, the first being the one
+you'd start on, then each that needs the user — and, if Today and Next are
+empty, the Soon tasks you'd move up, as one `decision`. Then do the work as below once the run
 has opened, with its reports. Leave the rating to the run: skip "Rate the
 run".
 

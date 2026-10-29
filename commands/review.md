@@ -43,8 +43,10 @@ the learnings and notes. What changes is only who says it:
 - **Each goal's points** (step 7), with their picks and writes (step 8),
   are kept for the run. Save the goal's notes (step 9) with them under
   Waiting to ask, so none is lost if the user stops before answering.
-- **Hand back** every point, goal by goal, most important first: the
-  goal, the noticing, your pick, the writes. That ends your part; the run
+- **Hand back** every point, goal by goal, most important first, in the
+  shape in `${CLAUDE_PLUGIN_ROOT}/reference/points.md` (read it unless it is already in this conversation): a plan check due as
+  `plan-check`, a goal's next step as `next-step`, an ongoing goal as
+  `ongoing`, each with `about: review`. That ends your part; the run
   raises them. When the user answers, step 8's rules apply as they would
   here (learn from the answer, what a yes leads to), and the notes of each
   goal whose points were settled are rewritten.

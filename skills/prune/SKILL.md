@@ -13,7 +13,8 @@ than the user or `/subnotes:run`, stop and do nothing.
 
 **Started quietly** (the argument is `quiet`): `/subnotes:run` started you
 and does the talking. Read and find what no longer holds as below, then
-hand the changes back as one point, in a line the user can say yes to
+hand the changes back as one `prune` point in the shape in
+`${CLAUDE_PLUGIN_ROOT}/reference/points.md` (read it unless it is already in this conversation), `about: prune`, its `pick` a line the user can say yes to
 without knowing what a prune is ("I'd tidy what I remember about you: 6
 lines that no longer hold — 2 merged, 4 out of date. OK?"), with the full
 list ready if they ask. Don't rate. On their yes the writes and

@@ -114,7 +114,9 @@ ones, then `end_run` (skill `tune`).
 
 ## 7. Hand back
 
-To the run, one line per change, in the user's terms, ready to say:
+To the run, one `change` point per change in the shape in
+`${CLAUDE_PLUGIN_ROOT}/reference/points.md` (read it unless it is already in this conversation), `about: tune`, `writes` the revert,
+its `pick` in the user's terms, ready to say:
 
 ```
 I changed the review so it leads with the plan's next step (2 lessons). Undo? (git revert a1b2c3d)

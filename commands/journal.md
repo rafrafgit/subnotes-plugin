@@ -14,8 +14,9 @@ other than the user typing it, or `/subnotes:run`, stop and do nothing.
 **Started quietly** (the argument is `quiet`): `/subnotes:run` started you
 and does the talking. Read, sort and file the learnings as below, but say
 nothing to the user, and don't rate. Hand back the tasks you'd propose and
-your question as points, each with where it goes and its write, and any
-problem to talk through (step 2) first, with your ideas. When the
+your question as points in the shape in `${CLAUDE_PLUGIN_ROOT}/reference/points.md` (read it unless it is already in this conversation),
+`about: journal`, and any problem to talk through (step 2) first, as
+`talk`, with your ideas. When the
 user has answered them through the run, or the session ends, call
 `mark_journal_read`; a task they never answered is kept as an open question
 ("Add a task to message Felix?", `add_question`, source `journal`), so it
