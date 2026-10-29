@@ -37,15 +37,25 @@ const texts = content => typeof content === 'string' ? [content]
   : Array.isArray(content) ? content.filter(b => b?.type === 'text').map(b => b.text) : [];
 
 // A Subnotes run or skill files its own learnings: catching it again would
-// file them twice.
-const ranSubnotes = lines.some(l =>
+// file them twice. But a chat often goes on after one ends, and what it
+// settles then is filed by nobody, so only the stretches outside a skill are
+// read: from the start, and from each skill's rating to the next skill.
+const toolUses = l => l.type === 'assistant' && Array.isArray(l.message?.content)
+  ? l.message.content.filter(b => b?.type === 'tool_use') : [];
+const startsSkill = l =>
   (l.type === 'user' && texts(l.message?.content).some(t => t.includes('<command-name>/subnotes:'))) ||
-  (l.type === 'assistant' && Array.isArray(l.message?.content) && l.message.content.some(b =>
-    b?.type === 'tool_use' && b.name === 'Skill' && String(b.input?.skill ?? '').startsWith('subnotes:'))));
-if (ranSubnotes) process.exit(0);
+  toolUses(l).some(b => b.name === 'Skill' && String(b.input?.skill ?? '').startsWith('subnotes:'));
+const rates = l => toolUses(l).some(b => b.name === `${TOOL}rate_run`);
+const outside = [];
+let inSkill = false;
+for (const l of lines) {
+  if (startsSkill(l)) inSkill = true;
+  else if (inSkill && rates(l)) inSkill = false;
+  else if (!inSkill) outside.push(l);
+}
 
 const turns = [];
-for (const l of lines) {
+for (const l of outside) {
   if ((l.type !== 'user' && l.type !== 'assistant') || l.isMeta) continue;
   // System reminders and command wrappers aren't what anyone said.
   const said = texts(l.message?.content).map(t => t.trim())

@@ -162,7 +162,7 @@ When the user stops, or nothing is left, end the way `subnotes:do` does:
 everything this session did, in one place, and everything left for them.
 
 Then the rating, every time: call `end_run` for each skill you started,
-and ask with the AskUserQuestion tool: "How was this?", with Great, Good,
+and ask with the AskUserQuestion tool: "How was this session, from the catch-up on?", with Great, Good,
 Meh, Waste of time. Then ask why, once, in one line of the chat: "Why was it
 good?" on Great or Good, "What would have made it worth it?" on Meh or
 Waste of time. The ratings are how the skills learn, and the why is what

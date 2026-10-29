@@ -58,10 +58,10 @@ From this chat — 1 learning (Freelance: quotes go out as PDFs, not links), 1 t
 
 Not when Do started you: Do's rating covers it. Otherwise, once any task is
 added or declined, call `end_run` (skill `wrapup`), then ask with the
-AskUserQuestion tool, the question one line, the time and what was done:
+AskUserQuestion tool, the question one line, naming in plain words the work it rates, so it isn't taken for the whole session:
 
 ```
-2 min · 1 learning, 1 task added · How was this run?
+How was filing what we talked about?
 ```
 
 Options: Great, Good, Meh, Waste of time. Then ask why, once, in one line of

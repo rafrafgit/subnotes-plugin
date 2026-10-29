@@ -75,10 +75,10 @@ say so in one line and still call `mark_pruned`, without a rating.
 ## Rate the run
 
 Call `end_run` (skill `prune`), then ask with the AskUserQuestion tool, the
-question one line, the time and what was done:
+question one line, naming in plain words the work it rates, so it isn't taken for the whole session:
 
 ```
-6 min · 6 changes, Subnotes down to 40 · How was this run?
+How was tidying what I remember about you?
 ```
 
 Options: Great, Good, Meh, Waste of time. Then ask why, once, in one line of

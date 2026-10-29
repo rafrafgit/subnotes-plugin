@@ -87,10 +87,10 @@ question left unanswered: still mark it read, and keep the question
 ## Rate the run
 
 Call `end_run` (skill `journal`), then ask with the AskUserQuestion tool,
-the question one line, the time and what was done:
+the question one line, naming in plain words the work it rates, so it isn't taken for the whole session:
 
 ```
-4 min · 3 learnings, 1 task added · How was this run?
+How was going through your journal?
 ```
 
 Options: Great, Good, Meh, Waste of time. Then ask why, once, in one line of

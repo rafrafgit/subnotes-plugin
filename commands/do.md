@@ -173,10 +173,10 @@ for the user, together.
 ## Rate the run
 
 Call `end_run` (skill `do`), then ask with the AskUserQuestion tool, the
-question one line, the time and what was done:
+question one line, naming in plain words the work it rates, so it isn't taken for the whole session:
 
 ```
-35 min · 2 done, 1 stopped, 1 commit · How was this run?
+How was working through today's tasks?
 ```
 
 Options: Great, Good, Meh, Waste of time. Then ask why, once, in one line of

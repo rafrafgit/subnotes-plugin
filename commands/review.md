@@ -339,7 +339,7 @@ When the last goal is done, or the user stops, call `end_run` (skill
 their own: the fewer, the better you chose. The user's bar: under 90
 seconds to each first question.
 
-Then ask "How was this run?" with the AskUserQuestion tool: Great, Good,
+Then ask "How was looking at your goals?" with the AskUserQuestion tool: Great, Good,
 Meh, Waste of time. Then ask why, once, in one line: "Why was it good?" on
 Great or Good, "What would have made it worth it?" on Meh or Waste of
 time. The ratings are how the skills learn, and the why is what they learn
