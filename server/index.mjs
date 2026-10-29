@@ -775,6 +775,7 @@ function addEntry(kind, { notebook, text, source }) {
   // fresh header ends in the blank line that sets it off from the entries.
   const base = entryCount(current) ? current.replace(/\n*$/, '\n') : current;
   writeEntryFile(path, base + `- ${today()} · ${who} · ${line}\n`);
+  if (who === CAUGHT_SOURCE) logCaught(label, k.noun, line);
   const n = entryCount(current) + 1;
   const crowded = n > 40 ? ` That is ${n} entries: correct or remove what no longer holds.` : '';
   return `${k.added}, in ${label}: ${line}${crowded}`;
@@ -1321,6 +1322,30 @@ function reviewElapsed() {
 // line each, for the user and the tune step to read. Clocks are kept per
 // skill, since one skill can start another (Do starts wrapup).
 const RUNS_PATH = join(AGENT_DIR, 'runs.md');
+
+// What the SessionEnd hook filed from a direct chat (hooks/catch-chat.mjs),
+// timed to the minute, so the next run can say what it filed since the last
+// rating and the user can correct it. Nobody saw these being written.
+const CAUGHT_SOURCE = 'caught';
+const CAUGHT_PATH = join(AGENT_DIR, 'caught.md');
+
+function logCaught(label, noun, line) {
+  const current = readEntryFile(CAUGHT_PATH) ??
+    '# Filed from direct chats\n\nWhat the end of a direct chat with Claude filed, without anyone watching.\n\n';
+  const base = current.includes('\n- ') ? current.replace(/\n*$/, '\n') : current;
+  writeEntryFile(CAUGHT_PATH, base + `- ${localTime(new Date())} · ${label} · ${noun} · ${line}\n`);
+}
+
+// Filed since the last rated run: a run rates at its end, so what came after
+// it is what the user hasn't seen. Minutes, so one filed in the minute of a
+// rating shows again rather than not at all.
+function caughtSinceLastRun() {
+  const text = readEntryFile(CAUGHT_PATH);
+  if (!text) return [];
+  let since = '';
+  try { since = localTime(statSync(RUNS_PATH).mtime); } catch {}
+  return text.split('\n').filter(l => /^- \d{4}-\d{2}-\d{2} \d{2}:\d{2} · /.test(l) && l.slice(2, 18) >= since);
+}
 const RATINGS = ['Great', 'Good', 'Meh', 'Waste of time', 'Skipped'];
 const runClocks = new Map();
 
@@ -1795,6 +1820,14 @@ function markPruned() {
   return `Pruned ${today()}; due again in ${PRUNE_EVERY_DAYS} days.`;
 }
 
+function caughtSection() {
+  const caught = caughtSinceLastRun();
+  if (!caught.length) return [];
+  return [`## From direct chats — ${caught.length} filed since the last run`,
+    'Filed when a direct chat ended, with nobody watching: say them in one line, so the user can correct one.',
+    ...caught, ''];
+}
+
 function whatsDue() {
   const m = manifest();
   if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,).";
@@ -1840,6 +1873,7 @@ function whatsDue() {
     ...named,
     `Do works on Today and Next. When both are empty: with ${PROMOTE_MIN_SOON} or more Soon, Do first offers to move up to ${PROMOTE_MAX} of them to Next; with fewer, the review runs again, even if it ran today, to work out what's next.`,
     '',
+    ...caughtSection(),
     // Every run is rated while the skills are being tuned: the feedback is
     // worth more than the interruption (2026-10-27). Was once a day.
     '## Rating — ask at the end of every run, and why',

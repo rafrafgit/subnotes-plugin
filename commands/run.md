@@ -66,6 +66,11 @@ the drive — I'll have ideas for those two hours in a moment"). Over a
 minute of silence before the first real reply is too long; the catch-up
 runs while they read.
 
+**What a chat filed.** When `whats_due` lists what was filed from direct
+chats, say it in those first lines, one line for all of it ("From your chat
+on the editor I kept: H1–H4 is the ladder"): nobody saw it written, and this
+is the user's chance to correct one (`correct_learning`, `close_question`).
+
 If the journal, the review or the prune is due, start each one that's due,
 in this order, with the Skill tool and `quiet` as its argument:
 
