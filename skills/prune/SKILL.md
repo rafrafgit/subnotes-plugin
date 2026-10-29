@@ -46,9 +46,12 @@ Go through every entry and pick out:
   like any other.
 - **Answered questions** still open. Closed (`close_question`).
 
-A file over 40 learnings is cut to 40 by the same rules, never by dropping
-what still holds. Leave everything else as it is: a prune doesn't reword
-lines that hold.
+A learnings file over 2,000 words (`prune_context` gives each file's
+count) is cut below it by the same rules, chained old versions first, then
+merges; never by dropping what still holds. Every skill reads the whole
+file before it acts, so past that its lessons outweigh the skill's own
+text. Leave everything else as it is: a prune doesn't reword lines that
+hold.
 
 ## 3. Ask once, then write
 

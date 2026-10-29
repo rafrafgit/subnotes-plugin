@@ -688,6 +688,13 @@ function writeNotes({ notebook, goal, content }) {
 // (THOUGHTS_SPEC.md in the app's repo). A question, once answered, becomes a
 // learning.
 const ENTRY_LIMIT = 500;
+// A learnings file's size, in words: every skill reads the whole file before
+// it acts, so past this its lessons start to outweigh the skill's own text
+// (Do and Run are about 1,900 words) and steer more than the skill does.
+// Words, not entries: one correction carrying its old wording costs as much
+// as five short lessons.
+const WORD_LIMIT = 2000;
+const wordCount = text => text.split('\n').filter(l => ENTRY.test(l)).join(' ').split(/\s+/).filter(Boolean).length;
 const ENTRY = /^- (\d{4}-\d{2}-\d{2}) · ([^·]+?) · (.*)$/;
 const KINDS = {
   learnings: {
@@ -776,8 +783,9 @@ function addEntry(kind, { notebook, text, source }) {
   const base = entryCount(current) ? current.replace(/\n*$/, '\n') : current;
   writeEntryFile(path, base + `- ${today()} · ${who} · ${line}\n`);
   if (who === CAUGHT_SOURCE) logCaught(label, k.noun, line);
-  const n = entryCount(current) + 1;
-  const crowded = n > 40 ? ` That is ${n} entries: correct or remove what no longer holds.` : '';
+  const words = wordCount(base + `- ${today()} · ${who} · ${line}\n`);
+  const crowded = kind === 'learnings' && words > WORD_LIMIT
+    ? ` The file is ${words} words, over ${WORD_LIMIT}: correct or remove what no longer holds.` : '';
   return `${k.added}, in ${label}: ${line}${crowded}`;
 }
 
@@ -1797,8 +1805,8 @@ function crowdedFiles() {
   let files = [];
   try { files = readdirSync(join(AGENT_DIR, 'learnings')).filter(f => f.endsWith('.md')); } catch {}
   for (const f of files) {
-    const n = entryCount(readFileSync(join(AGENT_DIR, 'learnings', f), 'utf8'));
-    if (n > 40) crowded.push(`${f.slice(0, -3)} (${n})`);
+    const n = wordCount(readFileSync(join(AGENT_DIR, 'learnings', f), 'utf8'));
+    if (n > WORD_LIMIT) crowded.push(`${f.slice(0, -3)} (${n} words)`);
   }
   return crowded;
 }
@@ -1810,7 +1818,10 @@ function pruneDue(m) {
   else if (daysSince(last) >= PRUNE_EVERY_DAYS) whys.push(`last pruned ${last}, ${daysSince(last)} days ago`);
   const lines = [last ? `Last pruned ${last}.` : 'Never pruned.'];
   const crowded = crowdedFiles();
-  if (crowded.length) lines.push(`Over 40 learnings: ${crowded.join(', ')}.`);
+  // Over the limit, every skill already reads more than it should: that
+  // can't wait for the month to pass.
+  if (crowded.length) whys.push(`over ${WORD_LIMIT} words: ${crowded.join(', ')}`);
+  if (crowded.length) lines.push(`Over ${WORD_LIMIT} words of learnings: ${crowded.join(', ')}.`);
   const orphans = [...orphanBrains(m).keys()];
   if (orphans.length) lines.push(`Kept for notebooks not connected now: ${orphans.join(', ')}.`);
   return { due: whys.length > 0, why: whys.join('; '), lines };
@@ -1841,7 +1852,7 @@ function pruneContext() {
         const status = cite && citeStatus(cite, m, texts);
         return status ? `${l}  ← ${status}` : l;
       };
-      out.push('', `## ${kind} — ${name} (${entryCount(text)} entries${off})`, '',
+      out.push('', `## ${kind} — ${name} (${entryCount(text)} entries, ${wordCount(text)} words${off})`, '',
         ...text.split('\n').filter(l => ENTRY.test(l)).map(flagged));
     }
   }
@@ -2057,7 +2068,7 @@ function whatsDue() {
     ...plan.lines,
     '',
     `## Prune — ${prune.due ? `due: ${prune.why}` : 'not due'}`,
-    `Due ${PRUNE_EVERY_DAYS} days after the last prune.`,
+    `Due ${PRUNE_EVERY_DAYS} days after the last prune, or when a learnings file is over ${WORD_LIMIT} words.`,
     ...prune.lines,
     '',
     `## Skill update — ${tune.due ? `due: ${tune.why}` : 'not due'}`,
