@@ -11,11 +11,11 @@ the tasks and write nothing: the run does the work.
 
 ## 1. Read, in one turn
 
-`list_notebooks`, then for every connected notebook with a purpose:
+`list_notebooks`, then for every connected notebook with a goal:
 `read_notebook`, `read_learnings`, `read_questions`; also the notebook
 marked Goals; and `${CLAUDE_PLUGIN_ROOT}/reference/points.md`, the shape
 you hand back in. Note which notebook is about the work in this folder:
-its name, purpose or sections match the project here (folder name, README,
+its name, goal or sections match the project here (folder name, README,
 what the code does). Its code tasks are the ones the run can change here.
 
 ## 2. Which tasks

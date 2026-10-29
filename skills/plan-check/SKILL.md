@@ -24,7 +24,7 @@ last check: start from it and look at what changed since), and
 `read_questions` for Goals.
 
 **No goal yet** (the argument says so): work one out instead. From the
-notebooks' purposes and what they hold, propose a goal with a number and a
+notebooks' goals and what they hold, propose a goal with a number and a
 date ("Would this be your goal: 4k a month from freelance work by June
 2027?"), and ask once. On a yes, add a task at the top of Goals, "Add this
 goal", with the heading as its subnote (`# Earn 4k a month from freelance
@@ -138,7 +138,7 @@ first post"). The run goes on with the goal from there.
 ## Rules
 
 - Writes only add tasks, learnings and questions, and edit one line on the
-  user's yes. Never a heading (a goal's name), a purpose, or more than one
+  user's yes. Never a heading (a goal's name), a notebook's goal, or more than one
   line per edit. Never claim more.
 - No task or line without their yes. One yes covers every write shown with
   it.

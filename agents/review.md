@@ -37,10 +37,10 @@ it's the shape you hand back in.
   notebook has any more.
 - Read for this goal only. A line that doesn't bear on it is left alone,
   however interesting.
-- The goal links no notebook: match one by purpose (a notebook no goal
-  links whose purpose plainly serves it), check Goals' learnings for a
-  match already agreed, and say a new one in your first point so the user
-  can correct it.
+- The goal links no notebook: match one by its own words (a notebook no
+  goal links whose goal in its own words plainly serves it), check Goals'
+  learnings for a match already agreed, and say a new one in your first
+  point so the user can correct it.
 
 ## 2. The goal itself
 
@@ -56,6 +56,17 @@ it's the shape you hand back in.
 - **Waiting on a decision** that would change or postpone the goal (an
   offer, an interview): say what it waits on and when in your notes, and
   hand back nothing else unless it's due.
+
+Reviewing a notebook no goal links, rather than a goal, its `Goal:` line
+is in the user's own words, if it has one:
+
+- **Its own words name an outcome to reach** (a number, a date, something
+  true by then): should it be a goal in Goals? First point, with your
+  wording of the heading and its date; `writes` none: the user makes it a goal,
+  in Goals or from the notebook's Goal menu in Subnotes.
+- **`review_context` says its goal in Goals is done:** what is the
+  notebook for now — another goal, a goal in their own words, or archiving
+  it? First point; `writes` none.
 
 ## 3. An ongoing goal
 
@@ -131,7 +142,7 @@ Last review: 2026-10-12
 Freelance → 4k a month by June 2027. Plan: retainer clients first. Next step: the Acme proposal. Pace: 1 client a month, on track.
 
 ## Notebooks
-Freelance (linked), Portfolio site (matched by purpose)
+Freelance (linked), Portfolio site (matched by its own words)
 
 ## Waiting to ask
 - 2026-10-12 — Is the side project with Sam still wanted? (Freelance › Status)

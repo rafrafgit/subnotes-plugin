@@ -136,7 +136,7 @@ function sectionOutline(n) {
 // in the app's repo), so a rename doesn't hide it. Said where it's listed,
 // because that's what every skill calls first.
 const GOALS_ROLE = 'Role: Goals — what the user is working toward and how their notebooks rank. ' +
-  'Read it before working in any notebook, and judge each notebook against it as well as its own purpose.';
+  'Read it before working in any notebook, and judge each notebook against it as well as the notebook\'s own goal.';
 // The Journal notebook likewise (JOURNAL_NOTEBOOK_SPEC.md in the app's repo).
 const JOURNAL_ROLE = "Role: Journal — the user's own entries on how their goals are going. " +
   '/subnotes:run\'s journal worker reads it and files what matters; no other skill reviews it or writes in it.';
@@ -145,11 +145,12 @@ function listNotebooks() {
   listedAt = Date.now();
   const m = manifest();
   if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,), which lists every notebook with a switch.";
+  const linked = notebookGoals(m);
   return m.notebooks.map(n => {
     const lines = [`## ${n.name}`];
     if (n.role === 'goals') lines.push(GOALS_ROLE);
     if (isJournal(n)) lines.push(JOURNAL_ROLE);
-    if (n.purpose) lines.push(`Purpose: ${n.purpose}`);
+    lines.push(...goalLines(n, linked));
     lines.push(`Open tasks: ${n.openTasks ?? 'unknown'}`);
     const changed = lastChanged(n);
     if (changed) lines.push(`Last changed: ${changed}`);
@@ -1330,7 +1331,7 @@ function contextFor(nb, goal = null) {
   const status = openSuggestionStatus(nb, text, reviewNotes);
   return [
     `# ${nb.name}`,
-    ...(nb.purpose ? [`Purpose: ${nb.purpose}`] : []),
+    ...goalLines(nb),
     ...(goal ? [] : ['', '## Your notes', reviewNotes || 'No notes yet — this is the first review of it.']),
     ...(status.length ? ['', '## Your open suggestions, as the notebook has them now', ...status] : []),
     '',
@@ -1448,7 +1449,7 @@ function rateRun({ skill, did, rating, comment, about }) {
 // Everything one visit needs in one call: the shared learnings and questions
 // once, then per notebook its learnings, questions, scheduled lines and what
 // changed. For a goal: the goal's notes once, and its linked notebooks unless
-// others are named (one matched by purpose); what changed is since this
+// others are named (one matched by its own words); what changed is since this
 // goal's last review. Without a goal, each notebook comes with its own notes.
 function reviewContext({ notebooks, goal, goals }) {
   // Several goals in one call (2026-10-28): the quiet review reads every goal
@@ -1508,28 +1509,114 @@ const PLAN_CHECKS = () => join(AGENT_DIR, 'plan', 'checks.json');
 // Every heading in Goals with a schedule is a goal: a date, maybe with a
 // time, or Today, Next, Soon, Someday (GOALS_NOTEBOOK_SPEC.md), or a repeat,
 // which makes it ongoing (below). Its text runs to the next heading, whatever
-// the level, so a goal's parts are their own.
+// the level, so a goal's parts are their own. A heading without a schedule
+// that goals sit under is a group ("Personal goals"): a notebook its own
+// text links serves every goal in it (NOTEBOOK_GOAL_SPEC.md), so a goal's
+// links take its groups' in too.
 function goalsIn(text) {
   const lines = text.split('\n');
   const goals = [];
+  const open = []; // the headings a line is under, and an unscheduled one's links
   for (let i = 0; i < lines.length; i++) {
-    const h = HEADING.exec(lines[i]);
-    const tags = h && SCHEDULE_PARTS.exec(h[2]);
-    if (!tags) continue;
-    const parts = [...tags[1].matchAll(/\[([^\]]+)\]/g)].map(m => m[1].trim());
-    if (parts.some(p => p.toLowerCase() === 'done')) continue;
-    const date = parts.map(p => /^(\d{4}-\d{2}-\d{2})/.exec(p)?.[1]).find(Boolean) ?? null;
-    const word = parts.find(p => PRIORITIES.some(x => x.toLowerCase() === p.toLowerCase())) ?? null;
-    const every = REPEATS.find(r => parts.some(p => p.toLowerCase() === r.toLowerCase())) ?? null;
-    const name = h[2].slice(0, tags.index).trim();
-    if (!name || (!date && !word && !every)) continue;
-    const block = [lines[i]];
-    for (let k = i + 1; k < lines.length && !HEADING.test(lines[k]); k++) if (lines[k].trim()) block.push(lines[k]);
-    const links = [...block.slice(1).join('\n').matchAll(/\[\[([^\]]+)\]\]/g)].map(l => l[1].trim());
-    goals.push({ name, level: h[1].length, date, word, every, links,
-      hash: fingerprint(block.map(l => l.replace(/\s+$/, '')).join('\n')) });
+    const h = headingAt(lines, i);
+    if (!h) continue;
+    while (open.length && open.at(-1).level >= h.level) open.pop();
+    open.push({ level: h.level, links: h.kind === 'plain' ? h.links : [] });
+    if (h.kind !== 'goal') continue;
+    const groupLinks = open.slice(0, -1).flatMap(o => o.links);
+    goals.push({ name: h.name, level: h.level, date: h.date, word: h.word, every: h.every,
+      links: [...h.links, ...groupLinks.filter(l => !h.links.includes(l))], hash: h.hash });
   }
   return goals;
+}
+
+// The heading on line i of Goals, if it is one: a goal, done (a goal marked
+// Done), or plain (no schedule); its name, and the links in its own text,
+// the lines up to the next heading.
+function headingAt(lines, i) {
+  const h = HEADING.exec(lines[i]);
+  if (!h) return null;
+  const block = [lines[i]];
+  for (let k = i + 1; k < lines.length && !HEADING.test(lines[k]); k++) if (lines[k].trim()) block.push(lines[k]);
+  const links = [...block.slice(1).join('\n').matchAll(/\[\[([^\]]+)\]\]/g)].map(l => l[1].trim());
+  const base = { level: h[1].length, links, block: block.slice(1) };
+  const tags = SCHEDULE_PARTS.exec(h[2]);
+  if (!tags) return { ...base, kind: 'plain', name: h[2].trim() };
+  const parts = [...tags[1].matchAll(/\[([^\]]+)\]/g)].map(m => m[1].trim());
+  const name = h[2].slice(0, tags.index).trim();
+  if (parts.some(p => p.toLowerCase() === 'done')) return { ...base, kind: 'done', name };
+  const date = parts.map(p => /^(\d{4}-\d{2}-\d{2})/.exec(p)?.[1]).find(Boolean) ?? null;
+  const word = parts.find(p => PRIORITIES.some(x => x.toLowerCase() === p.toLowerCase())) ?? null;
+  const every = REPEATS.find(r => parts.some(p => p.toLowerCase() === r.toLowerCase())) ?? null;
+  if (!name || (!date && !word && !every)) return { ...base, kind: 'plain', name: h[2].trim() };
+  return { ...base, kind: 'goal', name, date, word, every,
+    hash: fingerprint(block.map(l => l.replace(/\s+$/, '')).join('\n')) };
+}
+
+// A "Notebook: [[Work]], [[Side project]]" line: the label, then links and
+// nothing else but commas and "and". The app's goal sheet writes these; a
+// link with words around it is the user's prose.
+function isNotebookList(line) {
+  const label = /^\s*Notebooks?:/i.exec(line);
+  if (!label) return false;
+  const rest = line.slice(label[0].length);
+  return rest.includes('[[') && /^[\s,&]*$/.test(rest.replace(/\[\[[^\]\n]+\]\]/g, '').replace(/and/g, ''));
+}
+
+// The goal each notebook shows in the app (NOTEBOOK_GOAL_SPEC.md), by
+// lowercased name: the goal or group in Goals that links it — a
+// "Notebook:" line over a link in prose, then the deepest heading, the
+// first on a tie — as ScheduledHeadings.goalLinks has it. And, for a
+// notebook nothing open links, the done goal that does.
+function notebookGoals(m) {
+  const goals = new Map(), done = new Map();
+  const goalsNb = m.notebooks.find(n => n.role === 'goals');
+  if (!goalsNb) return { goals, done };
+  const lines = readFileSync(join(DIR, goalsNb.file), 'utf8').split('\n');
+  const heads = lines.map((_, i) => headingAt(lines, i));
+  // A plain heading is a group when a goal sits under it.
+  const isGroup = i => {
+    for (let k = i + 1; k < lines.length; k++) {
+      if (!heads[k]) continue;
+      if (heads[k].level <= heads[i].level) return false;
+      if (heads[k].kind === 'goal') return true;
+    }
+    return false;
+  };
+  const open = [];
+  for (let i = 0; i < lines.length; i++) {
+    const h = heads[i];
+    if (!h) continue;
+    while (open.length && open.at(-1).level >= h.level) open.pop();
+    if (h.kind === 'goal' || (h.kind === 'plain' && isGroup(i))) open.push({ level: h.level, name: h.name });
+    const depth = open.length;
+    for (const line of h.block) {
+      for (const l of line.matchAll(/\[\[([^\]\n]+)\]\]/g)) {
+        const key = l[1].trim().toLowerCase();
+        if (h.kind === 'done') { if (!done.has(key)) done.set(key, h.name); continue; }
+        const at = open.at(-1);
+        if (!at) continue;
+        const inProse = !isNotebookList(line), had = goals.get(key);
+        if (had && (had.inProse !== inProse ? inProse : had.depth >= depth)) continue;
+        goals.set(key, { name: at.name, inProse, depth });
+      }
+    }
+  }
+  for (const key of goals.keys()) done.delete(key);
+  return { goals, done };
+}
+
+// A notebook's goal, as the tools print it: from Goals, else in the user's
+// own words (the stored purpose), and a goal in Goals that's done.
+function goalLines(nb, linked = notebookGoals(manifest())) {
+  if (nb.role === 'goals' || isJournal(nb)) return nb.purpose ? [`Goal: ${nb.purpose} (in their own words)`] : [];
+  const key = nb.name.toLowerCase();
+  const goal = linked.goals.get(key);
+  if (goal) return [`Goal: ${goal.name} (from Goals)`];
+  return [
+    ...(nb.purpose ? [`Goal: ${nb.purpose} (in their own words)`] : []),
+    ...(linked.done.has(key) ? [`Its goal in Goals, "${linked.done.get(key)}", is done.`] : []),
+  ];
 }
 
 const goalKey = name => normText(name);
@@ -1638,12 +1725,12 @@ function planDue(m) {
 
 // The review goes goal by goal (REVIEW_BY_GOAL_SPEC.md): it is due once a
 // day, for each goal one of whose linked notebooks changed since that goal's
-// last review, and for each notebook with a purpose that no goal links and
-// that changed since its own. Once it has run today it isn't due again until
+// last review, and for each notebook no goal links that has a goal in its
+// own words, or a goal in Goals that's done, and changed since its own. Once it has run today it isn't due again until
 // tomorrow: what it didn't reach waits, so the next /subnotes:run goes on to
 // Do (2026-10-24). Due tasks aren't the review's: they're Do's. A goal that
 // links no notebook isn't due here; the review matches it to notebooks by
-// purpose. An ongoing goal is due by its repeat, not its notebooks'
+// their own words. An ongoing goal is due by its repeat, not its notebooks'
 // changes (ongoingState), linked or not.
 function reviewDue(m) {
   const now = today();
@@ -1655,6 +1742,7 @@ function reviewDue(m) {
   };
   const rows = [];
   const linked = new Set();
+  const { done } = notebookGoals(m);
   for (const g of goalsWithNotebooks(m)) {
     if (g.every) {
       const o = ongoingState(g);
@@ -1670,7 +1758,7 @@ function reviewDue(m) {
       notebooks: g.notebooks.map(nb => nb.name) });
   }
   for (const nb of m.notebooks) {
-    if (!nb.purpose || nb.role === 'goals' || isJournal(nb) || linked.has(nb)) continue;
+    if ((!nb.purpose && !done.has(nb.name.toLowerCase())) || nb.role === 'goals' || isJournal(nb) || linked.has(nb)) continue;
     const r = state(nb, readSnapshot(snapshotPath(nb)));
     if (r) rows.push({ name: nb.name, kind: 'notebook', ...r });
   }
@@ -1679,7 +1767,7 @@ function reviewDue(m) {
   for (const r of rows) {
     const label = r.kind === 'notebook' ? `Notebook no goal links: ${r.name}`
       : `${r.kind === 'ongoing' ? `Ongoing goal: ${r.name} [${r.every}]` : `Goal: ${r.name}`}${r.notebooks ? ` (${r.notebooks.join(', ')})` : ''}`;
-    if (r.none) { lines.push(`- ${label} — links no connected notebook; the review matches notebooks to it by purpose`); continue; }
+    if (r.none) { lines.push(`- ${label} — links no connected notebook; the review matches notebooks to it by their own words`); continue; }
     let st;
     if (r.kind === 'ongoing') st = r.visited === now ? `reviewed today, ${r.st}` : r.st;
     else if (r.visited === now) st = `reviewed today${r.changed ? ', changed since' : ''}`;
@@ -1726,7 +1814,7 @@ function journalEntries() {
   else if (!changes) body = `Most of it is new since ${old.taken}, so here is the whole notebook:\n\n` + text.replace(/\n*$/, '');
   else if (!changes.length) body = `Nothing new since the last run (${old.taken}).`;
   else body = `Since the last run (${old.taken}) — "+" is a new or changed line, the rest is context:\n\n` + changes.join('\n\n');
-  return [`# ${nb.name}`, ...(nb.purpose ? [`Purpose: ${nb.purpose}`] : []), '', body].join('\n');
+  return [`# ${nb.name}`, ...goalLines(nb), '', body].join('\n');
 }
 
 // Called once Journal has handled what journal_entries gave it, so the next
@@ -2062,7 +2150,7 @@ function whatsDue() {
     ...entry,
     '',
     `## Review — ${review.due.length ? `due for ${review.due.join(', ')}` : plan.due.length ? 'due for its plan checks' : 'not due'}`,
-    'Due once a day, for each goal whose notebooks changed since its last review, each ongoing goal (a repeat, no deadline) once most of a period has gone by since it last happened with nothing planned, and each notebook with a purpose no goal links.',
+    'Due once a day, for each goal whose notebooks changed since its last review, each ongoing goal (a repeat, no deadline) once most of a period has gone by since it last happened with nothing planned, and each notebook no goal in Goals links that has a goal in its own words, or whose goal in Goals is done.',
     ...review.lines,
     '',
     `## Plan checks, run inside the review — ${plan.due.length ? `due for ${plan.due.length} goal${plan.due.length > 1 ? 's' : ''}` : 'none due'}`,
@@ -2169,7 +2257,7 @@ const taskShape = {
 const TOOLS = [
   {
     name: 'list_notebooks',
-    description: 'List the connected Subnotes notebooks with their purpose, section headings and open task count. Call this before writing, to choose a notebook and a section without reading a whole notebook.',
+    description: 'List the connected Subnotes notebooks with their goal, section headings and open task count. Call this before writing, to choose a notebook and a section without reading a whole notebook.',
     inputSchema: { type: 'object', properties: {} },
     run: listNotebooks,
   },
@@ -2336,7 +2424,7 @@ const TOOLS = [
     inputSchema: { type: 'object', properties: {
       goal: { type: 'string', description: "The goal to review: its heading in Goals, without its schedule." },
       goals: { type: 'array', items: { type: 'string' }, description: "Several goals at once, each read as `goal` would be, with the shared learnings once. Use instead of `goal` to read every goal a review takes in one call." },
-      notebooks: { type: 'array', items: { type: 'string' }, description: "The connected notebooks to read. Leave out with a goal to read the ones it links; name them to add one matched by purpose." },
+      notebooks: { type: 'array', items: { type: 'string' }, description: "The connected notebooks to read. Leave out with a goal to read the ones it links; name them to add one matched by its own words." },
     } },
     run: reviewContext,
   },

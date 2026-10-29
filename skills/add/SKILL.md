@@ -11,7 +11,7 @@ asked to capture. If it isn't clear what they meant, ask rather than guess.
 
 Call `list_notebooks` first. If the argument names a notebook or a section, use
 it — "… in Freelance", "… under Bugs" — matching case-insensitively against what
-`list_notebooks` returned. Otherwise place it against the notebooks' purposes,
+`list_notebooks` returned. Otherwise place it against the notebooks' goals,
 and if none of them fits, ask where it belongs rather than settling for the
 least-bad one. Write it as a physical, visible action.
 
@@ -27,7 +27,7 @@ Tasks added:
  * Deploy the CD_sharedWithAI field to the CloudKit Production schema to Subnotes 1.4, plugin 1.0 in Subnotes.
 ```
 
-Name the purpose you placed it against too, when you chose the notebook rather
+Name the goal you placed it against too, when you chose the notebook rather
 than being told which one.
 
 If the argument is several things, add them in one `add_tasks` call.
