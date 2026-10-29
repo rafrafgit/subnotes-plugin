@@ -72,15 +72,29 @@ on the editor I kept: H1–H4 is the ladder"): nobody saw it written, and this
 is the user's chance to correct one (`correct_learning`, `close_question`).
 
 If the journal, the review or the prune is due, start each one that's due,
-in this order, with the Skill tool and `quiet` as its argument:
+in this order:
 
-1. `subnotes:journal`, if the journal is due.
-2. `subnotes:review`, if the review is due, or `quiet, what's next` when
-   `whats_due` says to review for what's next, in its `Run:` line or its
-   Do section: Today and Next are empty, so every goal needs its next step.
-3. `subnotes:prune`, if the prune is due.
+1. `subnotes:journal`, with the Skill tool and `quiet`, if the journal is
+   due.
+2. **The review, one reviewer per goal, all at once:** for each goal
+   `whats_due` lists as due (every goal, ongoing ones included, when it
+   says to review for what's next: Today and Next are empty, so every goal
+   needs its next step), and each notebook no goal links, start the
+   plugin's `review` agent (Agent tool, `subagent_type` `subnotes:review`),
+   all in one turn so they run in parallel. Give each its goal's heading
+   (or the notebook), what `whats_due` says about it, whether it's a
+   what's-next pass, and any journal point about that goal. Each reads in
+   its own context and hands back points and a `Summary:` line. A plan
+   check it hands back is held by you, with `subnotes:plan-check`, once
+   the user says yes.
+3. `subnotes:prune`, with the Skill tool and `quiet`, if the prune is due.
 
-In `quiet` mode each one does all of its reading and its filing as usual,
+When the user answers a reviewer's points, carry out the writes yourself,
+then send that reviewer the answers (SendMessage, by its name) so it saves
+the decisions and rewrites its notes; if it can't be reached, do that
+yourself with `write_notes`.
+
+Each one does all of its reading and its filing as usual,
 but doesn't talk to the user: it hands you its **points**, the things that
 need the user, in the shape in `${CLAUDE_PLUGIN_ROOT}/reference/points.md` (read it first). Merge
 them across the skills by what moves the goals most, whichever skill they
