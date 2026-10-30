@@ -98,10 +98,16 @@ to keep, and hands you points in the shape in
   each its goal's heading (or the notebook), what `whats_due` says about
   it, and whether it's a what's-next pass.
 - **`subnotes:journal`**, if the journal is due.
+- **`subnotes:next-steps`**, once do-plan is back, when fewer than three
+  things are lined up that you can work on (do-plan's points you can start
+  now, and the reviewers' next steps; not the user's own tasks or blocked
+  ones). You pick the goal: the one whose plan most needs moving now, by
+  its date, how far behind it is, and what the journal and Today say. Tell
+  it which, why, and what's already lined up or blocked.
 
 **Quiet while they work.** Say nothing as each worker comes back: no line
 per worker, no "still waiting" or "nearly there". Your next words after the first lines are the opening, once
-do-plan and the reviewers are all back; the journal joins it if it's back,
+do-plan, the reviewers and next-steps are all back; the journal joins it if it's back,
 or your next report if not.
 
 **Upkeep after the opening.** Tidying what you remember and the skill
@@ -138,12 +144,11 @@ do-plan's `today` points in order, the way
 (read those parts then): one task at a time, each reported, marked Done
 when built.
 
-**Nothing lined up is the reason to propose work, not to say little.** With
-Today and Next empty, the opening names a next task for each goal, taken
-from its plan (the review's what's-next points): the step that moves it,
-in bold with where it goes, not a small extra around a dated task. A fast
-catch-up means few rounds of reading; it never means fewer things to work
-on.
+**Little lined up is the reason to propose work, not to say little.** With
+fewer than three things you can work on, the opening offers next-steps'
+proposals together, as one point the user picks one or more from; its
+`plan-check` fallback is raised as a plan check. A fast catch-up means few
+rounds of reading; it never means fewer things to work on.
 
 ## 3. Open with today
 

@@ -76,6 +76,7 @@ whats_due (code) → │ opening · points · work · follow-up · end · one ra
 | review | One goal: its notebooks, its next step, what moves it | per goal `whats_due` lists, or every goal when Today and Next are empty | the goal's notes, `Why:` learnings | points, the first always the goal's next step when it has none; "plan check due" as a point |
 | prune | What no longer holds in the brain | `whats_due`: due | nothing until the yes | one point: the changes, ready to apply |
 | do-plan | Sort Today and Next: can do now, needs input, only the user | always | nothing | the ranked plan, each task with its group and reason |
+| next-steps | Three steps toward one goal's plan, or a change to the plan | fewer than 3 things Claude can work on; the run picks the goal | nothing | next-step points to pick one or more from, or one plan-check |
 | tune | Improve the skills from the week's lessons | `whats_due`: due | skill edits, commits, retired lessons | one line per change; its changes for the conductor to have checked |
 
 Each worker's file says: its objective, its inputs (the conductor passes
