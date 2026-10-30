@@ -10,6 +10,23 @@ Being started quietly changes only who speaks. It never changes what a
 skill reads, notices or proposes: a quiet review finds every point it would
 raise out loud, and a goal with no next step gets one.
 
+## The bar
+
+Every point the user sees is judged by it, so a point that misses it is
+worse than none. Before saving one, check all four:
+
+1. **In the user's words.** They could explain it to a friend. No names of
+   tools, workers, files or steps inside Subnotes or the plugin: not
+   "the checker", "the loop", "pending.md".
+2. **The outcome, not the mechanism.** Say what will be different for the
+   user when it's done, not how it gets done inside.
+3. **Visibly moves the goal,** in the terms of the goal's own text (its
+   What line, its number): the user would say "yes, that moves it".
+4. **Not already happening:** not a task, not a saved point, not what the
+   recent sessions were doing (the goal's notes, the latest learnings).
+
+Two that clear it beat three with one that doesn't.
+
 ## The shape
 
 One block per point, most important first:

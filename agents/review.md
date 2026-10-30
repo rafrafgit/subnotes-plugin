@@ -86,7 +86,8 @@ Save one `ongoing` point, warm and short, never a reproach:
 
 ## 4. Find what's worth raising
 
-Up to three points that would move this goal. None is a good result: a
+Up to three points that would move this goal, each clearing the bar in
+`points.md`. None is a good result: a
 needless point costs the user's attention and trust. In a what's-next pass,
 the first is always the goal's next step, from its plan, with your best
 guess: a `next-step` whose write adds it as `[Next]`. It's a new task,

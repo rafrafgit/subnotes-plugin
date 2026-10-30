@@ -36,8 +36,9 @@ Three things that take the user closer to carrying out the plan, each:
   declined.
 - **One physical action,** in the first person, in bold with where it goes.
 
-The bar is that the user would say "yes, that moves it". A mediocre step
-is worse than none: two good ones beat three with filler.
+Each step must clear the bar in `points.md`: in the user's words, the
+outcome not the mechanism, visibly moving the goal, not already happening.
+A mediocre step is worse than none.
 
 ## 3. No good step: the plan itself
 

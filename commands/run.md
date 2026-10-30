@@ -44,6 +44,11 @@ Pick the next tasks, in this order:
 The user's own errands (an upload, a call) are never the task: one line at
 most ("booking the dentist is yours today").
 
+**Screen each saved point** against the bar in
+`${CLAUDE_PLUGIN_ROOT}/reference/points.md`: one that misses it is
+reworded in the user's terms, or removed (`remove_point`, and a lesson
+about its `about`). It never reaches them as written.
+
 **Serve three to choose from**, one line each, with the goal it moves and
 whether you can do it or need them, your pick first:
 
@@ -62,9 +67,8 @@ filed from direct chats, add one line for it all, so they can correct one
 **Nothing at all to pick** (no open work, no Today or Next task for you or
 them, nothing saved): say in one line that you're finding something, start
 `subnotes:next-steps` (Agent tool) for the goal whose plan most needs
-moving, by its date, how far behind it is and what Today says; tell it
-which and why. When it's back, its points are in `today_context`: serve
-them. This is the only wait, at most 45 seconds.
+moving, and tell it which and why. Serve its points from `today_context`
+when it's back: the only wait, at most 45 seconds.
 
 ## 2. Work, one task at a time
 
