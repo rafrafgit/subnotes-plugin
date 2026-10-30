@@ -100,7 +100,7 @@ to keep, and hands you points in the shape in
 - **`subnotes:journal`**, if the journal is due.
 
 **Quiet while they work.** Say nothing as each worker comes back: no line
-per worker. Your next words after the first lines are the opening, once
+per worker, no "still waiting" or "nearly there". Your next words after the first lines are the opening, once
 do-plan and the reviewers are all back; the journal joins it if it's back,
 or your next report if not.
 
@@ -152,8 +152,8 @@ One reply, in this order:
 1. **What matters most today,** one to three things, each in one line with
    why it matters, from the plan and the goals. Don't repeat your first
    lines: say only what the catch-up changed.
-2. **What needs them,** the points, numbered, most important first: at most
-   three in this reply. A plan check that's due always makes the three: say
+2. **What needs them,** the most important point only: one point gets
+   real focus, three at once get none. A plan check that's due comes first: say
    plainly which goal you'd like to look at and why, in their terms ("Your
    business goal is five months out and the webinars haven't started — can
    we look at whether the plan still gets you there?"). A goal kept up, not
@@ -163,15 +163,12 @@ One reply, in this order:
 3. **What you're starting on,** if there's a task you can do without them:
    "Meanwhile I'll start on the Acme proposal draft."
 
-End with "Go with my picks, or tell me which to change?" when there are
-points, and then go straight on with the task you named. They answer when
+End with that point's question ("Ask Sam this week?") when there is one, and then go straight on with the task you named. They answer when
 they're back.
 
 ```
 Hi! Two things matter most today: the Acme proposal (due Friday, and it's your next client) and booking the dentist.
-1. Your freelance goal: one client so far against a pace of one a month. I'd ask Sam for an intro this week — **Ask Sam for an intro to her design agency** → Freelance [Next].
-2. It's been three weeks since you saw your friends. I'd pick Saturday — **Invite friends for dinner on Saturday** → Friends [2026-11-01].
-Go with my picks, or tell me which to change? Meanwhile I'll start on the Acme proposal draft.
+Your freelance goal: one client so far against a pace of one a month. I'd ask Sam for an intro this week — **Ask Sam for an intro to her design agency** → Freelance [Next]. Go with that? Meanwhile I'll start on the Acme proposal draft.
 ```
 
 ## 4. Work, and follow up
@@ -184,9 +181,9 @@ worker that raised them. A plan check they say yes to:
 start `subnotes:plan-check` for that goal, as the review would, and give it
 the time it needs; it's the most important conversation of the day.
 
-With every report, if a point is still open, add one line at the end:
-"Still waiting on you: 2 — dinner on Saturday?" Raise the points not shown
-yet once the first ones are settled, at most three at a time.
+With every report, if the point is still open, add one line at the end:
+"Still waiting on you: Sam's intro?" Once it's settled, raise the next
+point, one at a time, most important first.
 
 **The skills improve themselves.** When `whats_due` says the skill update
 is due, start the `subnotes:tune` worker once your opening is out, in the
