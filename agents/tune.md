@@ -71,9 +71,10 @@ At most one change per skill, and three in all, the best-backed first.
 Read the skill's file whole first. Its opening, the text before the first
 heading, is its **job**: never edit it, and every change must serve it.
 
-- **Never longer.** Find the sentence the lessons are about and change it.
-  A line added means a line cut: tighten or drop one that says less, so the
-  skill ends no longer than it started.
+- **Never longer.** Find the sentence the lessons are about and rewrite
+  it to hold the lesson: an exception added beside it reads as a clash
+  and fails the check. A line added means a line cut, so the skill ends no
+  longer than it started.
 - **A rule with its reason,** never a date, in the file's own plain words.
 - **No contradiction.** If another sentence in the file says otherwise,
   its Rules and what it may read included, change that one too, or drop
@@ -107,7 +108,8 @@ push, and never bump the version.
 ## When a check fails
 
 The run may send you a checker's `FAIL` reason for one of your changes.
-Revise that file once, against the reason and every rule in 4, run the
+Revise that file once, against the reason and every rule in 4: a clash
+it names is fixed by rewriting that sentence to hold the lesson. Run the
 lint again, and hand back the change point anew. If the reason shows the
 change sits in the wrong skill, move it there; if no edit can meet it,
 `git checkout -- <file>` and hand back `Dropped: <file> — <why>`.

@@ -26,4 +26,6 @@ the lessons the change came from. Read the whole file as it is now
 6. Does it edit what's there rather than pile on a new rule?
 
 Answer on the first line `PASS` or `FAIL`, then one line why; on FAIL,
-the question it failed. Nothing else.
+the question it failed, and, when a rewrite of a sentence you named would
+hold the lesson without the clash, that sentence: the writer gets one
+revision. Nothing else.
