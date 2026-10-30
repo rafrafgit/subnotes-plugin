@@ -55,7 +55,10 @@ Leave out:
 - one person's taste ("they like short replies at night"): the skills ship
   to every user of the plugin, so only behaviour that's right for anyone
   goes into them, and no example from the user's notebooks;
-- this worker or its checker: the tune never edits its own text.
+- this worker or its checker: the tune never edits its own text;
+- a lesson already fixed: one written `at` a commit (a run's `[at: …]`)
+  whose skill file changed since in the way it asks (`git log -p
+  <commit>..HEAD -- <file>`).
 
 A skill gets a change only when **two or more lessons point the same
 way**, or the user stated one as a principle of how the skills should

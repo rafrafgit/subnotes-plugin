@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
 import { randomUUID, createHash } from 'node:crypto';
 import { createInterface } from 'node:readline';
+import { execFileSync } from 'node:child_process';
 
 const PROTOCOL_VERSION = '2024-11-05';
 const CONNECTOR_VERSION = 1;   // the contract number in manifest.json
@@ -596,7 +597,7 @@ function agentFile(folder, nb) {
 // nothing here ever stops a read: at worst the brain stays where it was.
 const RENAMED_FILES = [
   ['review', '.md'], ['review', '.snapshot.json'], ['review', '.pending.json'],
-  ['learnings', '.md'], ['learnings', '.cites.json'], ['learnings', '.about.json'], ['questions', '.md'],
+  ['learnings', '.md'], ['learnings', '.cites.json'], ['learnings', '.about.json'], ['learnings', '.at.json'], ['questions', '.md'],
   ['journal', '.snapshot.json'],
 ];
 
@@ -886,7 +887,11 @@ function citeStatus(cite, m, texts) {
 // the one whose text caused it, and /subnotes:tune edits that one. Required,
 // with "none" for a fact about a notebook or the owner, so every writer
 // decides rather than forgets. Kept beside the learnings like the cites.
+//
+// Beside it, the plugin commit the lesson was written at: the tune skips a
+// lesson its skill has changed for since, instead of fixing it twice.
 const aboutPath = file => file.replace(/\.md$/, '.about.json');
+const atPath = file => file.replace(/\.md$/, '.at.json');
 const SKILL_NAMES = (() => {
   const root = join(dirname(fileURLToPath(import.meta.url)), '..');
   const names = new Set();
@@ -902,14 +907,22 @@ function aboutSkill(about) {
   throw new UserError(`\`about\` is the skill whose behaviour this is about — ${[...SKILL_NAMES].sort().join(', ')} — or "none" for a fact about a notebook or the owner.`);
 }
 
-function readAbouts(file) {
-  try { return JSON.parse(readFileSync(aboutPath(file), 'utf8')); } catch { return {}; }
+function readAbouts(file, pathOf = aboutPath) {
+  try { return JSON.parse(readFileSync(pathOf(file), 'utf8')); } catch { return {}; }
 }
 
-function writeAbouts(file, abouts) {
-  const path = aboutPath(file);
+function writeAbouts(file, abouts, pathOf = aboutPath) {
+  const path = pathOf(file);
   if (Object.keys(abouts).length) writeEntryFile(path, JSON.stringify(abouts, null, 2) + '\n');
   else if (existsSync(path)) unlinkSync(path);
+}
+
+// The plugin repo's commit now, short; null when it isn't a checkout. Read
+// each time, since a tune commits while the server runs.
+function pluginCommit() {
+  const repo = sourceRepo();
+  if (!repo) return null;
+  try { return execFileSync('git', ['-C', repo, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim() || null; } catch { return null; }
 }
 
 const readLearnings = ({ notebook }) => readEntries('learnings', notebook);
@@ -922,6 +935,12 @@ const addLearning = args => {
     const abouts = readAbouts(path);
     abouts[citeKey(oneLine(args.text, 'learning'))] = about;
     writeAbouts(path, abouts);
+    const at = pluginCommit();
+    if (at) {
+      const ats = readAbouts(path, atPath);
+      ats[citeKey(oneLine(args.text, 'learning'))] = at;
+      writeAbouts(path, ats, atPath);
+    }
   }
   if (cite) {
     const { path } = entryTarget('learnings', args.notebook);
@@ -960,12 +979,13 @@ function correctLearning({ notebook, match, text, reason, source, goal, prune })
     if (replacement) cites[citeKey(ENTRY.exec(found.lines[found.i])[3])] = cite;
     writeCites(found.path, cites);
   }
-  const abouts = readAbouts(found.path);
-  const about = abouts[citeKey(found.text)];
-  if (about) {
+  for (const pathOf of [aboutPath, atPath]) {
+    const abouts = readAbouts(found.path, pathOf);
+    const about = abouts[citeKey(found.text)];
+    if (!about) continue;
     delete abouts[citeKey(found.text)];
     if (replacement) abouts[citeKey(ENTRY.exec(found.lines[found.i])[3])] = about;
-    writeAbouts(found.path, abouts);
+    writeAbouts(found.path, abouts, pathOf);
   }
   if (replacement) recordPlanCheck({ notebook, source, goal });
   return replacement ? `Corrected, in ${found.label}: ${replacement}` : `Removed from ${found.label}: ${found.old}`;
@@ -1460,7 +1480,8 @@ function rateRun({ skill, did, rating, comment, about }) {
   const clock = runClocks.get(name);
   const time = clock ? minutesText(clock.ms ?? Date.now() - clock.startedAt) : 'not timed';
   runClocks.delete(name);
-  const line = `- ${today()} · ${name} · ${time} · ${r} · ${what}${note ? ` — "${note}"` : ''}${cause !== 'none' && cause !== name ? ` [about: ${cause}]` : ''}`;
+  const at = pluginCommit();
+  const line = `- ${today()} · ${name} · ${time} · ${r} · ${what}${note ? ` — "${note}"` : ''}${cause !== 'none' && cause !== name ? ` [about: ${cause}]` : ''}${at ? ` [at: ${at}]` : ''}`;
   const current = readEntryFile(RUNS_PATH) ??
     '# Runs and ratings\n\nEach skill run by hand: when, how long, how the user rated it, and what it did.\n\n';
   writeEntryFile(RUNS_PATH, current.replace(/\n*$/, current.includes('\n- ') ? '\n' : '\n\n') + line + '\n');
@@ -2113,17 +2134,18 @@ function tuneContext() {
   const runs = ratedRuns().filter(r => after(r.date));
   out.push(...(runs.length ? runs.map(r => `- ${r.line}`) : ['(none)']));
   for (const kind of ['learnings', 'questions']) {
-    out.push('', `## ${kind} written since ${since} — file, the skill it's about when its writer named one, then the entry`);
+    out.push('', `## ${kind} written since ${since} — file, the skill it's about when its writer named one, the plugin commit it was written at, then the entry`);
     let files = [];
     try { files = readdirSync(join(AGENT_DIR, kind)).filter(f => f.endsWith('.md')).sort(); } catch {}
     let any = false;
     for (const f of files) {
       const abouts = kind === 'learnings' ? readAbouts(join(AGENT_DIR, kind, f)) : {};
+      const ats = kind === 'learnings' ? readAbouts(join(AGENT_DIR, kind, f), atPath) : {};
       for (const l of readFileSync(join(AGENT_DIR, kind, f), 'utf8').split('\n')) {
         const e = ENTRY.exec(l);
         if (!e || !after(e[1])) continue;
-        const about = abouts[citeKey(e[3])];
-        out.push(`- ${f.slice(0, -3)} | ${about ? `about ${about} | ` : ''}${l.slice(2)}`);
+        const about = abouts[citeKey(e[3])], at = ats[citeKey(e[3])];
+        out.push(`- ${f.slice(0, -3)} | ${about ? `about ${about} | ` : ''}${at ? `at ${at} | ` : ''}${l.slice(2)}`);
         any = true;
       }
     }
