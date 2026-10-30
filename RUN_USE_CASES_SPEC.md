@@ -1,6 +1,6 @@
 # Run: a task in seconds, refilled in the background
 
-**Status: draft 2026-10-30, for discussion.** Builds on ORCHESTRATOR_SPEC.md
+**Status: built 2026-10-30, not yet released (1.6.0).** Builds on ORCHESTRATOR_SPEC.md
 (the conductor and its workers). That spec says how Run is built. This one
 says what the user gets and how fast. Run gets rewritten from it, not from
 rules added one by one.

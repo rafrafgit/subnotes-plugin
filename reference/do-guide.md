@@ -1,6 +1,6 @@
 # Doing the work
 
-How `/subnotes:run` does the tasks do-plan handed it, one at a time, in
+How `/subnotes:run` does the tasks it picked, one at a time, in
 its order, and how it ends the session. The run reads these parts when it
 starts on the first task. A task the run can do on its own is started
 without asking: the user doesn't want to give permission for work Claude

@@ -52,8 +52,34 @@ const init = await send('initialize', {});
 check('initialize', init.result?.serverInfo?.name === 'subnotes');
 
 const tools = await send('tools/list', {});
-check('twenty-seven tools', tools.result.tools.length === 27,
+check('thirty-two tools', tools.result.tools.length === 32,
       tools.result.tools.map(t => t.name).join(', '));
+
+const pick = await call('today_context');
+check('today_context', !pick.isError && pick.text.includes('## Today, overdue and Next') && pick.text.includes('## For the refill'));
+
+// Points saved for the pick: a review's replace its own for the goal, the
+// journal's add, and one is removed by a piece of its pick.
+const pendingPath = join(DIR, 'agent', 'pending.md');
+const pendingBefore = existsSync(pendingPath) ? readFileSync(pendingPath, 'utf8') : null;
+const point = (pick, kind = 'next-step') => ({ kind, noticed: 'Smoke noticed.', pick, writes: ['add_task Smoke "x"'] });
+const s1 = await call('save_points', { source: 'review', goal: 'Smoke goal', points: [point('Smoke pick one'), point('Smoke pick two')] });
+check('save_points saves', !s1.isError && s1.text.startsWith('Saved 2 points'), s1.text);
+const s2 = await call('save_points', { source: 'review', goal: 'Smoke goal', points: [point('Smoke pick three')] });
+check("a review's new points replace its old ones for the goal", s2.text.includes('replacing 2 earlier review points'), s2.text);
+const s3 = await call('save_points', { source: 'journal', goal: 'Smoke goal', points: [point('Smoke talk', 'talk')] });
+check("the journal's points are added", !s3.text.includes('replacing'), s3.text);
+const badKind = await call('save_points', { source: 'review', points: [point('x', 'urgent')] });
+check('save_points refuses an unknown kind', badKind.isError);
+const shown = await call('today_context');
+check('today_context shows the saved points', shown.text.includes('Smoke pick three') && shown.text.includes('Smoke talk') && !shown.text.includes('Smoke pick one'));
+const r1 = await call('remove_point', { match: 'smoke pick three', reason: 'done' });
+check('remove_point removes one', !r1.isError && r1.text.startsWith('Removed: Smoke pick three'), r1.text);
+const r2 = await call('remove_point', { match: 'smoke' });
+check('remove_point removes the last one by a piece of its pick', !r2.isError, r2.text);
+const r3 = await call('remove_point', { match: 'smoke' });
+check('remove_point refuses what is not there', r3.isError);
+if (pendingBefore === null) rmSync(pendingPath, { force: true }); else writeFileSync(pendingPath, pendingBefore);
 
 const list = await call('list_notebooks');
 check('list_notebooks', !list.isError && list.text.includes('Open tasks'));

@@ -51,6 +51,13 @@ from there instead, without adding this marketplace first.
 - `whats_due` — what `/subnotes:run` runs: each goal's last review and plan
   check, notebooks no goal links, the last prune, and the tasks Do would
   pick up
+- `today_context` — the run's pick in one call: the points the workers
+  saved, the Today, overdue and Next tasks with where they sit and what's
+  under them, the goals with their plans and checks, the open questions,
+  and what the refill should start
+- `save_points`, `remove_point` — the store between the workers and the
+  run (`pending.md`): a worker saves its points there instead of handing
+  them back, and the run removes one once it's done or turned down
 - `prune_context`, `remove_notebook_brain`, `mark_pruned` — the monthly
   prune: every learnings and questions file, the brain kept for a notebook
   no longer connected, and marking it done

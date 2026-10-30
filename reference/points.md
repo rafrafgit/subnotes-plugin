@@ -1,8 +1,9 @@
-# Points: what a skill hands back to the run
+# Points: what a worker saves for the run
 
 When `/subnotes:run` starts a skill quietly, the skill doesn't talk to the
-user: it hands back points, and the run says them. Every skill hands them
-back in this one shape, so the run can merge them, rank them across skills,
+user: it saves points to pending.md (`save_points`), and the run raises
+them when it picks the next task. Every worker saves them in this one
+shape, so the run can merge them, rank them across skills,
 and carry out a yes without knowing how the skill thinks.
 
 Being started quietly changes only who speaks. It never changes what a
@@ -48,4 +49,8 @@ A `today` point puts in `pick` what Claude does with the task: "I'll start
 on it now", the one question it needs, or "only you can do this", and why.
 A `change` point puts in `writes` how to undo it.
 
-Nothing to hand back is a fine result: hand back nothing.
+Nothing to save is a fine result: save nothing.
+
+The prune and the skill update run at the end of a session, beside the
+wrap-up, and hand their points back in this same shape instead: there's
+no pick left for them to wait for.

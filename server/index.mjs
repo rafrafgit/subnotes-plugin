@@ -30,6 +30,7 @@ const CONNECTOR_VERSION = 1;   // the contract number in manifest.json
 // Unreadable is not fatal. This is diagnostic information the app uses to say
 // "update the plugin" earlier than it otherwise could; failing a write over it
 // would trade a real feature for a cosmetic one.
+const PLUGIN_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PLUGIN_VERSION = (() => {
   try {
     const here = dirname(fileURLToPath(import.meta.url));
@@ -2230,6 +2231,213 @@ function whatsDue() {
   ].filter(l => l !== null).join('\n');
 }
 
+// MARK: - Today
+
+// The pick in one call (RUN_USE_CASES_SPEC.md, 2026-10-30): the run used to
+// start a worker to read Today and Next across the notebooks before it could
+// say anything, 19 s and ten tool calls. Everything the pick needs comes
+// here at once: the Today, overdue and Next tasks with where they sit and
+// what's under them, the goals with their dates, plans and checks, the open
+// questions, and the points the workers saved for it.
+const PENDING_PATH = () => join(AGENT_DIR, 'pending.md');
+const GOAL_LINES_SHOWN = 8;
+
+function sectionAt(lines, i) {
+  for (let k = i - 1; k >= 0; k--) {
+    const h = HEADING.exec(lines[k]);
+    if (h) return h[2].replace(PRIORITY_TAG, '').replace(DATE_TAG, '').trim();
+  }
+  return null;
+}
+
+function todayTasks(m) {
+  const out = [], soon = [];
+  for (const nb of m.notebooks) {
+    if (nb.role === 'goals' || isJournal(nb)) continue;
+    let text;
+    try { text = readFileSync(join(DIR, nb.file), 'utf8'); } catch { continue; }
+    const lines = text.split('\n');
+    const shown = [];
+    for (const s of scheduledLines(text)) {
+      if (DONE_TAG.test(s.line)) continue;
+      if (s.group === 'Soon') { if (s.due) soon.push(`- ${s.name} (${nb.name}, ${s.due})`); continue; }
+      // A task inside a scheduled heading's block is shown there already.
+      if (shown.some(b => s.at > b.at && s.at <= b.end)) continue;
+      shown.push(s);
+      const where = [nb.name, sectionAt(lines, s.at)].filter(Boolean).join(' › ');
+      const when = s.due && s.due < today() ? `overdue, ${s.due}` : s.due ? `due ${s.due}` : s.group;
+      const block = s.block.slice(0, BLOCK_SHOWN);
+      out.push({ order: s.group === 'Today' ? 0 : 1, text: [`- ${where}: ${s.line.trim()}   ← ${when}`,
+        ...block.map(l => `  ${l}`),
+        ...(s.block.length > block.length ? [`  (${s.block.length - block.length} more lines)`] : [])].join('\n') });
+    }
+  }
+  out.sort((a, b) => a.order - b.order);
+  return { tasks: out.map(t => t.text), soon };
+}
+
+function todayGoals(m) {
+  const goalsNb = m.notebooks.find(n => n.role === 'goals');
+  if (!goalsNb) return ['No Goals notebook is connected.'];
+  const lines = readFileSync(join(DIR, goalsNb.file), 'utf8').split('\n');
+  const plan = planDue(m);
+  const due = new Map(plan.due.map(d => [goalKey(d.name), d.why]));
+  const checks = readPlanChecks(), fallback = newestPlanLearning(goalsNb);
+  const out = [];
+  for (const g of goalsWithNotebooks(m)) {
+    const at = lines.findIndex((l, i) => headingAt(lines, i)?.name === g.name);
+    const body = at < 0 ? [] : headingAt(lines, at).block.slice(1);
+    const nbs = g.notebooks.length ? g.notebooks.map(n => n.name).join(', ') : 'no notebook linked';
+    let state;
+    if (g.every) state = `ongoing [${g.every}], ${ongoingState(g).st}`;
+    else {
+      const checked = checks[goalKey(g.name)]?.checked ?? fallback;
+      state = `${g.date ? `by ${g.date}` : `[${g.word}], no date yet`}; plan ${due.has(goalKey(g.name))
+        ? `check DUE: ${due.get(goalKey(g.name))}` : `checked ${checked}`}`;
+    }
+    out.push([`- ${g.name} (${nbs}) — ${state}`,
+      ...body.slice(0, GOAL_LINES_SHOWN).map(l => `  ${l.trim()}`),
+      ...(body.length > GOAL_LINES_SHOWN ? [`  (${body.length - GOAL_LINES_SHOWN} more lines)`] : [])].join('\n'));
+  }
+  return out.length ? out : [`Goals ("${goalsNb.name}") has no goal yet.`];
+}
+
+function todayQuestions(m) {
+  const out = [];
+  for (const nb of [null, ...m.notebooks]) {
+    const lines = (readEntryFile(agentFile('questions', nb)) ?? '').split('\n').filter(l => ENTRY.test(l));
+    if (lines.length) out.push(`${nb ? nb.name : 'Shared'}:`, ...lines);
+  }
+  return out.length ? out : ['(none)'];
+}
+
+// The points the workers save for the pick (RUN_USE_CASES_SPEC.md): a
+// worker's points used to come back as a message, which woke the run and
+// made it say something. Now they wait in pending.md, in the shape of
+// reference/points.md, until the run raises them. A reviewer's or
+// next-steps' new points for a goal replace their old ones for it, so a
+// stale point never outlives a fresh look; the journal's add to what's there.
+const POINT_KINDS = ['next-step', 'decision', 'plan-check', 'ongoing', 'today', 'prune', 'change', 'talk'];
+const POINT_FIELDS = ['kind', 'goal', 'about', 'saved', 'noticed', 'pick', 'options'];
+const REPLACING_SOURCES = ['review', 'next-steps'];
+const PENDING_HEADER = '# Saved for the pick\n\nPoints the workers saved for /subnotes:run, until it raises them. ' +
+  'Removed once done or turned down.\n';
+
+function readPoints() {
+  const text = readEntryFile(PENDING_PATH()) ?? '';
+  const points = [];
+  let p = null;
+  for (const line of text.split('\n')) {
+    const start = /^- kind: (.+)$/.exec(line);
+    if (start) { p = { kind: start[1].trim(), writes: [] }; points.push(p); continue; }
+    if (!p) continue;
+    const w = /^    - (.+)$/.exec(line);
+    if (w) { p.writes.push(w[1]); continue; }
+    const f = /^  ([a-z]+): ?(.*)$/.exec(line);
+    if (f && f[1] !== 'writes') p[f[1]] = f[2];
+  }
+  return points;
+}
+
+function writePoints(points) {
+  const blocks = points.map(p => [
+    `- kind: ${p.kind}`,
+    ...POINT_FIELDS.slice(1).filter(k => p[k]).map(k => `  ${k}: ${p[k]}`),
+    '  writes:', ...(p.writes.length ? p.writes : ['none']).map(w => `    - ${w}`),
+  ].join('\n'));
+  writeEntryFile(PENDING_PATH(), PENDING_HEADER + (blocks.length ? `\n${blocks.join('\n\n')}\n` : ''));
+}
+
+function savePoints({ source, goal, points }) {
+  const who = sourceName(source);
+  if (!Array.isArray(points)) throw new UserError('`points` is a list, in the shape of reference/points.md. An empty list saves nothing.');
+  const scope = String(goal ?? '').trim();
+  const fresh = points.map((p, i) => {
+    const kind = String(p?.kind ?? '').trim().toLowerCase();
+    if (!POINT_KINDS.includes(kind)) throw new UserError(`Point ${i + 1}: \`kind\` is one of ${POINT_KINDS.join(', ')}.`);
+    const out = { kind, saved: `${today()} · ${who}`, writes: [] };
+    for (const k of ['goal', 'about', 'noticed', 'pick', 'options']) {
+      if (p[k] !== undefined && String(p[k]).trim()) out[k] = oneLine(p[k], `point's ${k}`);
+    }
+    if (!out.goal) out.goal = scope || 'none';
+    if (!out.noticed || !out.pick) throw new UserError(`Point ${i + 1} needs \`noticed\` and \`pick\`.`);
+    const writes = Array.isArray(p.writes) ? p.writes : p.writes ? [p.writes] : [];
+    out.writes = writes.map(w => oneLine(w, 'write')).filter(w => w.toLowerCase() !== 'none');
+    return out;
+  });
+  let kept = readPoints();
+  const replaces = REPLACING_SOURCES.includes(who) && scope;
+  const before = kept.length;
+  if (replaces) kept = kept.filter(p => !(p.saved?.split(' · ')[1] === who && goalKey(p.goal ?? '') === goalKey(scope)));
+  const known = new Set(kept.map(p => normText(p.pick ?? '')));
+  const added = fresh.filter(p => !known.has(normText(p.pick)));
+  writePoints([...kept, ...added]);
+  const replaced = before - kept.length;
+  return `Saved ${added.length} point${added.length === 1 ? '' : 's'}${replaced ? `, replacing ${replaced} earlier ${who} point${replaced === 1 ? '' : 's'} for "${scope}"` : ''}` +
+    `${fresh.length > added.length ? ` (${fresh.length - added.length} already saved)` : ''}. ${kept.length + added.length} waiting in pending.md.`;
+}
+
+function removePoint({ match, reason }) {
+  const wanted = normText(String(match ?? ''));
+  if (!wanted) throw new UserError("Name the point to remove: a piece of its `pick` that only it has.");
+  const points = readPoints();
+  const found = points.filter(p => normText(p.pick ?? '').includes(wanted));
+  if (!found.length) throw new UserError(`No saved point's pick holds "${match}".`);
+  if (found.length > 1) throw new UserError(`${found.length} saved points hold "${match}": say more of the one you mean.`);
+  writePoints(points.filter(p => p !== found[0]));
+  const why = String(reason ?? '').trim();
+  return `Removed: ${found[0].pick}${why ? ` (${why})` : ''}. ${points.length - 1} waiting in pending.md.`;
+}
+
+// The refill runs detached and never reports back, so a failed one would go
+// unnoticed: its last exit line in refill.log says how it went.
+function lastRefill() {
+  const lines = (readEntryFile(join(AGENT_DIR, 'refill.log')) ?? '').trim().split('\n');
+  const at = lines.findLastIndex(l => /^refill exit \d+ /.test(l));
+  if (at < 0) return 'Last refill: none yet.';
+  const [, code, when] = /^refill exit (\d+) (.*)$/.exec(lines[at]);
+  const said = lines.slice(0, at).reverse().find(l => l.trim() && !/^refill exit/.test(l)) ?? '';
+  return code === '0' ? `Last refill: ${when} — ${said.trim()}`
+    : `Last refill FAILED (exit ${code}, ${when}): ${said.trim() || 'no output'}. Say so in one line; see refill.log.`;
+}
+
+function todayContext() {
+  const m = manifest();
+  if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,).";
+  const { tasks, soon } = todayTasks(m);
+  const pending = readEntryFile(PENDING_PATH())?.trim();
+  const review = reviewDue(m), plan = planDue(m), prune = pruneDue(m), tune = tuneDue();
+  const journal = journalNotebook(m);
+  let journalNew = false;
+  try { journalNew = !!journal && journalHasNew(journal); } catch {}
+  const reviewers = [...new Set([...review.due, ...plan.due.map(d => d.name).filter(n => n !== '(none)')])];
+  return [
+    `Today: ${today()}`,
+    '',
+    '## Saved for the pick (pending.md)',
+    pending || 'Nothing saved yet.',
+    '',
+    '## Today, overdue and Next',
+    ...(tasks.length ? tasks : ['None.']),
+    ...(soon.length ? ['', `Dated in the next ${STALL_DAYS} days:`, ...soon] : []),
+    '',
+    '## Goals',
+    ...todayGoals(m),
+    '',
+    '## Open questions',
+    ...todayQuestions(m),
+    '',
+    '## For the refill',
+    `Start it: \`${join(PLUGIN_ROOT, 'bin', 'refill.sh')} "${AGENT_DIR}"\``,
+    lastRefill(),
+    `Reviewers due: ${reviewers.length ? reviewers.join('; ') : 'none'}`,
+    `Journal: ${journalNew ? 'a new entry' : 'nothing new'}`,
+    `At the end: prune ${prune.due ? `due (${prune.why})` : 'not due'}; skill update ${tune.due ? `due (${tune.why})` : 'not due'}`,
+    '',
+    ...caughtSection(),
+  ].join('\n');
+}
+
 // MARK: - Search
 
 // A skill that needs "anything about X" used to read whole notebooks to find
@@ -2516,6 +2724,39 @@ const TOOLS = [
     description: "For /subnotes: what's due, read-only — each goal's last plan check, each notebook's last review visit and whether it changed since, when each ongoing goal last happened, and the tasks Do would pick up — and which to run first: Journal, Review, Prune or Do.",
     inputSchema: { type: 'object', properties: {} },
     run: whatsDue,
+  },
+  {
+    name: 'today_context',
+    description: "For /subnotes:run's pick, read-only, in one call: the points the workers saved (pending.md), the Today, overdue and Next tasks with their notebook, section and the lines under them, the goals with dates, plans and plan checks, the open questions, and what the refill should start.",
+    inputSchema: { type: 'object', properties: {} },
+    run: todayContext,
+  },
+  {
+    name: 'save_points',
+    description: "For the workers /subnotes:run starts: save points for the run's pick to pending.md, in the shape of reference/points.md, instead of handing them back. A review's or next-steps' points for a goal replace its earlier ones for that goal; the journal's are added. Hand back nothing worth saying once saved.",
+    inputSchema: { type: 'object', properties: {
+      source: { type: 'string', description: 'The worker saving them, one word: review, journal, next-steps.' },
+      goal: { type: 'string', description: "The goal (or notebook) these points are for, as named in Goals. A point without its own `goal` takes this one." },
+      points: { type: 'array', description: 'The points, most important first.', items: { type: 'object', properties: {
+        kind: { type: 'string', enum: POINT_KINDS },
+        goal: { type: 'string' },
+        about: { type: 'string', description: 'The skill handing it back.' },
+        noticed: { type: 'string', description: 'One plain line: what was found.' },
+        pick: { type: 'string', description: "One plain line: Claude's own answer; a task in bold with where it goes." },
+        options: { type: 'string', description: 'Up to two others, in one line, split by " · ".' },
+        writes: { type: 'array', items: { type: 'string' }, description: 'Exactly what a yes does, one tool call each; leave out when a yes writes nothing.' },
+      }, required: ['kind', 'noticed', 'pick'] } },
+    }, required: ['source', 'points'] },
+    run: savePoints,
+  },
+  {
+    name: 'remove_point',
+    description: "For /subnotes:run: remove one saved point from pending.md once it's done or the user turned it down. A turned-down point also gets a learning with the reason (add_learning), so it isn't proposed again.",
+    inputSchema: { type: 'object', properties: {
+      match: { type: 'string', description: "A piece of the point's pick that only it has." },
+      reason: { type: 'string', description: 'Done, or why the user turned it down.' },
+    }, required: ['match'] },
+    run: removePoint,
   },
   {
     name: 'journal_entries',

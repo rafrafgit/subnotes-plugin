@@ -43,7 +43,7 @@ the skill they're about: the `about` their writer named (a learning's
 `about`, a run's `[about: …]`), else the one they name, else the one that
 wrote them. Treat it as a strong hint, not the answer: before editing,
 find the sentence that caused the behaviour, in every skill involved (the
-run starts the journal, review, do-plan and prune workers, and reads the guides,
+run starts the journal, review, next-steps and prune workers, and reads the guides,
 words), and edit there. A lesson filed under the run is often caused by a
 word in the review or Do: when it's about what a worker hands back
 (points missing, weak or dropped), the fix goes in that worker, never in
