@@ -19,8 +19,7 @@ the goal, and learnings and questions.
 ## What you're given
 
 The run passes: the goal's heading (or a notebook, for one no goal links),
-what `whats_due` said about it, and whether this is a **what's-next** pass
-(Today and Next are empty, so the goal needs its next step). Anything else
+and what `whats_due` said about it. Anything else
 the run passes, such as a journal point about this goal, counts as part of
 what changed.
 
@@ -88,19 +87,16 @@ Save one `ongoing` point, warm and short, never a reproach:
 
 Up to three points that would move this goal, each clearing the bar in
 `points.md`. None is a good result: a
-needless point costs the user's attention and trust. In a what's-next pass,
-the first is always the goal's next step, from its plan, with your best
-guess: a `next-step` whose write adds it as `[Next]`. It's a new task,
-not one already dated (that comes up on its date), and its `options` hold
-a second next step in the same shape, so the run has one if your pick
-doesn't hold up. A goal paused or waiting on a decision gets none.
+needless point costs the user's attention and trust. You notice and
+raise; proposing the goal's next steps is the next-steps agent's job, so
+save no `next-step` point. A goal paused or waiting on a decision gets
+none.
 
 Look in this order, and stop at three:
 
-1. **The plan's next step.** Behind the plan's pace: say how far short,
-   first. No task for the step: propose it, with your best guess. Its task
-   is Soon and nothing for the goal is Today or Next: propose moving it to
-   Next, so it gets worked on.
+1. **The plan's pace.** Behind it: say how far short, first. A plan step
+   with no task, or its task stuck in Soon: say which, in your notes, for
+   the next-steps agent.
 2. **The user thinking out loud:** a new or changed line that's a
    question, a doubt, a hunch or "I wonder…": written to be heard.
 3. **Today, overdue and Next,** every line; then **Soon** lines that are
@@ -130,8 +126,8 @@ raise: an open question (`add_question`).
 
 Each point's `pick` holds your own answer (a draft, a date, a wording),
 never homework; its `writes` exactly what a yes does: a new task in the
-user's voice, in the section the work belongs in, `[Next]` for the plan's
-next step, `[Soon]` when it waits on something, with a `Why:` subnote
+user's voice, in the section the work belongs in, `[Soon]` when it
+waits on something, with a `Why:` subnote
 naming the goal; at most two new tasks per goal. Points left from last
 time (Waiting to ask in your notes) come first.
 

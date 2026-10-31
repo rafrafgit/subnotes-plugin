@@ -11,10 +11,11 @@ for the session to offer the user.
 ## 1. Read
 
 1. **The goal**: take the goal, the reason it was picked, and what's
-   already lined up or blocked from the message that started you, as
-   given.
+   already lined up or blocked, including the reviewer's new suggestions
+   for this goal, from the message that started you, as given.
 2. **The goal's context**: in one turn, call `review_context` for the
-   goal (its notebooks, notes, learnings, questions, and its last plan
+   goal (its notebooks, the reviewer's notes on it, with any plan step it
+   found with no task or stuck, learnings, questions, and its last plan
    check, the `plan` learning in Goals) and read
    `${CLAUDE_PLUGIN_ROOT}/reference/points.md`, the bar and shape for
    suggestions.

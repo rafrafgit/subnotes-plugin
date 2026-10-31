@@ -76,7 +76,7 @@ their own context, at the same time, and never talk to you themselves:
   learnings, and any task it leads to is proposed;
 - **one look per goal**, once a day for each goal whose notebooks changed:
   what would move it, and a next step when it has none. When a goal's plan
-  check is due, every 30 days or when the goal changes, the run checks the
+  check is due, every 7 days or when the goal changes, the run checks the
   plan with you: that the goal has a measure and a date, and that the plan
   can get there in time, with the arithmetic shown;
 - **today's tasks**, sorted into what Claude can do now, what needs your

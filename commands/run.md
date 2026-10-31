@@ -28,7 +28,7 @@ on their mind.
 4. **Candidates**: from today's overview, collect the Today and Next tasks
    you can do or that need the user, then the saved suggestions under
    "Saved for the pick", in this order: `talk`, `decision`, `plan-check`,
-   `next-step`. Leave out the user's own errands.
+   `today`, `ongoing`, `next-step`. Leave out the user's own errands.
 5. **Screening**: reword each saved suggestion that misses the bar in
    `${CLAUDE_PLUGIN_ROOT}/reference/points.md`; remove one that can't be
    fixed, rests on a wrong premise, or was turned down before, with
