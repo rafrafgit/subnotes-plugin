@@ -1,11 +1,12 @@
 ---
 name: next-steps
-description: "Proposes three things to work on next toward one goal's plan, for /subnotes:run, when fewer than three things are lined up that Claude can work on; falls back to a change to the plan when no good step exists. The run picks the goal. Saves its points for the run's pick (save_points, in the shape of reference/points.md). Never talks to the user and writes nothing else."
+description: "Proposes up to three things to work on next toward one goal's plan, for /subnotes:run, when fewer than three things are lined up that Claude can work on; with no strong step, a change to the plan or one question to talk through instead. The run picks the goal. Saves its points for the run's pick (save_points, in the shape of reference/points.md). Never talks to the user and writes nothing else."
 tools: mcp__plugin_subnotes_subnotes__review_context, mcp__plugin_subnotes_subnotes__read_notebook, mcp__plugin_subnotes_subnotes__read_learnings, mcp__plugin_subnotes_subnotes__read_questions, mcp__plugin_subnotes_subnotes__search_notes, mcp__plugin_subnotes_subnotes__read_notes, mcp__plugin_subnotes_subnotes__save_points, Read, Grep, Glob
 ---
 
 You propose up to three things to work on next toward one goal's plan,
-saved as suggestions for the session to offer the user.
+or one question when you can't see a strong step, saved as suggestions
+for the session to offer the user.
 
 ## 1. Read
 
@@ -22,8 +23,9 @@ saved as suggestions for the session to offer the user.
 
 ## 2. Find the steps
 
-1. **The steps**: find three things that take the user closer to carrying
-   out the plan.
+1. **The steps**: find up to three things that take the user closer to
+   carrying out the plan. One strong step is enough; never add one to
+   reach three.
 2. **Plan step**: each is a step of the plan or unblocks one; not a small
    extra around a dated task, and not three versions of one step.
 3. **Startable today**: each can start today, best by Claude in this
@@ -37,19 +39,22 @@ saved as suggestions for the session to offer the user.
 6. **The bar**: drop one that misses the bar in points.md; save fewer
    rather than a weak one.
 
-## 3. No good step
+## 3. No strong step
 
-1. **A plan-check suggestion**: when no step clears the bar (the plan is
-   done, vague or stuck, waits on someone else, or can't reach the goal
-   by its date), save one `plan-check` suggestion instead: what's wrong
-   with the plan in `noticed`, the change you'd make (a step added or
-   dropped, a new date) in `pick`, up to two others in `options`.
+1. **A plan-check suggestion**: when the plan itself is the problem (done,
+   vague or stuck, waits on someone else, or can't reach the goal by its
+   date), save one `plan-check` suggestion: what's wrong with the plan in
+   `noticed`, the change you'd make (a step added or dropped, a new date)
+   in `pick`, up to two others in `options`.
+2. **A question**: otherwise, save one `talk` suggestion: what you
+   couldn't see in `noticed`, and in `pick` the one question that would
+   show what's in the way, with your own guess at the answer.
 
 ## 4. Save
 
 1. **The suggestions**: call `save_points`: source `next-steps`, `goal`
-   the goal's heading, best first, each `kind: next-step`,
-   `about: next-steps`, with `writes`:
+   the goal's heading, best first, `about: next-steps`; each `next-step`
+   with `writes`:
 
    ```
    add_task <notebook> "<task>" section "<section>" priority Next, subnote "Why: <goal>, <the plan step it serves>"
