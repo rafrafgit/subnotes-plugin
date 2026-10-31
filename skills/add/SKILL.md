@@ -4,30 +4,39 @@ description: "Capture one or more tasks the user asked for into the right connec
 user-invocable: false
 ---
 
+You add the tasks the user asked for to the right notebook and section,
+and say exactly what was added.
+
 Add this to the user's Subnotes: $ARGUMENTS
 
-If that is empty, take what to add from the conversation: what the user just
-asked to capture. If it isn't clear what they meant, ask rather than guess.
+## 1. Find what to add
 
-Call `list_notebooks` first. If the argument names a notebook or a section, use
-it — "… in Freelance", "… under Bugs" — matching case-insensitively against what
-`list_notebooks` returned. Otherwise place it against the notebooks' goals,
-and if none of them fits, ask where it belongs rather than settling for the
-least-bad one. Write it as a physical, visible action.
+1. **The tasks**: take them from the line above; when it's empty, from
+   what the user just asked to capture.
+2. **Unclear**: when it isn't clear what they meant, ask instead of
+   guessing.
 
-Look for it first (`search_notes`, a few of its words): when a task like it
-is already there, say where and ask before adding a second — a reworded copy
-gets past the duplicate check, and the user would have to delete one.
+## 2. Place them
 
-Then say exactly what was added, one line per task — the user does not see the
-tool's own output, and the write cannot be taken back:
+1. **The notebooks**: call `list_notebooks`.
+2. **A named notebook or section** ("… in Freelance", "… under Bugs"):
+   use it, matched case-insensitively against `list_notebooks`.
+3. **Otherwise**: place each task against the notebooks' goals; when none
+   fits, ask where it belongs instead of taking the least-bad one.
+4. **The wording**: write each as a physical, visible action.
+5. **A task already there**: look for it first (`search_notes`, a few of
+   its words); when one like it is there, say where and ask before adding
+   a second.
 
-```
-Tasks added:
- * Deploy the CD_sharedWithAI field to the CloudKit Production schema to Subnotes 1.4, plugin 1.0 in Subnotes.
-```
+## 3. Add and report
 
-Name the goal you placed it against too, when you chose the notebook rather
-than being told which one.
+1. **The write**: call `add_task`, or `add_tasks` once for several.
+2. **The report**: say exactly what was added, one line per task:
 
-If the argument is several things, add them in one `add_tasks` call.
+   ```
+   Tasks added:
+    * Email Sara the invoice under Admin in Freelance.
+   ```
+
+3. **The goal**: when you chose the notebook yourself, name the goal you
+   placed it against.

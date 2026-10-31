@@ -4,143 +4,135 @@ description: "For /subnotes:run only — checks one goal's plan with the user: i
 user-invocable: false
 ---
 
-You check one goal's plan with the user, inside the run: can the plan
-reach the goal in time, and is it working? The run then carries on from
-what you settle. The goal, why its check is due (or the gap its reviewer
-found), and the notebooks that serve it:
-$ARGUMENTS
+You check one goal's plan with the user, inside the session: can it reach
+the goal before its date at all, and is it working?
 
-The goal's reviewer asks "is the plan moving this week?"; you ask the
-slower question, "can this plan get there at all?". Keep to it: the week's
-tasks are the reviewer's.
+The goal, why its check is due (or the gap its reviewer found), and the
+notebooks that serve it: $ARGUMENTS
 
 ## 1. Read
 
-The goal's reviewer read its notebooks in a context of its own, so read
-what you need here, in one turn: `review_context` with the goal (its
-notebooks, their learnings and the shared ones), `read_notebook` for Goals,
-`read_learnings` for Goals (the goal's last `plan` learning is your
-last check: start from it and look at what changed since), and
-`read_questions` for Goals.
+1. **The goal's context**: in one turn, call `review_context` with the
+   goal (its notebooks, their learnings and the shared ones), and
+   `read_notebook`, `read_learnings` and `read_questions` for Goals.
+2. **The last check**: the goal's `plan` learning in Goals; start from it
+   and look at what changed since.
+3. **This week's tasks**: leave them out; ask only whether the plan can
+   get there at all.
 
-**No goal yet** (the argument says so): work one out instead. From the
-notebooks' goals and what they hold, propose a goal with a number and a
-date ("Would this be your goal: 4k a month from freelance work by June
-2027?"), and ask once. On a yes, add a task at the top of Goals, "Add this
-goal", with the heading as its subnote (`# Earn 4k a month from freelance
-work [2027-06-01]`) and "Why: agreed in the plan check, <today>" last: you
-can't write a heading. Then hand back.
+## 2. No goal yet
 
-## 2. Find the plan
+1. **The proposal**: when the arguments say there's no goal, work one out
+   from the notebooks' goals and what they hold, with a number and a
+   date, and ask once: "Would this be your goal: 4k a month from
+   freelance work by June 2027?"
+2. **On a yes**: add a task "Add this goal" at the top of Goals, with the
+   heading as a subnote and the Why last:
 
-A plan is how they mean to get there: a strategy, phases, the work named.
-A heap of unrelated tasks isn't one, and nor is a direction ("Be more
-visible online" says what should change, not the work).
+   ```
+   # <goal> [<yyyy-MM-dd>]
+   Why: agreed in the plan check, <today>
+   ```
 
-Gather it from the text under the goal and its parts, and from the
-notebooks it links. A scheduled heading there is a project in the plan,
-and its tasks are the work.
+3. **Then**: hand back.
 
-## 3. Check it
+## 3. Find the plan
 
-Check in order, and stop at the first gap: each matters only once the one
-before holds.
+1. **The plan**: how the user means to get there: a strategy, phases,
+   the work named; not a heap of unrelated tasks, and not a direction
+   ("Be more visible online").
+2. **Where**: the text under the goal and its parts, and the notebooks it
+   links; a scheduled heading there is a project in the plan, and its
+   tasks are the work.
 
-1. **It has substance.** None, or only a direction: work one out from
-   "Given where this is today, what's needed to reach the goal?" Bring your
-   answer: the things to build, or the use cases that show the goal is met,
-   each with where it stands. Never fill a thin plan with dates or phases.
-2. **It can reach the goal.**
-   - Something in it leads to the number, and enough of it. Check the
-     assumption: do the clients it aims at pay enough for the 4k?
-   - It fits before the date, in rough arithmetic you state: weeks left,
-     hours a week, the size of what's open. Hours not written, and the
-     answer turns on them: ask.
-   - There's work behind it, and its next step is a task.
-3. **It's working.**
-   - The signal: the one number that shows it's on track (new clients a
-     month), from the notebooks. None written: propose one. For a yes/no
-     goal, the signal is whether it's happening yet.
-   - The pace the date needs, against the signal now: "2 clients in 10
-     weeks; the 4k by June needs about one a month".
-   - On pace: no gap. Too early: say when it will show. Behind: ask whether
-     to change the plan, the effort or the goal. That's theirs to decide.
+## 4. Check it
 
-## 4. Verdict and points, in one reply
+Check in order, and stop at the first gap.
 
-Open with the goal in the user's own words ("Your business goal, then:"):
-the user never hears the names of the steps. Then one line each:
+1. **Substance**: none, or only a direction: work one out from "Given
+   where this is today, what's needed to reach the goal?", with the
+   things to build, or the use cases that show the goal is met, each with
+   where it stands. Never fill a thin plan with dates or phases.
+2. **It can reach the goal**:
+   - **The number**: something in it leads to the number, and enough of
+     it; check the assumption (do the clients it aims at pay enough for
+     the 4k?).
+   - **The date**: it fits before the date, in rough arithmetic you
+     state: weeks left, hours a week, the size of what's open; when the
+     hours aren't written and the answer turns on them, ask.
+   - **The work**: there's work behind it, and its next step is a task.
+3. **It's working**:
+   - **The signal**: the one number that shows it's on track (new clients
+     a month), from the notebooks; propose one when none is written; for a
+     yes/no goal, whether it's happening yet.
+   - **The pace**: the pace the date needs, against the signal now: "2
+     clients in 10 weeks; the 4k by June needs about one a month".
+   - **The verdict**: on pace, no gap; too early, say when it will show;
+     behind, ask whether to change the plan, the effort or the goal.
 
-- the plan: good, or vague and what's vague
-- will it reach the goal, and why, with the numbers
-- an alternative, in a line
-- not known: a fact or two that would change this, if any
+## 5. Verdict and points, in one reply
 
-No gap and nothing not known: say so in a line, record it (step 6) and
-hand back to the run without asking anything.
+1. **The opening**: the goal in the user's own words ("Your business
+   goal, then:"); never the names of these steps.
+2. **The verdict**, one line each:
+   - the plan: good, or vague and what's vague;
+   - will it reach the goal, and why, with the numbers;
+   - an alternative, in a line;
+   - not known: a fact or two that would change this, if any.
+3. **No gap and nothing not known**: say so in a line, record it (section
+   7) and hand back without asking anything.
+4. **The points**: otherwise, the first gap, then any not-known, numbered
+   in the same reply, each in a few lines:
+   - what you found, short, with the numbers;
+   - two or three options, and your pick and why: your own answer, never
+     homework;
+   - any write your pick leads to (a line as `− old` / `+ new`, tasks with
+     where they go);
+   - a fact only the user has, when the point turns on it.
+5. **The question**: end with "Go with my picks, or tell me which to
+   change?", then stop.
+6. **The answer**: one yes takes all your picks and their writes; a point
+   their answer changes may get one more short round, never more.
 
-Otherwise your points: the first gap, then any not-known. All in the same
-reply, numbered, each in a few lines:
+## 6. Learn, and write what was agreed
 
-- What you found, short, with the numbers.
-- Two or three options, and the one you'd pick and why. Bring your own
-  answer, never homework: "Would this be your goal: 4k a month from
-  freelance work by June 2027?"
-- Any write your pick leads to (a line as `− old` / `+ new`, tasks with
-  where they go), so a yes can cover it.
-- A fact only the user has, when the point turns on it.
+1. **A lesson**: when the user corrects your verdict, waves off a gap, or
+   passes over your proposal for their own, save it right away
+   (`add_learning`, source `plan`): "Don't treat X as a gap while Y: Z",
+   in Goals for this goal, shared for how they plan; open your next reply
+   with "Learned: …". A plain yes teaches nothing.
+2. **New wording for a line already there** (a goal's What, a plan line):
+   `edit_line`, as shown.
+3. **New lines or a heading**: a task at the end of the section they go
+   in ("Add as a part of the 4k goal"), with the lines as subnotes and
+   "Why: agreed in the plan check, <today>" last; not when they've written
+   it in already.
+4. **Next steps**: tasks in the first person ("Ask my manager…"), one
+   physical action each, in the section the work belongs in (`add_tasks`).
 
-End with one question: "Go with my picks, or tell me which to change?"
-Then stop. The user is often doing other things while this runs, and every
-question puts the whole run on hold. One yes takes all your picks and
-their writes. A point their answer changes may lead to one more short
-round; otherwise there's no second.
+## 7. Record it, and hand back
 
-## 5. Learn, and write what was agreed
+1. **The check**: one learning for the goal (source `plan`, notebook
+   Goals, `goal` its heading), replacing your earlier one
+   (`correct_learning` with `goal`), else `add_learning` with `goal`;
+   never a second:
 
-**Learn from the answer.** When the user corrects your verdict, waves off a
-gap, or passes over your proposal for their own, save a lesson right away
-(`add_learning`, source `plan`): "Don't treat X as a gap while Y: Z", in
-Goals for this goal, shared for how they plan. Open your next reply with
-"Learned: …", so they can correct it (`correct_learning`). A plain yes
-teaches nothing.
+   ```
+   Goal: 4k/month by June 2027. Plan: retainer clients first; served by Freelance and Portfolio site. Signal: new clients a month, pace about 1; 0.8 on 2026-10-19. Checked with the user: no gap.
+   ```
 
-**When they agree a change:**
-
-- **New wording for a line already there** (a goal's What, a plan line):
-  `edit_line`, as shown.
-- **New lines or a heading,** which you can't write: a task at the end of
-  the section they go in ("Add as a part of the 4k goal"), with the lines
-  as subnotes and "Why: agreed in the plan check, <today>" last. Not when
-  they've written it in already.
-- **Next steps:** tasks in the first person ("Ask my manager…"), one
-  physical action each, in the section the work belongs in (`add_tasks`).
-
-## 6. Record it, and hand back
-
-One learning for the goal (source `plan`, notebook Goals, `goal` set to
-its heading, so the run knows when it's next due):
-
-```
-Goal: 4k/month by June 2027. Plan: retainer clients first; served by Freelance and Portfolio site. Signal: new clients a month, pace about 1; 0.8 on 2026-10-19. Checked with the user: no gap.
-```
-
-Replace your earlier one for the goal (`correct_learning`, with `goal`);
-if there's none, `add_learning` with `goal`. Never a second.
-
-What stays unsettled, a gap the talk didn't close or a not-known, becomes
-an open question (`add_question`, source `plan`).
-
-Then hand back to the run with one line: the verdict and what was
-agreed ("Plan check: posts as the one channel, first reading after the
-first post"). The run goes on with the goal from there.
+2. **Unsettled**: a gap the talk didn't close, or a not-known, becomes an
+   open question (`add_question`, source `plan`).
+3. **The reply**: hand back one line: the verdict and what was agreed
+   ("Plan check: posts as the one channel, first reading after the first
+   post").
 
 ## Rules
 
-- Writes only add tasks, learnings and questions, and edit one line on the
-  user's yes. Never a heading (a goal's name), a notebook's goal, or more than one
-  line per edit. Never claim more.
-- No task or line without their yes. One yes covers every write shown with
-  it.
-- Keep replies short: lead with the question, each option in one line.
-  Detail goes in the notebook, not the chat.
+1. **Writes**: only add tasks, learnings and questions, and edit one line
+   on the user's yes; never a heading (a goal's name), a notebook's goal,
+   or more than one line per edit; never claim more.
+2. **Yes first**: no task or line without their yes; one yes covers every
+   write shown with it.
+3. **Replies**: short, leading with the question, each option in one
+   line; detail goes in the notebook.
