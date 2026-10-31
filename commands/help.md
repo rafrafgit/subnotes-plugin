@@ -29,12 +29,13 @@ has just installed it, briefly, as an orientation, not a manual.
    - **Capturing**: say "put that on the backlog" mid-conversation and it
      lands in the right notebook and section, with no command; naming the
      notebook and section in the same sentence makes it explicit.
-   - **`/subnotes:run`**: the one command, any time of day. It catches up
-     on their notes and goals quietly (a new Journal entry, a look at each
-     goal that changed with its plan check when due, the monthly tidy-up of
-     what Claude remembers), then opens with what matters most today and
-     works on it with them: code here, or a draft or write-up for any
-     notebook. Words after it ask for one job: `/subnotes:run look at my
+   - **`/subnotes:run`**: the one command, any time of day. It offers up
+     to three things that move their goals, from today's tasks and what it
+     found in their notes, and works on the one they pick with them: code
+     here, or a draft or write-up for any notebook. In the background it
+     catches up on their notes and goals (a new Journal entry, a look at
+     each goal that changed, the monthly tidy-up of what Claude
+     remembers). Words after it ask for one job: `/subnotes:run look at my
      business goal`, `/subnotes:run prune`, `/subnotes:run let's talk
      about pricing`.
    - **`/subnotes:wrapup`**: files what a chat with Claude that didn't
