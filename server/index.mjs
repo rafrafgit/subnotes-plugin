@@ -1349,6 +1349,8 @@ function openSuggestionStatus(nb, text, reviewNotes) {
   });
 }
 
+const WHOLE_NOTEBOOK_WORDS = 15000;
+
 function contextFor(nb, goal = null) {
   const text = readFileSync(join(DIR, nb.file), 'utf8');
   const entries = kind => {
@@ -1358,9 +1360,16 @@ function contextFor(nb, goal = null) {
   const old = (goal && readSnapshot(goalSnapshotPath(goal, nb))) || readSnapshot(snapshotPath(nb));
   const changes = old ? changesSince(old, text) : null;
 
+  // The whole notebook on every review (2026-10-31): a plan or context that
+  // sits still was read once and never again. Notebooks are a few thousand
+  // words and reviews run in the background, so it costs little; a very
+  // large one falls back to only what changed.
+  const whole = text.split(/\s+/).filter(Boolean).length <= WHOLE_NOTEBOOK_WORDS;
   let changed;
-  if (!old) changed = 'No snapshot from an earlier visit, so here is the whole notebook:\n\n' + text.replace(/\n*$/, '');
-  else if (!changes) changed = `Most of it is new since ${old.taken}, so here is the whole notebook:\n\n` + text.replace(/\n*$/, '');
+  if (!old) changed = whole ? 'No snapshot from an earlier visit: all of it is new to you.'
+    : 'No snapshot from an earlier visit, so here is the whole notebook:\n\n' + text.replace(/\n*$/, '');
+  else if (!changes) changed = whole ? `Most of it is new since ${old.taken}.`
+    : `Most of it is new since ${old.taken}, so here is the whole notebook:\n\n` + text.replace(/\n*$/, '');
   else if (!changes.length) changed = `Nothing has changed since the last visit (${old.taken}).`;
   else changed = `Since the last visit (${old.taken}) — "+" is a new or changed line, the rest is unchanged context:\n\n` + changes.join('\n\n');
 
@@ -1385,6 +1394,7 @@ function contextFor(nb, goal = null) {
     '## Scheduled lines — Today, Next, Soon, in that order',
     scheduledReport(text, old),
     '',
+    ...(whole ? ['## The whole notebook', text.replace(/\n*$/, ''), ''] : []),
     '## What changed',
     changed,
     ...(notes.length ? ['', '## From the connector, not part of the notebook', ...notes] : []),
@@ -2682,7 +2692,7 @@ const TOOLS = [
   },
   {
     name: 'review_context',
-    description: "For a goal's reviewer (started by /subnotes:run): everything one goal's review needs, in one call — the shared learnings and questions once, the review's notes on the goal, then per notebook what it shows now of each suggestion the notes list as open, its learnings and open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), and only what changed since this goal's last review (the whole notebook on a first one). With a goal and no notebooks, it reads the notebooks the goal links. Without a goal, for a notebook no goal links, each notebook comes with its own notes. Call it once per goal, instead of read_notes, read_notebook, read_learnings and read_questions.",
+    description: "For a goal's reviewer (started by /subnotes:run): everything one goal's review needs, in one call — the shared learnings and questions once, the review's notes on the goal, then per notebook what it shows now of each suggestion the notes list as open, its learnings and open questions, the lines scheduled Today, Next and Soon (Today and Next always whole, with whether each is new, changed, unchanged or unmoved for a week; Soon whole when new or changed, else named), the whole notebook (only what changed for one over 15,000 words), and what changed since this goal's last review. With a goal and no notebooks, it reads the notebooks the goal links. Without a goal, for a notebook no goal links, each notebook comes with its own notes. Call it once per goal, instead of read_notes, read_notebook, read_learnings and read_questions.",
     inputSchema: { type: 'object', properties: {
       goal: { type: 'string', description: "The goal to review: its heading in Goals, without its schedule." },
       goals: { type: 'array', items: { type: 'string' }, description: "Several goals at once, each read as `goal` would be, with the shared learnings once. Use instead of `goal` to read every goal a review takes in one call." },

@@ -20,8 +20,8 @@ the session to offer the user.
    notebook marked Goals, and read
    `${CLAUDE_PLUGIN_ROOT}/reference/points.md`, the bar and shape for
    suggestions. `review_context` gives your notes on the goal, each
-   notebook's learnings, questions, scheduled lines and what changed
-   since the last review; the goal's `plan` learning in Goals is its last
+   notebook's learnings, questions, scheduled lines, the whole notebook,
+   and what changed since the last review; the goal's `plan` learning in Goals is its last
    plan check.
 3. **Stale notes**: drop a line from your notes that names something no
    notebook has any more.
@@ -99,8 +99,9 @@ the session to offer the user.
       doubt, a hunch or "I wonder…".
    4. **Today, overdue and Next**: every line; then Soon lines that are
       new or changed.
-   5. **Other new or changed lines** that bear on the goal; never the
-      rest.
+   5. **The rest of the notebook** that bears on the goal: new or
+      changed lines first, then context that has sat still, such as a
+      plan section or a status.
    6. **One idea of your own**, if there's room: something that would
       move the goal and isn't in any notebook, from what you know of the
       goal, the user and the field, with "Not in your notes: …" in
