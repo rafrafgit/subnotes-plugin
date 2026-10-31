@@ -41,10 +41,15 @@ the session to offer the user.
    broken: no plan, no next step, behind pace, a number it can't reach):
    a `plan-check` suggestion in the user's terms ("five months left, and
    the webinars haven't started").
-4. **Only reworded**: when it's due only because the goal's text changed
+4. **Nothing left but waiting**: when every plan step is done or only
+   waits (on a date, a reply, a scheduled run) and time is left before the
+   goal's date, a `plan-check` suggestion whose `pick` adds up to three
+   steps to the plan, from the notebook's vision and what good looks like,
+   each one Claude could start.
+5. **Only reworded**: when it's due only because the goal's text changed
    and its `plan` learning still describes it, save no suggestion, and
    save your notes with `planUnchanged: true`.
-5. **Paused or waiting** on a decision that would change or postpone it
+6. **Paused or waiting** on a decision that would change or postpone it
    (an offer, an interview): put a `Waiting until: <date> — <what>` line
    under Last review in your notes, the date it can move again, and save
    no other suggestion unless its plan check is due; drop the line once
