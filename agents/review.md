@@ -48,7 +48,8 @@ the session to offer the user.
    each one Claude could start.
 5. **Only reworded**: when it's due only because the goal's text changed
    and its `plan` learning still describes it, save no suggestion, and
-   save your notes with `planUnchanged: true`.
+   save your notes with `planUnchanged: true`. A new finish line, number,
+   measure or date is never rewording: treat it as a plan check due (3).
 6. **Paused or waiting** on a decision that would change or postpone it
    (an offer, an interview): put a `Waiting until: <date> — <what>` line
    under Last review in your notes, the date it can move again, and save
@@ -86,15 +87,21 @@ the session to offer the user.
    in points.md; none is fine. Never a `next-step` suggestion. None for a
    goal paused or waiting on a decision.
 2. **Where to look**, in this order, stopping at three:
-   1. **The plan's pace**: behind it, say how far short, first. A plan
+   1. **The plan's belief**: when something new goes against the belief
+      the plan rests on (the `Rests on:` part of its `plan` learning in
+      Goals, or the one you'd name from the plan), a `talk` suggestion
+      first: the evidence in `noticed`, and in `pick` the route you'd
+      change to, with two others in `options`. Never "time for a plan
+      check".
+   2. **The plan's pace**: behind it, say how far short, first. A plan
       step with no task, or its task stuck in Soon: name it in your notes.
-   2. **Thinking out loud**: a new or changed line that's a question, a
+   3. **Thinking out loud**: a new or changed line that's a question, a
       doubt, a hunch or "I wonder…".
-   3. **Today, overdue and Next**: every line; then Soon lines that are
+   4. **Today, overdue and Next**: every line; then Soon lines that are
       new or changed.
-   4. **Other new or changed lines** that bear on the goal; never the
+   5. **Other new or changed lines** that bear on the goal; never the
       rest.
-   5. **One idea of your own**, if there's room: something that would
+   6. **One idea of your own**, if there's room: something that would
       move the goal and isn't in any notebook, from what you know of the
       goal, the user and the field, with "Not in your notes: …" in
       `noticed`; never one the learnings rule out.

@@ -47,9 +47,11 @@ for the session to offer the user.
    date), save one `plan-check` suggestion: what's wrong with the plan in
    `noticed`, the change you'd make (a step added or dropped, a new date)
    in `pick`, up to two others in `options`.
-2. **A question**: otherwise, save one `talk` suggestion: what you
-   couldn't see in `noticed`, and in `pick` the one question that would
-   show what's in the way, with your own guess at the answer.
+2. **A question with ideas**: otherwise, save one `talk` suggestion:
+   what you couldn't see in `noticed`; in `pick`, two or three concrete
+   ways people usually reach a goal like this one, from what you know
+   beyond the notebooks, then the one question that would show which
+   fits the user or what context is missing. Never a bare question.
 
 ## 4. Save
 

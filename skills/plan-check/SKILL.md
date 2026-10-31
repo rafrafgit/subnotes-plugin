@@ -53,7 +53,13 @@ Check in order, and stop at the first gap.
    where this is today, what's needed to reach the goal?", with the
    things to build, or the use cases that show the goal is met, each with
    where it stands. Never fill a thin plan with dates or phases.
-2. **It can reach the goal**:
+2. **The belief**: name the one belief the plan rests on ("there are
+   enough senior education roles in Berlin with English ads") and test
+   it against what the notebooks and learnings show. When the evidence
+   goes against it, that's the gap: say what the evidence is, and offer
+   two or three other routes to the same goal, your pick first. Question
+   the route, not only the timing; never invent a number to do it.
+3. **It can reach the goal**:
    - **The number**: something in it leads to the number, and enough of
      it; check the assumption (do the clients it aims at pay enough for
      the 4k?).
@@ -61,7 +67,7 @@ Check in order, and stop at the first gap.
      state: weeks left, hours a week, the size of what's open; when the
      hours aren't written and the answer turns on them, ask.
    - **The work**: there's work behind it, and its next step is a task.
-3. **It's working**:
+4. **It's working**:
    - **The signal**: the one number that shows it's on track (new clients
      a month), from the notebooks; propose one when none is written; for a
      yes/no goal, whether it's happening yet.
@@ -76,6 +82,7 @@ Check in order, and stop at the first gap.
    goal, then:"); never the names of these steps.
 2. **The verdict**, one line each:
    - the plan: good, or vague and what's vague;
+   - the belief it rests on, and whether the evidence holds it;
    - will it reach the goal, and why, with the numbers;
    - an alternative, in a line;
    - not known: a fact or two that would change this, if any.
@@ -118,7 +125,7 @@ Check in order, and stop at the first gap.
    never a second:
 
    ```
-   Goal: 4k/month by June 2027. Plan: retainer clients first; served by Freelance and Portfolio site. Signal: new clients a month, pace about 1; 0.8 on 2026-10-19. Checked with the user: no gap.
+   Goal: 4k/month by June 2027. Plan: retainer clients first; served by Freelance and Portfolio site. Rests on: small agencies pay retainers at 1k a month. Signal: new clients a month, pace about 1; 0.8 on 2026-10-19. Checked with the user: no gap.
    ```
 
 2. **Unsettled**: a gap the talk didn't close, or a not-known, becomes an
