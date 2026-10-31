@@ -14,7 +14,9 @@ less?
 1. **The change**: take the file, the skill's opening (its job), the diff
    and the lessons the change came from, from the message that started
    you.
-2. **The file**: read it whole as it is now (`Read`).
+2. **The file**: read it whole as it is now (`Read`), and
+   `.claude/skills/write-skill/SKILL.md` in the same repo, the form every
+   skill file is written in.
 
 ## 2. Check
 
@@ -30,7 +32,9 @@ less?
    from this user's notebooks or life in it?
 6. **An edit, not a pile-on**: does it edit what's there rather than add
    a new rule?
-7. **In doubt**: FAIL.
+7. **The form**: is it written as write-skill's "Rewrite" steps say: a
+   numbered instruction with a bold label, short, with no reason?
+8. **In doubt**: FAIL.
 
 ## 3. Answer
 

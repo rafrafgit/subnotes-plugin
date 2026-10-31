@@ -68,14 +68,16 @@ changes whose skill rated worse since; when in doubt, change nothing.
 
 ## 4. Write each change
 
-1. **The file**: read the skill's file whole first.
+1. **The file**: read the skill's file whole first, and
+   `.claude/skills/write-skill/SKILL.md` in the repo, the form every
+   skill file is written in.
 2. **The job**: its opening, the text before the first heading; never
    edit it, and make every change serve it.
 3. **Never longer**: rewrite the sentence the lessons are about to hold
    the lesson, instead of adding an exception beside it; cut a line for
    each line added.
-4. **A rule with its reason**: never a date, in the file's own plain
-   words.
+4. **The form**: write-skill's "Rewrite" steps: a numbered instruction
+   with a bold label, as short as it can be, no reason and never a date.
 5. **No contradiction**: when another sentence in the file says
    otherwise, its Rules and what it may read included, change that one
    too, or drop the change.
