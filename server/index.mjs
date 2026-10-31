@@ -1768,12 +1768,15 @@ function planDue(m) {
 // The review goes goal by goal (REVIEW_BY_GOAL_SPEC.md): it is due once a
 // day, for each goal one of whose linked notebooks changed since that goal's
 // last review, and for each notebook no goal links that has a goal in its
-// own words, or a goal in Goals that's done, and changed since its own. Once it has run today it isn't due again until
-// tomorrow: what it didn't reach waits, so the next /subnotes:run goes on to
-// Do (2026-10-24). Due tasks aren't the review's: they're Do's. A goal that
+// own words, or a goal in Goals that's done, and changed since its own,
+// even when it already ran today: it waits only while pending.md already
+// holds REVIEW_ENOUGH of the review's points, enough for the run to offer
+// (2026-10-31; was once a day, so a goal changed after the morning's review
+// went unseen until tomorrow). Due tasks aren't the review's: they're Do's. A goal that
 // links no notebook isn't due here; the review matches it to notebooks by
 // their own words. An ongoing goal is due by its repeat, not its notebooks'
 // changes (ongoingState), linked or not.
+const REVIEW_ENOUGH = 3;
 function reviewDue(m) {
   const now = today();
   const state = (nb, old) => {
@@ -1808,7 +1811,8 @@ function reviewDue(m) {
     const r = state(nb, readSnapshot(snapshotPath(nb)));
     if (r) rows.push({ name: nb.name, kind: 'notebook', ...r });
   }
-  const ranToday = rows.some(r => r.visited === now);
+  const waitingPoints = readPoints().filter(p => p.about === 'review' || /·\s*review\s*$/.test(p.saved ?? '')).length;
+  const enough = waitingPoints >= REVIEW_ENOUGH;
   const due = [], lines = [];
   for (const r of rows) {
     const label = r.kind === 'notebook' ? `Notebook no goal links: ${r.name}`
@@ -1819,12 +1823,12 @@ function reviewDue(m) {
     else if (r.visited === now) st = `reviewed today${r.changed ? ', changed since' : ''}`;
     else if (!r.visited) st = 'never reviewed';
     else st = r.changed ? `changed since the last review, ${r.visited}` : `no change since the last review, ${r.visited}`;
-    const waiting = r.changed && r.visited !== now;
-    if (waiting && !ranToday) { st += ' — DUE'; due.push(r.name); }
-    else if (waiting) st += ' — waits until tomorrow';
+    const waiting = r.changed;
+    if (waiting && !enough) { st += ' — DUE'; due.push(r.name); }
+    else if (waiting) st += ' — waits until fewer of its suggestions are waiting';
     lines.push(`- ${label} — ${st}`);
   }
-  if (ranToday) lines.unshift('The review already ran today, so it is due again tomorrow.');
+  if (enough) lines.unshift(`${waitingPoints} of the review's suggestions are already waiting, so it waits until fewer than ${REVIEW_ENOUGH} are.`);
   return { due, lines, rows };
 }
 
@@ -2201,7 +2205,7 @@ function whatsDue() {
     '',
     `## Review — ${review.due.length ? `due for ${review.due.join(', ')}` : plan.due.length ? 'due for its plan checks' : 'not due'}`,
     `Reviewers to start: ${reviewers.length ? reviewers.join('; ') : 'none'}`,
-    'Due once a day, for each goal whose notebooks changed since its last review, each ongoing goal (a repeat, no deadline) once most of a period has gone by since it last happened with nothing planned, and each notebook no goal in Goals links that has a goal in its own words, or whose goal in Goals is done.',
+    `Due, even again the same day, for each goal whose notebooks changed since its last review, unless ${REVIEW_ENOUGH} or more of its suggestions are already waiting; each ongoing goal (a repeat, no deadline) once most of a period has gone by since it last happened with nothing planned, and each notebook no goal in Goals links that has a goal in its own words, or whose goal in Goals is done.`,
     ...review.lines,
     '',
     `## Plan checks, run inside the review — ${plan.due.length ? `due for ${plan.due.length} goal${plan.due.length > 1 ? 's' : ''}` : 'none due'}`,

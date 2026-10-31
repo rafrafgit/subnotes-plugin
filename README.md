@@ -74,7 +74,8 @@ their own context, at the same time, and never talk to you themselves:
 
 - **the journal**, when there's a new entry: what you wrote becomes
   learnings, and any task it leads to is proposed;
-- **one look per goal**, once a day for each goal whose notebooks changed:
+- **one look per goal**, for each goal whose notebooks changed, until three
+  of its suggestions are waiting:
   what would move it, and a next step when it has none. When a goal's plan
   check is due, every 7 days or when the goal changes, the run checks the
   plan with you: that the goal has a measure and a date, and that the plan

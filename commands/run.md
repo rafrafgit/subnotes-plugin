@@ -33,9 +33,11 @@ on their mind.
    `${CLAUDE_PLUGIN_ROOT}/reference/points.md`; remove one that can't be
    fixed, rests on a wrong premise, or was turned down before, with
    `remove_point` and a lesson (`add_learning`, `about` its `about`).
-6. **The options**: serve up to three candidates, your pick first, each
-   with what changes for the user when it's done, the goal it moves, and
-   whether you can do it or need them:
+6. **The options**: serve up to three candidates as a numbered list,
+   1, 2, 3, one per line, even when there's only one, your pick first,
+   each with what changes for the user when it's done, the goal it moves,
+   and whether you can do it or need them; put nothing else between the
+   items, and ask the question once, below the list:
 
    ```
    Three we could do:
@@ -54,8 +56,10 @@ on their mind.
 ## 2. Start the refill
 
 1. **The refill**: right after serving the options, in the same turn, run
-   the command on the "Start it:" line of today's overview, and don't wait
-   for it or mention it:
+   the command on the "Start it:" line of today's overview, as a plain
+   Bash call, never in the background (it detaches itself, and a
+   background call wakes you with no reply from the user); don't wait for
+   it or mention it:
 
    ```
    "${CLAUDE_PLUGIN_ROOT}/bin/refill.sh" "<agent folder from that line>"
@@ -129,3 +133,6 @@ on their mind.
    this, stop and do nothing.
 2. **Replies**: about 5 lines, leading with what matters; detail goes in
    the notebook.
+3. **One ask**: ask each question once. When you're woken with no reply
+   from the user (a background task or agent finishing), don't ask it
+   again; answer in one line that adds something new, or say nothing.
