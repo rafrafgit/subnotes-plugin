@@ -104,16 +104,21 @@ shakes the plan, so the user hears only what's worth their time.
       first: the evidence in `noticed`, and in `pick` the route you'd
       change to, with two others in `options`. Never "time for a plan
       check".
-   2. **The plan's pace**: behind it, say how far short, first. A plan
+   2. **Active projects**: a heading scheduled Today or Next in the
+      goal's notebooks is a project, what the user has chosen to work on
+      now. When it has no open task, or all its tasks are done, a `talk`
+      suggestion: what the project is after in `noticed`, and in `pick`
+      two or three concrete first steps, your pick first and why.
+   3. **The plan's pace**: behind it, say how far short, first. A plan
       step with no task, or its task stuck in Soon: name it in your notes.
-   3. **Thinking out loud**: a new or changed line that's a question, a
+   4. **Thinking out loud**: a new or changed line that's a question, a
       doubt, a hunch or "I wonder…".
-   4. **Today, overdue and Next**: every line; then Soon lines that are
+   5. **Today, overdue and Next**: every line; then Soon lines that are
       new or changed.
-   5. **The rest of the notebook** that bears on the goal: new or
+   6. **The rest of the notebook** that bears on the goal: new or
       changed lines first, then context that has sat still, such as a
       plan section or a status.
-   6. **One idea of your own**, if there's room: something that would
+   7. **One idea of your own**, if there's room: something that would
       move the goal and isn't in any notebook, from what you know of the
       goal, the user and the field, with "Not in your notes: …" in
       `noticed`; never one the learnings rule out.

@@ -2308,7 +2308,14 @@ function todayTasks(m) {
       if (shown.some(b => s.at > b.at && s.at <= b.end)) continue;
       shown.push(s);
       const where = [nb.name, sectionAt(lines, s.at)].filter(Boolean).join(' › ');
-      const when = s.due && s.due < today() ? `overdue, ${s.due}` : s.due ? `due ${s.due}` : s.group;
+      let when = s.due && s.due < today() ? `overdue, ${s.due}` : s.due ? `due ${s.due}` : s.group;
+      // A scheduled heading is a project (2026-11-01): say so, with its open
+      // tasks, so an empty one is offered as a talk on how to start it.
+      if (s.heading) {
+        const tasks = s.block.filter(l => TASK_LINE.test(l));
+        const open = tasks.filter(l => !DONE_TAG.test(l)).length;
+        when += ` · project, ${open ? `${open} open task${open > 1 ? 's' : ''}` : tasks.length ? 'all its tasks done' : 'no tasks yet'}`;
+      }
       const block = s.block.slice(0, BLOCK_SHOWN);
       out.push({ order: s.group === 'Today' ? 0 : 1, text: [`- ${where}: ${s.line.trim()}   ← ${when}`,
         ...block.map(l => `  ${l}`),

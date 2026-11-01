@@ -35,7 +35,9 @@ the session gets to real work.
    "Saved for the pick", in this order: `talk`, `decision`, `plan-check`,
    `today`, `ongoing`, `next-step`; when that's fewer than three, add
    from "Soon, with no date" the tasks that move a goal most. Leave out
-   the user's own errands.
+   the user's own errands. A project with no open tasks, or all done, is
+   offered as a talk on how to go on, with your first step, never as a
+   task you'd do.
 5. **Screening**: reword each saved suggestion that misses the bar in
    `${CLAUDE_PLUGIN_ROOT}/reference/points.md`; remove one that can't be
    fixed, rests on a wrong premise, or was turned down before, with
