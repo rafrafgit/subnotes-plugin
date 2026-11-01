@@ -2262,7 +2262,7 @@ function sectionAt(lines, i) {
 }
 
 function todayTasks(m) {
-  const out = [], soon = [];
+  const out = [], soon = [], later = [];
   for (const nb of m.notebooks) {
     if (nb.role === 'goals' || isJournal(nb)) continue;
     let text;
@@ -2271,7 +2271,13 @@ function todayTasks(m) {
     const shown = [];
     for (const s of scheduledLines(text)) {
       if (DONE_TAG.test(s.line)) continue;
-      if (s.group === 'Soon') { if (s.due) soon.push(`- ${s.name} (${nb.name}, ${s.due})`); continue; }
+      // Undated Soon tasks too (2026-11-01): the user's own Soon list never
+      // came up as an option when Today and Next were empty.
+      if (s.group === 'Soon') {
+        if (s.due) soon.push(`- ${s.name} (${nb.name}, ${s.due})`);
+        else later.push(`- ${s.name} (${[nb.name, /^\s*#/.test(lines[s.at]) ? null : sectionAt(lines, s.at)].filter(Boolean).join(' › ')})`);
+        continue;
+      }
       // A task inside a scheduled heading's block is shown there already.
       if (shown.some(b => s.at > b.at && s.at <= b.end)) continue;
       shown.push(s);
@@ -2284,7 +2290,7 @@ function todayTasks(m) {
     }
   }
   out.sort((a, b) => a.order - b.order);
-  return { tasks: out.map(t => t.text), soon };
+  return { tasks: out.map(t => t.text), soon, later };
 }
 
 function todayGoals(m) {
@@ -2415,7 +2421,7 @@ function lastRefill() {
 function todayContext() {
   const m = manifest();
   if (!m.notebooks.length) return "No notebooks are connected. The user turns them on in Subnotes' Settings (⌘,).";
-  const { tasks, soon } = todayTasks(m);
+  const { tasks, soon, later } = todayTasks(m);
   const pending = readEntryFile(PENDING_PATH())?.trim();
   const review = reviewDue(m), plan = planDue(m), prune = pruneDue(m), tune = tuneDue();
   const journal = journalNotebook(m);
@@ -2431,6 +2437,7 @@ function todayContext() {
     '## Today, overdue and Next',
     ...(tasks.length ? tasks : ['None.']),
     ...(soon.length ? ['', `Dated in the next ${STALL_DAYS} days:`, ...soon] : []),
+    ...(later.length ? ['', 'Soon, with no date:', ...later] : []),
     '',
     '## Goals',
     ...todayGoals(m),
