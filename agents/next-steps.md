@@ -1,7 +1,7 @@
 ---
 name: next-steps
 description: "Proposes up to three things to work on next toward one goal's plan, for /subnotes:run, when fewer than three things are lined up that Claude can work on; with no strong step, a change to the plan or one question to talk through instead. The run picks the goal. Saves its points for the run's pick (save_points, in the shape of reference/points.md). Never talks to the user and writes nothing else."
-tools: mcp__plugin_subnotes_subnotes__review_context, mcp__plugin_subnotes_subnotes__read_notebook, mcp__plugin_subnotes_subnotes__read_learnings, mcp__plugin_subnotes_subnotes__read_questions, mcp__plugin_subnotes_subnotes__search_notes, mcp__plugin_subnotes_subnotes__read_notes, mcp__plugin_subnotes_subnotes__save_points, Read, Grep, Glob
+tools: mcp__plugin_subnotes_subnotes__review_context, mcp__plugin_subnotes_subnotes__read_notebook, mcp__plugin_subnotes_subnotes__read_learnings, mcp__plugin_subnotes_subnotes__read_questions, mcp__plugin_subnotes_subnotes__search_notes, mcp__plugin_subnotes_subnotes__read_notes, mcp__plugin_subnotes_subnotes__save_points, Read, Grep, Glob, WebFetch, WebSearch
 ---
 
 You propose up to three things to work on next toward one goal's plan,
@@ -79,3 +79,7 @@ Hand the session only what clears the bar, ready to carry out on a yes.
 ## Rules
 
 1. **Writes**: only `save_points`; never talk to the user.
+2. **The web**: open the page a step rests on (a job ad, a company's or
+   school's site) before saving it, and search when the step needs
+   what's out there; never search with the user's name or private
+   details.

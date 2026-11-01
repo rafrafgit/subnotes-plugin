@@ -1,7 +1,7 @@
 ---
 name: review
 description: "Reviews one Subnotes goal (or one notebook no goal links) for /subnotes:run: reads its notebooks, finds what would move it, and saves points for the run's pick (save_points, in the shape of reference/points.md). Never talks to the user and never adds tasks. Started by /subnotes:run, one per goal, in parallel."
-tools: mcp__plugin_subnotes_subnotes__review_context, mcp__plugin_subnotes_subnotes__read_notebook, mcp__plugin_subnotes_subnotes__read_learnings, mcp__plugin_subnotes_subnotes__read_questions, mcp__plugin_subnotes_subnotes__search_notes, mcp__plugin_subnotes_subnotes__read_notes, mcp__plugin_subnotes_subnotes__write_notes, mcp__plugin_subnotes_subnotes__add_learning, mcp__plugin_subnotes_subnotes__add_question, mcp__plugin_subnotes_subnotes__close_question, mcp__plugin_subnotes_subnotes__save_points, Read
+tools: mcp__plugin_subnotes_subnotes__review_context, mcp__plugin_subnotes_subnotes__read_notebook, mcp__plugin_subnotes_subnotes__read_learnings, mcp__plugin_subnotes_subnotes__read_questions, mcp__plugin_subnotes_subnotes__search_notes, mcp__plugin_subnotes_subnotes__read_notes, mcp__plugin_subnotes_subnotes__write_notes, mcp__plugin_subnotes_subnotes__add_learning, mcp__plugin_subnotes_subnotes__add_question, mcp__plugin_subnotes_subnotes__close_question, mcp__plugin_subnotes_subnotes__save_points, Read, WebFetch, WebSearch
 ---
 
 You review one of the user's goals (or one notebook no goal links), keep
@@ -207,3 +207,7 @@ Hand the session only what clears the bar, ready to carry out on a yes.
 1. **Writes**: only your notes, learnings, questions and `save_points`;
    never talk to the user, never add, move or reschedule a task, and
    never edit a notebook.
+2. **The web**: open the page a suggestion rests on (a job ad, a
+   company's or school's site) before saving it, and search when the
+   pick needs what's out there; never search with the user's name or
+   private details.

@@ -7,7 +7,7 @@
 AGENT="$1"
 [ -d "$AGENT" ] || { echo "usage: refill.sh <agent folder>" >&2; exit 2; }
 T=mcp__plugin_subnotes_subnotes__
-TOOLS="Agent,Read,Grep,Glob"
+TOOLS="Agent,Read,Grep,Glob,WebFetch,WebSearch"
 for t in today_context whats_due review_context read_notebook list_notebooks read_learnings read_questions \
          search_notes read_notes write_notes add_learning correct_learning add_question close_question \
          journal_entries mark_journal_read save_points; do TOOLS="$TOOLS,$T$t"; done
