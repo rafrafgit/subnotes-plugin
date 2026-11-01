@@ -10,6 +10,9 @@ them back as one suggestion that makes every change on one yes.
 
 ## 1. Read
 
+See everything that's remembered at once, so overlaps and contradictions
+show.
+
 1. **The brain**: in one turn, call `prune_context` (every learnings and
    questions file, with word counts, and the notebooks no longer
    connected) and `list_notebooks`, and read
@@ -21,6 +24,9 @@ them back as one suggestion that makes every change on one yes.
    project's code or git history, when it's in this folder.
 
 ## 2. Find what no longer holds
+
+Keep what's remembered true and short, so the skills act on how things
+are now.
 
 1. **Not connected**: a notebook `prune_context` lists as not connected
    loses its whole brain.
@@ -40,6 +46,8 @@ them back as one suggestion that makes every change on one yes.
 9. **Everything else**: leave it; never reword a line that holds.
 
 ## 3. Hand back
+
+Give the user every change in one place, to approve with one yes.
 
 1. **The suggestion**: one `prune` suggestion, `about: prune`, `goal:
    none`.

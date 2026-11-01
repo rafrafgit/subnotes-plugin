@@ -11,6 +11,9 @@ suggestions for the session to offer the user.
 
 ## 1. Read
 
+Read what the user wrote since last time, alongside what's already known,
+so nothing is filed twice or out of context.
+
 1. **The new entries**: in one turn, call `journal_entries`,
    `list_notebooks` and `read_notebook` for the notebook marked Goals, and
    read `${CLAUDE_PLUGIN_ROOT}/reference/points.md`, the bar and shape for
@@ -20,6 +23,9 @@ suggestions for the session to offer the user.
    connected notebook; never quote the rest back.
 
 ## 2. Sort each line
+
+Find what each line means for the user's work, so it ends up where it
+will be used.
 
 1. **A fact**: a date, a reply or where something stands that a
    notebook's work depends on becomes a learning in that notebook.
@@ -41,6 +47,8 @@ suggestions for the session to offer the user.
 
 ## 3. File
 
+Keep the facts and decisions where the next skill will find them.
+
 1. **The notebook's learnings**: before adding a learning, read that
    notebook's learnings (`read_learnings`).
 2. **A changed learning**: when the entry changes one, correct it
@@ -51,6 +59,9 @@ suggestions for the session to offer the user.
    concerns or `none`.
 
 ## 4. Save and hand back
+
+Turn what the user is wrestling with into things to talk through or do,
+ready for the next session.
 
 1. **The suggestions**: call `save_points`: source `journal`, the `talk`
    ones first, each with `about: journal` and the goal it touches.

@@ -11,6 +11,8 @@ less?
 
 ## 1. Read
 
+See the change next to the skill's job, so it can be judged fairly.
+
 1. **The change**: take the file, the skill's opening (its job), the diff
    and the lessons the change came from, from the message that started
    you.
@@ -19,6 +21,9 @@ less?
    skill file is written in.
 
 ## 2. Check
+
+Stop a change that would make the skill do less of its job, even if it
+reads well.
 
 1. **The job**: does it serve the job, as written in the opening?
 2. **Doing less**: could it make the skill do less of its job: propose
@@ -37,6 +42,8 @@ less?
 8. **In doubt**: FAIL.
 
 ## 3. Answer
+
+Give a clear verdict the update can act on without another round.
 
 1. **The verdict**: `PASS` or `FAIL` on the first line, then one line
    why.

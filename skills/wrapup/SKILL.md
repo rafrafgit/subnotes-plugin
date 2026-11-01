@@ -10,12 +10,16 @@ Anything the user added: $ARGUMENTS
 
 ## 1. Check who started it
 
+Only file when the user wants it, so nothing is written behind their back.
+
 1. **Allowed**: the user, Claude when the user wraps up a chat, or
    `/subnotes:run`'s session summary; anything else, stop and do nothing.
 2. **From the run**: file only what the talk settled that its workers
    didn't, report in one line for the run's summary, and skip the rating.
 
 ## 2. Read
+
+See the notebooks and goals, so what's filed lands in the right place.
 
 1. **The notebooks**: in one turn, call `start_run` (skill `wrapup`),
    `list_notebooks`, and `read_notebook` for the notebook marked "Role:
@@ -26,6 +30,8 @@ Anything the user added: $ARGUMENTS
    rating.
 
 ## 3. Sort what the chat produced
+
+Keep what the chat settled and what's still open, and drop the rest.
 
 1. **A decision**: a design settled, an option ruled out, a priority
    becomes a learning in the notebook it's about, or shared when it holds
@@ -45,6 +51,8 @@ Anything the user added: $ARGUMENTS
 
 ## 4. Write, then report
 
+File it where the skills will use it, and tell the user in a few lines.
+
 1. **The notebook's learnings**: before adding a learning, read that
    notebook's learnings (`read_learnings`); correct one the chat changes
    (`correct_learning`) instead of adding a second, and skip one already
@@ -60,6 +68,8 @@ Anything the user added: $ARGUMENTS
    ```
 
 ## 5. Rate it
+
+Learn from the user's rating, so filing gets better.
 
 1. **When**: not when the run started you; otherwise once any task is
    added or declined.

@@ -7,10 +7,14 @@ has just installed it, briefly, as an orientation, not a manual.
 
 ## 1. Read
 
+See what's already set up, so the help fits where the user is.
+
 1. **The notebooks**: call `list_notebooks`, and leave out every setup
    step the user has already done.
 
 ## 2. Nothing connected
+
+Get the user to a first connected notebook, since nothing works without one.
 
 1. **An error** (no connector folder, or nothing connected): the setup is
    the whole answer, in this order:
@@ -22,6 +26,8 @@ has just installed it, briefly, as an orientation, not a manual.
 2. **No tools**: never list them here.
 
 ## 3. Notebooks connected
+
+Show what the user can do now with what they've connected, so they can start.
 
 1. **The notebooks**: name them.
 2. **What's possible**, one point each:

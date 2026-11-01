@@ -11,6 +11,8 @@ changes whose skill rated worse since; when in doubt, change nothing.
 
 ## 1. Read
 
+Gather what the user's ratings and corrections said about each skill.
+
 1. **The tune's context**: call `tune_context`: the repo, each skill's
    and worker's file, the rated runs and the learnings and questions
    written since the last tune, and the earlier tunes' changes. Run every
@@ -25,6 +27,8 @@ changes whose skill rated worse since; when in doubt, change nothing.
 
 ## 2. Undo first
 
+Take back changes that made a skill worse, before adding new ones.
+
 1. **A change rated worse since** (marked in `tune_context`): revert it:
 
    ```
@@ -35,6 +39,9 @@ changes whose skill rated worse since; when in doubt, change nothing.
    leave it, and say so in your reply.
 
 ## 3. Find what to change
+
+Find the change that would most improve what the user rates, not the
+easiest one to write.
 
 1. **The lessons**: the learnings, and the "why" in each rated run's
    comment.
@@ -68,6 +75,8 @@ changes whose skill rated worse since; when in doubt, change nothing.
 
 ## 4. Write each change
 
+Make each change small and clear, so it can be checked and undone.
+
 1. **The file**: read the skill's file whole first, and
    `.claude/skills/write-skill/SKILL.md` in the repo, the form every
    skill file is written in.
@@ -93,6 +102,8 @@ changes whose skill rated worse since; when in doubt, change nothing.
 
 ## 5. Hand back
 
+Give the session each change with its reason, to keep or drop.
+
 1. **The shape**: read `${CLAUDE_PLUGIN_ROOT}/reference/points.md` first.
 2. **The suggestions**: one `change` suggestion per change, `about:
    tune`, with:
@@ -113,6 +124,8 @@ changes whose skill rated worse since; when in doubt, change nothing.
 4. **Nothing changed or undone**: hand back nothing.
 
 ## 6. When a check fails
+
+Fix a change once from the check's reason, or drop it.
 
 1. **A FAIL reason**: when the run sends one for a change, revise that
    file once, against the reason and every step in section 4; fix a clash

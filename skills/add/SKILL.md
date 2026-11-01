@@ -11,12 +11,16 @@ Add this to the user's Subnotes: $ARGUMENTS
 
 ## 1. Find what to add
 
+Capture exactly what the user asked for, in their words.
+
 1. **The tasks**: take them from the line above; when it's empty, from
    what the user just asked to capture.
 2. **Unclear**: when it isn't clear what they meant, ask instead of
    guessing.
 
 ## 2. Place them
+
+Put each task where the user will look for it.
 
 1. **The notebooks**: call `list_notebooks`.
 2. **A named notebook or section** ("… in Freelance", "… under Bugs"):
@@ -29,6 +33,9 @@ Add this to the user's Subnotes: $ARGUMENTS
    a second.
 
 ## 3. Add and report
+
+Write the tasks and say exactly what went where, so the user can trust
+it without checking.
 
 1. **The write**: call `add_task`, or `add_tasks` once for several.
 2. **The report**: say exactly what was added, one line per task:

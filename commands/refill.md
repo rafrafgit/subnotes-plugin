@@ -8,9 +8,14 @@ reading but a log.
 
 ## 1. What's due
 
+Find what needs fresh thinking, so only the workers that are due run.
+
 1. **What's due**: in one turn, call `today_context` and `whats_due`.
 
 ## 2. Reviewers and Journal
+
+Turn the goals and new journal entries into suggestions while the user
+works, so the next options are ready when they ask.
 
 1. **The reviewers**: start `subnotes:review` (Agent tool) once per name
    under **Reviewers to start** in `whats_due`, all in one turn, each with
@@ -20,6 +25,9 @@ reading but a log.
 3. **Wait**: let every one of them finish before section 3.
 
 ## 3. Next steps
+
+Make sure there's enough worth offering, so a session never opens with
+nothing to pick.
 
 1. **What's lined up**: call `today_context` again: the Today and Next
    tasks Claude can do or that need the user, and every saved suggestion,
@@ -33,6 +41,8 @@ reading but a log.
    reviewer's new suggestions included. Wait for it.
 
 ## 4. Log
+
+Leave one line on what happened, so the next session knows.
 
 1. **The log line**: write one line and stop:
 
