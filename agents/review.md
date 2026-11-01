@@ -104,21 +104,29 @@ shakes the plan, so the user hears only what's worth their time.
       first: the evidence in `noticed`, and in `pick` the route you'd
       change to, with two others in `options`. Never "time for a plan
       check".
-   2. **Active projects**: a heading scheduled Today or Next in the
+   2. **The next deciding moment**: an interview, application, launch
+      or deadline in the goal's notebooks within the next two weeks. A
+      `talk` suggestion: the moment and what it decides in `noticed`; in
+      `pick`, one thing Claude makes now that shows the work already
+      done, built from the other side's own material (their ad, their
+      site, their programs) and the user's current work, even from
+      another goal. Never prep the user could list themselves (questions
+      to ask, a checklist).
+   3. **Active projects**: a heading scheduled Today or Next in the
       goal's notebooks is a project, what the user has chosen to work on
       now. When it has no open task, or all its tasks are done, a `talk`
       suggestion: what the project is after in `noticed`, and in `pick`
       two or three concrete first steps, your pick first and why.
-   3. **The plan's pace**: behind it, say how far short, first. A plan
+   4. **The plan's pace**: behind it, say how far short, first. A plan
       step with no task, or its task stuck in Soon: name it in your notes.
-   4. **Thinking out loud**: a new or changed line that's a question, a
+   5. **Thinking out loud**: a new or changed line that's a question, a
       doubt, a hunch or "I wonder…".
-   5. **Today, overdue and Next**: every line; then Soon lines that are
+   6. **Today, overdue and Next**: every line; then Soon lines that are
       new or changed.
-   6. **The rest of the notebook** that bears on the goal: new or
+   7. **The rest of the notebook** that bears on the goal: new or
       changed lines first, then context that has sat still, such as a
       plan section or a status.
-   7. **One idea of your own**, if there's room: something that would
+   8. **One idea of your own**, if there's room: something that would
       move the goal and isn't in any notebook, from what you know of the
       goal, the user and the field, with "Not in your notes: …" in
       `noticed`; never one the learnings rule out.
