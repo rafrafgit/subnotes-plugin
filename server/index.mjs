@@ -395,7 +395,7 @@ function addSubnotes({ notebook, match, subnotes }) {
   if (!lines.length) throw new UserError('No subnotes given.');
   if (lines.some(l => l.includes('\n'))) throw new UserError('A subnote is one line. Send several lines as several subnotes.');
 
-  const task = findTask(nb, wanted);
+  const task = findTask(nb, wanted, { orHeading: true });
   if (task.subtask) throw new UserError(
     `"${wanted}" is a subtask, which can't have subnotes of its own. Tell the user what to add instead.`);
   const words = task.text;
@@ -423,8 +423,17 @@ function addSubnotes({ notebook, match, subnotes }) {
 // line's own words, so an app that matches them exactly still finds it — or
 // the words as given when the notebook can't be read, or the task is only
 // queued.
-function findTask(nb, wanted) {
-  const words = taskWords(`• ${wanted}`)?.text || wanted;
+//
+// With orHeading (add_subnotes), a project heading counts too, on its title
+// without its marker and trailing [tags], as the app matches it (2026-11-01).
+function headingWords(line) {
+  const h = /^#{1,6}\s+(.*?)\s*$/.exec(line);
+  if (!h) return null;
+  return { text: h[1].replace(/(\s*\[[^\]]*\])+$/, '').trim(), subtask: false };
+}
+
+function findTask(nb, wanted, { orHeading = false } = {}) {
+  const words = (orHeading && headingWords(wanted)?.text) || taskWords(`• ${wanted}`)?.text || wanted;
   const key = words.toLowerCase();
   const sameTask = t => String(t ?? '').toLowerCase() === key;
   let text = null;
@@ -432,12 +441,19 @@ function findTask(nb, wanted) {
     text = readFileSync(join(DIR, nb.file), 'utf8');
   } catch {}
   if (text === null) return { text: words, subtask: false };
-  const hits = text.split('\n').map(taskWords).filter(t => t && sameTask(t.text));
+  // Lines inside code fences aren't tasks or headings, as in the app.
+  let inCode = false;
+  const hits = text.split('\n').map(line => {
+    if (line.trimStart().startsWith('```')) { inCode = !inCode; return null; }
+    if (inCode) return null;
+    return taskWords(line) || (orHeading ? headingWords(line) : null);
+  }).filter(t => t && sameTask(t.text));
   const queued = queuedTasks(nb).some(t => sameTask(t.text));
+  const what = orHeading ? 'task or project heading' : 'task';
   if (!hits.length && !queued) throw new UserError(
-    `"${nb.name}" has no task "${wanted}". Pass the task's text as read_notebook shows it, without its schedule tag.`);
+    `"${nb.name}" has no ${what} "${wanted}". Pass its text as read_notebook shows it, without its schedule tag${orHeading ? ' or # marker' : ''}.`);
   if (hits.length > 1) throw new UserError(
-    `"${nb.name}" has ${hits.length} tasks "${wanted}". A write changes exactly one, so this can't be placed — tell the user instead.`);
+    `"${nb.name}" has ${hits.length} lines "${wanted}". A write changes exactly one, so this can't be placed — tell the user instead.`);
   return hits[0] ?? { text: words, subtask: false };
 }
 
@@ -2602,10 +2618,10 @@ const TOOLS = [
   },
   {
     name: 'add_subnotes',
-    description: 'Write detail lines under one existing task, after the subnotes it already has — such as a decision talked through in Claude Code, under the task it settles. Adds only: it cannot change or remove the task or its subnotes. The task is named by its text and must be exactly one top-level task in the notebook.',
+    description: 'Write detail lines under one existing task or project heading, after the subnotes it already has — such as a decision talked through in Claude Code, or context the user gave about a project. Adds only: it cannot change or remove the line or its subnotes. Named by its text, it must be exactly one top-level task or heading in the notebook.',
     inputSchema: { type: 'object', properties: {
       notebook: { type: 'string' },
-      match: { type: 'string', description: "The task's text, as read_notebook shows it, without its schedule tag." },
+      match: { type: 'string', description: "The task's or heading's text, as read_notebook shows it, without its schedule tag or # marker." },
       subnotes: { type: 'array', items: { type: 'string' }, description: 'The lines to add, one subnote each.' },
     }, required: ['notebook', 'match', 'subnotes'] },
     run: addSubnotes,

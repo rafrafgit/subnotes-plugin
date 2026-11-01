@@ -32,7 +32,7 @@ from there instead, without adding this marketplace first.
 - `search_notes` — the lines that hold every word of a query, across the
   connected notebooks, learnings and questions, each with where it sits
 - `add_task` / `add_tasks` — append tasks to a notebook
-- `add_subnotes` — add detail lines under an existing task (needs a Subnotes that knows it; an older one sets the write aside)
+- `add_subnotes` — add detail lines under an existing task or project heading (needs a Subnotes that knows it; an older one sets the write aside)
 - `set_schedule` — reschedule an existing task: Today, Next, Soon, Someday, Done or a date (needs a Subnotes that knows it; an older one sets the write aside)
 - `read_learnings` / `add_learning` / `correct_learning` — what the skills
   have learned, about one notebook or about you, shared by all of them; a
