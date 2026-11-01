@@ -14,8 +14,10 @@ Only file when the user wants it, so nothing is written behind their back.
 
 1. **Allowed**: the user, Claude when the user wraps up a chat, or
    `/subnotes:run`'s session summary; anything else, stop and do nothing.
-2. **From the run**: file only what the talk settled that its workers
-   didn't, report in one line for the run's summary, and skip the rating.
+2. **From the run**: file only what the talk settled that the session
+   didn't already file, report in one line for the run's summary, and
+   skip the rating; skip section 2's reads, and when nothing is left to
+   file, say "nothing new" and stop.
 
 ## 2. Read
 

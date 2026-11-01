@@ -10,7 +10,7 @@ reading but a log.
 
 Find what needs fresh thinking, so only the workers that are due run.
 
-1. **What's due**: in one turn, call `today_context` and `whats_due`.
+1. **What's due**: call `whats_due`.
 
 ## 2. Reviewers and Journal
 
@@ -29,7 +29,7 @@ works, so the next options are ready when they ask.
 Make sure there's enough worth offering, so a session never opens with
 nothing to pick.
 
-1. **What's lined up**: call `today_context` again: the Today and Next
+1. **What's lined up**: call `today_context`: the Today and Next
    tasks Claude can do or that need the user, and every saved suggestion,
    the reviewers' new ones included. Leave out the user's own errands and
    blocked tasks.

@@ -679,6 +679,7 @@ function writeNotes({ notebook, goal, content, planUnchanged }) {
   writeFileSync(tmp, text.endsWith('\n') ? text : text + '\n');
   renameSync(tmp, target.path);
   target.keep();
+  if (goal) recordReviewed(goal);
   const kept = goal && planUnchanged ? keepPlanCheck(goal) : '';
   return `Notes for ${target.label} saved (${text.length} characters).${kept}`;
 }
@@ -1787,6 +1788,24 @@ function planDue(m) {
 // their own words. An ongoing goal is due by its repeat, not its notebooks'
 // changes (ongoingState), linked or not.
 const REVIEW_ENOUGH = 3;
+
+// Once a day per goal, unless the goal's own text in Goals changed since
+// (2026-11-01): the session's own writes to a notebook made the same goal due
+// again every refill, five reviews of one goal in 90 minutes. A change to the
+// goal itself still gets a fresh review the same day.
+const REVIEWED = () => join(AGENT_DIR, 'review', 'reviewed.json');
+function readReviewed() {
+  try { return JSON.parse(readFileSync(REVIEWED(), 'utf8')); } catch { return {}; }
+}
+function recordReviewed(goal) {
+  const g = goalsWithNotebooks(manifest()).find(x => goalKey(x.name) === goalKey(goal));
+  if (!g) return;
+  const all = readReviewed();
+  all[goalKey(g.name)] = { name: g.name, at: today(), hash: g.hash };
+  mkdirSync(dirname(REVIEWED()), { recursive: true });
+  writeEntryFile(REVIEWED(), JSON.stringify(all, null, 2) + '\n');
+}
+
 function reviewDue(m) {
   const now = today();
   const state = (nb, old) => {
@@ -1799,6 +1818,7 @@ function reviewDue(m) {
   const linked = new Set();
   const { done } = notebookGoals(m);
   const goals = goalsWithNotebooks(m);
+  const reviewed = readReviewed();
   goals.forEach((g, i) => {
     const seen = g.notebooks.map(nb => { linked.add(nb); return state(nb, readSnapshot(goalSnapshotPath(g.name, nb)) || readSnapshot(snapshotPath(nb))); }).filter(Boolean);
     const notebooksChanged = seen.some(r => r.changed);
@@ -1813,8 +1833,11 @@ function reviewDue(m) {
     }
     if (!g.notebooks.length) { rows.push({ name: g.name, kind: 'goal', none: true, parent, waiting }); return; }
     const visits = seen.map(r => r.visited).filter(Boolean).sort();
-    rows.push({ name: g.name, kind: 'goal', visited: visits.pop() ?? null, changed: notebooksChanged,
-      notebooksChanged, parent, waiting, notebooks: g.notebooks.map(nb => nb.name) });
+    const rec = reviewed[goalKey(g.name)];
+    const goalChanged = !!rec && rec.at === now && rec.hash !== g.hash;
+    rows.push({ name: g.name, kind: 'goal', visited: visits.pop() ?? null, changed: notebooksChanged || goalChanged,
+      notebooksChanged, goalChanged, doneToday: rec?.at === now && !goalChanged,
+      parent, waiting, notebooks: g.notebooks.map(nb => nb.name) });
   });
   for (const nb of m.notebooks) {
     if ((!nb.purpose && !done.has(nb.name.toLowerCase())) || nb.role === 'goals' || isJournal(nb) || linked.has(nb)) continue;
@@ -1833,8 +1856,11 @@ function reviewDue(m) {
     else if (r.visited === now) st = `reviewed today${r.changed ? ', changed since' : ''}`;
     else if (!r.visited) st = 'never reviewed';
     else st = r.changed ? `changed since the last review, ${r.visited}` : `no change since the last review, ${r.visited}`;
-    const waiting = r.changed;
-    if (waiting && !enough) { st += ' — DUE'; due.push(r.name); }
+    const oncePerDay = r.kind === 'goal' ? r.doneToday : r.kind === 'notebook' && r.visited === now;
+    if (r.goalChanged) st += ', its text in Goals changed since';
+    const waiting = r.changed && !oncePerDay;
+    if (r.changed && oncePerDay) st += ' — waits until tomorrow, or until its text in Goals changes';
+    else if (waiting && !enough) { st += ' — DUE'; due.push(r.name); }
     else if (waiting) st += ' — waits until fewer of its suggestions are waiting';
     lines.push(`- ${label} — ${st}`);
   }
@@ -2215,7 +2241,7 @@ function whatsDue() {
     '',
     `## Review — ${review.due.length ? `due for ${review.due.join(', ')}` : plan.due.length ? 'due for its plan checks' : 'not due'}`,
     `Reviewers to start: ${reviewers.length ? reviewers.join('; ') : 'none'}`,
-    `Due, even again the same day, for each goal whose notebooks changed since its last review, unless ${REVIEW_ENOUGH} or more of its suggestions are already waiting; each ongoing goal (a repeat, no deadline) once most of a period has gone by since it last happened with nothing planned, and each notebook no goal in Goals links that has a goal in its own words, or whose goal in Goals is done.`,
+    `Due once a day for each goal whose notebooks changed since its last review, and again the same day only when its own text in Goals changed; never while ${REVIEW_ENOUGH} or more of its suggestions are already waiting; each ongoing goal (a repeat, no deadline) once most of a period has gone by since it last happened with nothing planned, and each notebook no goal in Goals links that has a goal in its own words, or whose goal in Goals is done.`,
     ...review.lines,
     '',
     `## Plan checks, run inside the review — ${plan.due.length ? `due for ${plan.due.length} goal${plan.due.length > 1 ? 's' : ''}` : 'none due'}`,
