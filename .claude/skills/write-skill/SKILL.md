@@ -8,6 +8,9 @@ it step by step.
 
 ## 1. Read
 
+Understand what the skill is for before changing a word, so the rewrite
+keeps its job.
+
 1. **The file**: read it whole, and the parts of any file it points to
    that its steps depend on.
 2. **The job**: find what the skill is for, and what it reads and
@@ -15,25 +18,36 @@ it step by step.
 
 ## 2. Rewrite
 
+Turn the file into steps an agent can follow one by one, with a line of
+purpose per section so it can judge the cases the steps don't cover.
+
 1. **The opening**: one sentence saying what the skill is for.
 2. **The sections**: one per stage of the work, in the order it happens,
    each headed by what it does.
-3. **The steps**: in each section, a numbered list, one instruction per
+3. **The purpose line**: under each section's heading, one sentence
+   saying what the section achieves and why, before its steps; aim it at
+   the outcome the user cares about, not the mechanics.
+4. **The steps**: in each section, a numbered list, one instruction per
    item, as short as it can be.
-4. **The labels**: start each item with a bold label naming the
+5. **The labels**: start each item with a bold label naming the
    deliverable it reads or produces ("**Today's overview**", "**The
    options**").
-5. **Names**: define each deliverable where it's first used, saying what
+6. **Names**: define each deliverable where it's first used, saying what
    it is, and call it by that name after. No separate list of names.
-6. **Code**: put every command to run in a code block, with placeholders
+7. **Code**: put every command to run in a code block, with placeholders
    in `<angle brackets>`.
-7. **Deletions**: delete every line that can't be written as an
-   instruction: reasons, background, what another agent does.
-8. **Order**: when a step needs something no earlier step gives, or two
+8. **Deletions**: delete every line that can't be written as an
+   instruction, apart from the purpose lines: reasons, background, what
+   another agent does.
+9. **Order**: when a step needs something no earlier step gives, or two
    steps pull against each other, reorder or merge them.
-9. **The frontmatter**: keep it; make its description match the opening.
+10. **The frontmatter**: keep it; make its description match the
+    opening.
 
 ## 3. Check and report
+
+Catch what the rewrite broke, and show the user every change so nothing
+slips in unseen.
 
 1. **The lint**: run it, and fix what it reports:
 
