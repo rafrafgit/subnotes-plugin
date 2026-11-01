@@ -33,7 +33,8 @@ nothing to pick.
    tasks Claude can do or that need the user, and every saved suggestion,
    the reviewers' new ones included. Leave out the user's own errands and
    blocked tasks.
-2. **The goal**: when fewer than three are lined up, pick the goal whose
+2. **The goal**: when fewer than six saved suggestions are waiting (tasks
+   don't count: the user may be passing them over), pick the goal whose
    plan most needs moving now, by its date, how far behind it is, and what
    the Journal, the reviewers and Today say.
 3. **Next-steps**: start `subnotes:next-steps` (Agent tool) for that goal,

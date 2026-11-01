@@ -1803,7 +1803,9 @@ function planDue(m) {
 // links no notebook isn't due here; the review matches it to notebooks by
 // their own words. An ongoing goal is due by its repeat, not its notebooks'
 // changes (ongoingState), linked or not.
-const REVIEW_ENOUGH = 3;
+// Six, two rounds of options (2026-11-01): with only three, turning all
+// three down left nothing to pick from.
+const REVIEW_ENOUGH = 6;
 
 // Once a day per goal, unless the goal's own text in Goals changed since
 // (2026-11-01): the session's own writes to a notebook made the same goal due

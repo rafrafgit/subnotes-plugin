@@ -1,6 +1,6 @@
 ---
 name: next-steps
-description: "Proposes up to three things to work on next toward one goal's plan, for /subnotes:run, when fewer than three things are lined up that Claude can work on; with no strong step, a change to the plan or one question to talk through instead. The run picks the goal. Saves its points for the run's pick (save_points, in the shape of reference/points.md). Never talks to the user and writes nothing else."
+description: "Proposes up to three things to work on next toward one goal's plan, for /subnotes:run, when fewer than six suggestions are saved; with no strong step, a change to the plan or one question to talk through instead. The run picks the goal. Saves its points for the run's pick (save_points, in the shape of reference/points.md). Never talks to the user and writes nothing else."
 tools: mcp__plugin_subnotes_subnotes__review_context, mcp__plugin_subnotes_subnotes__read_notebook, mcp__plugin_subnotes_subnotes__read_learnings, mcp__plugin_subnotes_subnotes__read_questions, mcp__plugin_subnotes_subnotes__search_notes, mcp__plugin_subnotes_subnotes__read_notes, mcp__plugin_subnotes_subnotes__save_points, Read, Grep, Glob, WebFetch, WebSearch
 ---
 

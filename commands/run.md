@@ -78,7 +78,7 @@ Keep the next options coming without the user waiting for them.
    "${CLAUDE_PLUGIN_ROOT}/bin/refill.sh" "<agent folder from that line>"
    ```
 
-2. **Another refill**: run it again when fewer than three saved
+2. **Another refill**: run it again when fewer than six saved
    suggestions are left that the user hasn't taken or turned down, unless
    they're talking through their own idea (section 4).
 
@@ -93,16 +93,18 @@ from how the user took it.
 2. **An accepted suggestion**: carry out its `writes`, then
    `remove_point`. One that asks for context: ask its questions, then
    write the answers under the task or project, in the user's words.
-3. **A turned-down suggestion**: `remove_point` with the reason, and save
+3. **A task not wanted now**: leave it as it is, and don't offer it again
+   this session; no lesson.
+4. **A turned-down suggestion**: `remove_point` with the reason, and save
    a lesson (`add_learning`, source `run`, `about` its `about`). Only one
    in the numbered list the user saw; a "none" turns down nothing else.
-4. **An accepted plan check**: start `subnotes:plan-check` for that goal
+5. **An accepted plan check**: start `subnotes:plan-check` for that goal
    (Skill tool), and give it all the time it needs.
-5. **A decision or answer**: save it with `add_learning`, or
+6. **A decision or answer**: save it with `add_learning`, or
    `close_question` when it answers an open question.
-6. **New options**: after each report, call `today_context` and serve new
+7. **New options**: after each report, call `today_context` and serve new
    options as in section 1.
-7. **Nothing left**: when the user has turned everything down and nothing
+8. **Nothing left**: when the user has turned everything down and nothing
    new came in, say nothing's lined up and go to section 5.
 
 ## 4. When the user brings their own

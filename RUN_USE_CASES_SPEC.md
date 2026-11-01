@@ -61,7 +61,9 @@ tool calls inside each worker.
    it or asks the one question it needs.
 2. **Refill, in the same first turn, in the background.** The reviewers
    that are due, the journal if there's a new entry, and next-steps
-   whenever `pending.md` has fewer than three steps Juno could work on.
+   whenever `pending.md` has fewer than six points (two rounds of
+   options, so turning all three down still leaves three; Today and Next
+   tasks don't count, since the user may be passing them over).
    Each saves its points to `pending.md` and hands back nothing.
    The goals and their plans keep their place: each reviewer still looks
    at the goal itself first (no number or date, a date passed) and saves
