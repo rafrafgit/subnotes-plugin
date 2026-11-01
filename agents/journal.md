@@ -27,6 +27,11 @@ so nothing is filed twice or out of context.
 Find what each line means for the user's work, so it ends up where it
 will be used.
 
+An entry can hold more than one thing: sort each on its own. A wish for
+how you and the other skills should work with the user (notice a
+feeling, push less, ask why) is its own suggestion, with goal `none`,
+never folded into the goal its example comes from.
+
 1. **A fact**: a date, a reply or where something stands that a
    notebook's work depends on becomes a learning in that notebook.
 2. **A decision or a priority**: what comes first this week, or what's

@@ -46,7 +46,9 @@ the session gets to real work.
    1, 2, 3, one per line, even when there's only one, your pick first,
    each with what changes for the user when it's done, the goal it moves,
    and whether you can do it or need them; put nothing else between the
-   items, and ask the question once, below the list:
+   items, and ask the question once, below the list. The list is the
+   turn's last message, after every tool call, never only in your
+   thinking:
 
    ```
    Three we could do:
@@ -66,7 +68,7 @@ the session gets to real work.
 
 Keep the next options coming without the user waiting for them.
 
-1. **The refill**: right after serving the options, in the same turn, run
+1. **The refill**: before serving the options, in the same turn, run
    the command on the "Start it:" line of today's overview, as a plain
    Bash call, never in the background (it detaches itself, and a
    background call wakes you with no reply from the user); don't wait for
@@ -92,7 +94,8 @@ from how the user took it.
    `remove_point`. One that asks for context: ask its questions, then
    write the answers under the task or project, in the user's words.
 3. **A turned-down suggestion**: `remove_point` with the reason, and save
-   a lesson (`add_learning`, source `run`, `about` its `about`).
+   a lesson (`add_learning`, source `run`, `about` its `about`). Only one
+   in the numbered list the user saw; a "none" turns down nothing else.
 4. **An accepted plan check**: start `subnotes:plan-check` for that goal
    (Skill tool), and give it all the time it needs.
 5. **A decision or answer**: save it with `add_learning`, or
