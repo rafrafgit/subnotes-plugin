@@ -111,12 +111,18 @@ shakes the plan, so the user hears only what's worth their time.
       done, built from the other side's own material (their ad, their
       site, their programs) and the user's current work, even from
       another goal. Never prep the user could list themselves (questions
-      to ask, a checklist).
+      to ask, a checklist). When the notebook doesn't say what the moment
+      is or what's expected (its format, who's there, what they want to
+      see), don't guess: in `pick`, one or two questions for the user and
+      what the answers change; in `writes`, `add_subnotes` under its task
+      or heading with the answers.
    3. **Active projects**: a heading scheduled Today or Next in the
       goal's notebooks is a project, what the user has chosen to work on
       now. When it has no open task, or all its tasks are done, a `talk`
       suggestion: what the project is after in `noticed`, and in `pick`
-      two or three concrete first steps, your pick first and why.
+      two or three concrete first steps, your pick first and why. When
+      too little is written under it to know what it's after, ask
+      instead, as for a moment.
    4. **The plan's pace**: behind it, say how far short, first. A plan
       step with no task, or its task stuck in Soon: name it in your notes.
    5. **Thinking out loud**: a new or changed line that's a question, a

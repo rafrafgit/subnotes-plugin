@@ -49,7 +49,9 @@ One block per point, most important first:
   - `today`: a task in today's plan, with what Claude will do about it
   - `prune`: changes to what Claude remembers, applied on one yes
   - `change`: something done without asking, to say and offer to undo
-  - `talk`: a problem or idea to talk through first, with Claude's ideas
+  - `talk`: a problem or idea to talk through first, with Claude's ideas;
+    or one or two questions about something coming up that the notes
+    don't explain, so what Claude makes for it fits
 - **goal** — the goal it serves, a notebook when no goal, or `none`.
 - **about** — the skill handing it back. A correction of this point is a
   lesson about that skill.
