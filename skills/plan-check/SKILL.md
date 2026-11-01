@@ -12,6 +12,9 @@ notebooks that serve it: $ARGUMENTS
 
 ## 1. Read
 
+Know the goal, its plan and what changed since the last check, so the talk
+starts from where things stand.
+
 1. **The goal's context**: in one turn, call `review_context` with the
    goal (its notebooks, their learnings and the shared ones), and
    `read_notebook`, `read_learnings` and `read_questions` for Goals.
@@ -21,6 +24,9 @@ notebooks that serve it: $ARGUMENTS
    get there at all.
 
 ## 2. No goal yet
+
+Give the user a goal worth working toward when there isn't one, so the
+work has something to aim at.
 
 1. **The proposal**: when the arguments say there's no goal, work one out
    from the notebooks' goals and what they hold, with a number and a
@@ -38,6 +44,9 @@ notebooks that serve it: $ARGUMENTS
 
 ## 3. Find the plan
 
+Pin down how the user means to get there, so there's something concrete
+to question.
+
 1. **The plan**: how the user means to get there: a strategy, phases,
    the work named; not a heap of unrelated tasks, and not a direction
    ("Be more visible online").
@@ -46,6 +55,9 @@ notebooks that serve it: $ARGUMENTS
    tasks are the work.
 
 ## 4. Check it
+
+Question whether this is the right route and whether it's working, not
+only whether the dates fit, and find the one gap that matters most.
 
 Check in order, and stop at the first gap.
 
@@ -78,6 +90,9 @@ Check in order, and stop at the first gap.
 
 ## 5. Verdict and points, in one reply
 
+Give the user a straight verdict and your own answers in one go, so the
+check takes a minute or two, not a long back-and-forth.
+
 1. **The opening**: the goal in the user's own words ("Your business
    goal, then:"); never the names of these steps.
 2. **The verdict**, one line each:
@@ -103,6 +118,9 @@ Check in order, and stop at the first gap.
 
 ## 6. Learn, and write what was agreed
 
+Keep what the user decided and corrected, so the plan in the notebook and
+the next check reflect it.
+
 1. **A lesson**: when the user corrects your verdict, waves off a gap, or
    passes over your proposal for their own, save it right away
    (`add_learning`, source `plan`): "Don't treat X as a gap while Y: Z",
@@ -118,6 +136,8 @@ Check in order, and stop at the first gap.
    physical action each, in the section the work belongs in (`add_tasks`).
 
 ## 7. Record it, and hand back
+
+Record the check, so the next one starts from it and knows when it's due.
 
 1. **The check**: one learning for the goal (source `plan`, notebook
    Goals, `goal` its heading), replacing your earlier one

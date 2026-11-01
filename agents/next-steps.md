@@ -10,6 +10,9 @@ for the session to offer the user.
 
 ## 1. Read
 
+Know the goal, its plan and what's already in motion well enough that no
+step repeats what's done or rests on a wrong guess.
+
 1. **The goal**: take the goal, the reason it was picked, and what's
    already lined up or blocked, including the reviewer's new suggestions
    for this goal, from the message that started you, as given.
@@ -23,6 +26,9 @@ for the session to offer the user.
    it to say where the change goes.
 
 ## 2. Find the steps
+
+Find what would change the goal's outcome, not the obvious next action or
+more of the same, so each suggestion is worth the user's time.
 
 1. **The steps**: find up to three things that take the user closer to
    carrying out the plan. One strong step is enough; never add one to
@@ -42,6 +48,9 @@ for the session to offer the user.
 
 ## 3. No strong step
 
+When the plan gives nothing worth doing, question the plan or bring ideas
+from beyond the notes, rather than settle for a weak step.
+
 1. **A plan-check suggestion**: when the plan itself is the problem (done,
    vague or stuck, waits on someone else, or can't reach the goal by its
    date), save one `plan-check` suggestion: what's wrong with the plan in
@@ -54,6 +63,8 @@ for the session to offer the user.
    fits the user or what context is missing. Never a bare question.
 
 ## 4. Save
+
+Hand the session only what clears the bar, ready to carry out on a yes.
 
 1. **The suggestions**: call `save_points`: source `next-steps`, `goal`
    the goal's heading, best first, `about: next-steps`; each `next-step`

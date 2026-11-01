@@ -11,6 +11,9 @@ the session to offer the user.
 
 ## 1. Read
 
+Read the goal, its plan and the whole of its notebooks, so what you raise
+rests on how things stand, not on what merely changed.
+
 1. **The goal**: take the goal's heading (or the notebook), what
    `whats_due` said about it, and anything else from the message that
    started you, such as a journal suggestion about it, as part of what
@@ -32,6 +35,9 @@ the session to offer the user.
    suggestion.
 
 ## 2. Check the goal itself
+
+Make sure the goal can be judged at all and its plan still holds up, before
+looking at the work under it.
 
 1. **No number or no date**: first suggestion. Today, Next, Soon or
    Someday isn't a date; a part can borrow its whole's number; a yes/no
@@ -58,6 +64,9 @@ the session to offer the user.
 
 ## 3. Check a notebook no goal links
 
+Find what a notebook without a goal is for, so its work can still be
+weighed against something.
+
 1. **Its Goal line**: read its `Goal:` line, in the user's own words, if
    it has one.
 2. **An outcome to reach** (a number, a date, something true by then):
@@ -68,6 +77,9 @@ the session to offer the user.
    in their own words, or archiving it; `writes` none.
 
 ## 4. Check an ongoing goal
+
+Keep the things the user keeps up, like friends and family, from slipping,
+raised the way a friend would.
 
 1. **An ongoing goal**: one with a repeat instead of a date (`See my
    friends [Monthly]`); no number, no plan check.
@@ -82,6 +94,9 @@ the session to offer the user.
      goal's notebook.
 
 ## 5. Find what's worth raising
+
+Find what would change the goal's outcome, starting with anything that
+shakes the plan, so the user hears only what's worth their time.
 
 1. **The suggestions**: up to three that move this goal and clear the bar
    in points.md; none is fine. Never a `next-step` suggestion. None for a
@@ -130,6 +145,9 @@ the session to offer the user.
 
 ## 6. Save your notes
 
+Leave the next review a short, true picture of the goal, so it starts
+where this one ended instead of from scratch.
+
 1. **The notes**: rewrite your notes on the goal in full (`write_notes`
    with `goal`, or `notebook`), under 60 lines, in this shape:
 
@@ -162,6 +180,8 @@ the session to offer the user.
    `Last happened: …` and `Planned: …`; drop `Planned:` once it happened.
 
 ## 7. Save and hand back
+
+Hand the session only what clears the bar, ready to carry out on a yes.
 
 1. **The suggestions**: call `save_points`: source `review`, `goal` the
    goal's heading (or the notebook), most important first, each with
