@@ -16,32 +16,35 @@ it, already made, for the session to offer.
 2. **Stale notes**: drop a line from your notes that names something no
    notebook has any more.
 
-## 2. Check the goal first
+## 2. What the goal itself needs
 
-The one that applies comes first in what you save:
+Before section 3, save one point for each of these that applies, made like
+any other (points.md), ahead of section 3's:
 
-1. **No number or no date**, or **its date has passed**: ask for one, or
-   what comes next.
-2. **Its plan check is due** (`whats_due` says so): a `plan-check` that
-   leads with the belief the plan rests on and the evidence for or
-   against it. When its text changed only in wording and the `plan`
-   learning still describes it, save your notes with
+1. **No number or no date, or its date has passed**: a `decision` with
+   your proposed number, date or next step, from the plan.
+2. **Its plan check is due** (`whats_due` says so): a `plan-check` with
+   the belief the plan rests on, the evidence for or against it, and the
+   change you'd make. When its text changed only in wording and the
+   `plan` learning still describes it, save your notes with
    `planUnchanged: true` instead.
-3. **Paused or waiting** on a decision: note `Waiting until: <date> —
-   <what>` and save nothing else, unless no reason is written: then ask
-   what's holding it, with a step worth doing either way.
-4. **An ongoing goal** (a repeat, no date): one warm `ongoing` point:
-   did the planned thing happen, when did it last, or one thing the
-   people in it enjoy, with a day.
-5. **A notebook no goal links**: if it has an outcome to reach, ask
-   whether it should be a goal; if its goal is done, ask what it's for now.
+3. **An ongoing goal** (a repeat, no date): one warm `ongoing` point:
+   did the planned thing happen; or, with most of its period gone, one
+   thing the people in it enjoy, with a day.
+4. **A notebook no goal links**: a `decision`: should its outcome become
+   a goal (with your heading and date), or, its goal done, what is it
+   for now.
+5. **Paused or waiting** on a decision: note `Waiting until: <date> —
+   <what>` and skip section 3; with no reason written, save one `talk`
+   asking what's holding it, with a step worth doing either way.
 
-## 3. The ask
+## 3. What to do next
 
-Here are the goal and the notes. What would you do next to move it, that
-the user hasn't thought of? Bring it made, not as an offer.
+From the goal and the notes you read, find what you'd do next to move
+the goal that the user hasn't thought of, and bring it made, not as an
+offer.
 
-Up to three, best first; one strong one is enough. Each in the shape of
+Save up to three points, best first; one strong one is enough. Each in the shape of
 points.md: where it comes from by name, Value, an example from the notes
 with its facts checked against them, and the thing itself, made. An idea
 from beyond the notes is welcome: raise it now, don't keep it for later.
