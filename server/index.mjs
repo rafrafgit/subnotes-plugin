@@ -2425,6 +2425,24 @@ function writePoints(points) {
   writeEntryFile(PENDING_PATH(), PENDING_HEADER + (blocks.length ? `\n${blocks.join('\n\n')}\n` : ''));
 }
 
+// Every point that leaves pending.md, with how it left, so the turned-down
+// ones can be read back (2026-11-02): done, turned down (remove_point), or
+// replaced by a fresh look before the user saw it (save_points).
+const POINTS_LOG_PATH = () => join(AGENT_DIR, 'points-log.md');
+const POINTS_LOG_HEADER = '# Points that left the pick\n\nEvery saved point once it is done, turned down, or replaced by a newer one. Newest last.\n';
+
+function logPoints(points, outcome, reason = '') {
+  if (!points.length) return;
+  const at = localTime(new Date()).slice(0, 16);
+  const blocks = points.map(p => [
+    `- ${at} · ${outcome} · ${p.saved?.split(' · ')[1] ?? '?'} · ${p.goal ?? 'none'} · ${p.kind}`,
+    ...['noticed', 'pick', 'options'].filter(k => p[k]).map(k => `  ${k}: ${p[k]}`),
+    ...(reason ? [`  reason: ${reason}`] : []),
+  ].join('\n'));
+  const old = readEntryFile(POINTS_LOG_PATH()) ?? POINTS_LOG_HEADER;
+  writeEntryFile(POINTS_LOG_PATH(), `${old.replace(/\n*$/, '\n')}\n${blocks.join('\n\n')}\n`);
+}
+
 function savePoints({ source, goal, points }) {
   const who = sourceName(source);
   if (!Array.isArray(points)) throw new UserError('`points` is a list, in the shape of reference/points.md. An empty list saves nothing.');
@@ -2445,7 +2463,12 @@ function savePoints({ source, goal, points }) {
   let kept = readPoints();
   const replaces = REPLACING_SOURCES.includes(who) && scope;
   const before = kept.length;
-  if (replaces) kept = kept.filter(p => !(p.saved?.split(' · ')[1] === who && goalKey(p.goal ?? '') === goalKey(scope)));
+  if (replaces) {
+    const isOld = p => p.saved?.split(' · ')[1] === who && goalKey(p.goal ?? '') === goalKey(scope);
+    const fresher = new Set(fresh.map(p => normText(p.pick)));
+    logPoints(kept.filter(p => isOld(p) && !fresher.has(normText(p.pick ?? ''))), 'replaced');
+    kept = kept.filter(p => !isOld(p));
+  }
   const known = new Set(kept.map(p => normText(p.pick ?? '')));
   const added = fresh.filter(p => !known.has(normText(p.pick)));
   writePoints([...kept, ...added]);
@@ -2463,6 +2486,7 @@ function removePoint({ match, reason }) {
   if (found.length > 1) throw new UserError(`${found.length} saved points hold "${match}": say more of the one you mean.`);
   writePoints(points.filter(p => p !== found[0]));
   const why = String(reason ?? '').trim();
+  logPoints(found, /^done\b/i.test(why) ? 'done' : 'turned down', why);
   return `Removed: ${found[0].pick}${why ? ` (${why})` : ''}. ${points.length - 1} waiting in pending.md.`;
 }
 
@@ -2829,10 +2853,10 @@ const TOOLS = [
   },
   {
     name: 'remove_point',
-    description: "For /subnotes:run: remove one saved point from pending.md once it's done or the user turned it down. A turned-down point also gets a learning with the reason (add_learning), so it isn't proposed again.",
+    description: "For /subnotes:run: remove one saved point from pending.md once it's done or the user turned it down; it goes to points-log.md with the reason, logged as done when the reason starts with \"Done\", else as turned down. A turned-down point also gets a learning with the reason (add_learning), so it isn't proposed again.",
     inputSchema: { type: 'object', properties: {
       match: { type: 'string', description: "A piece of the point's pick that only it has." },
-      reason: { type: 'string', description: 'Done, or why the user turned it down.' },
+      reason: { type: 'string', description: 'Starts with "Done" when it was done; else why the user turned it down.' },
     }, required: ['match'] },
     run: removePoint,
   },

@@ -45,8 +45,9 @@ the session gets to real work.
    `remove_point` and a lesson (`add_learning`, `about` its `about`).
 6. **The options**: serve up to three candidates as a numbered list,
    1, 2, 3, one per line, even when there's only one, your pick first,
-   each with what changes for the user when it's done, the goal it moves,
-   and whether you can do it or need them; put nothing else between the
+   each opening with the task, project or goal it comes from, by its
+   name in the notebook, then what changes for the user when it's done,
+   the goal it moves, and whether you can do it or need them; put nothing else between the
    items, and ask the question once, below the list. The list is the
    turn's last message, after every tool call, never only in your
    thinking:

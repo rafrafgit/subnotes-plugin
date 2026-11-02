@@ -95,9 +95,11 @@ names; do it, then go on to section 3.
 Find what would change the goal's outcome, starting with anything that
 shakes the plan, so the user hears only what's worth their time.
 
-1. **The suggestions**: up to three that move this goal and clear the bar
-   in points.md; none is fine. Never a `next-step` suggestion. None for a
-   goal paused or waiting on a decision.
+1. **The suggestions**: one to three that move this goal and clear the
+   bar in points.md. Never a `next-step` suggestion. None only when the
+   goal is reached, its plan is done (1.4 raises the plan check), or it's
+   paused or waiting on a decision. When what you'd raise is already
+   happening, raise what that work leaves out, or what comes after it.
 2. **Where to look**, in this order, stopping at three:
    1. **The plan's belief**: when something new goes against the belief
       the plan rests on (the `Rests on:` part of its `plan` learning in
@@ -221,7 +223,8 @@ Hand the session only what clears the bar, ready to carry out on a yes.
    new ones.
 2. **The reply**: hand back one line, `Summary:`, the goal in a line
    ("Freelance → 4k by June; next step the Acme proposal; on pace").
-   Nothing worth raising: save nothing, and hand back `Summary:` alone.
+   A goal reached, its plan done, or paused: save nothing, and hand back
+   `Summary:` alone.
 
 ## Rules
 

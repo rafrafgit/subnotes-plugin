@@ -13,7 +13,7 @@ raise out loud, and a goal with no next step gets one.
 ## The bar
 
 Every point the user sees is judged by it, so a point that misses it is
-worse than none. Before saving one, check all four:
+worse than none. Before saving one, check all six:
 
 1. **In the user's words.** They could explain it to a friend. No names of
    tools, workers, files or steps inside Subnotes or the plugin: not
@@ -24,6 +24,17 @@ worse than none. Before saving one, check all four:
    What line, its number): the user would say "yes, that moves it".
 4. **Not already happening:** not a task, not a saved point, not what the
    recent sessions were doing (the goal's notes, the latest learnings).
+5. **One thing, named.** The pick names one concrete thing Claude makes
+   or does ("I draft the Babbel cover letter, for Wednesday"), clear when
+   read alone by someone who has never seen Subnotes. Never a rule, a
+   process, or how sessions, options or suggestions work, even for a goal
+   about Subnotes itself: there, name the feature and what the user sees.
+6. **The value to the user, shown.** Say what the user gets from it, in
+   their work or life, with a short example from their own notes of what
+   they'd see ("you open the session and your Babbel application is
+   there, written from their ad; you fix two lines and send it").
+   Leave out your own reasons (ratings, streaks, days left, what a skill
+   lacks): they belong in your notes, not in what the user reads.
 
 Two that clear it beat three with one that doesn't.
 
@@ -56,7 +67,10 @@ One block per point, most important first:
 - **goal** — the goal it serves, a notebook when no goal, or `none`.
 - **about** — the skill handing it back. A correction of this point is a
   lesson about that skill.
-- **noticed** — one plain line: what was found, in the user's terms.
+- **noticed** — one plain line: what was found, in the user's terms,
+  opening with the name of the task, project or goal it's about, as the
+  notebook writes it ("Fix reviewers to not give shallow suggestions has
+  sat…"), so the user knows where it comes from.
 - **pick** — one plain line: Claude's own answer (a draft, a date, a
   wording), never homework. A task in bold, with where it goes after it.
 - **options** — up to two others, one line each; leave out when there's
@@ -69,7 +83,8 @@ A `today` point puts in `pick` what Claude does with the task: "I'll start
 on it now", the one question it needs, or "only you can do this", and why.
 A `change` point puts in `writes` how to undo it.
 
-Nothing to save is a fine result: save nothing.
+Nothing to save is a fine result only when the goal is reached, its
+plan is done, or it's paused: then save nothing.
 
 The prune and the skill update run at the end of a session, beside the
 wrap-up, and hand their points back in this same shape instead: there's
