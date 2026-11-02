@@ -65,7 +65,8 @@ names; do it, then go on to section 3.
       it (an offer, an interview): put a `Waiting until: <date> — <what>`
       line under Last review in your notes, the date it can move again,
       and save no other suggestion unless its plan check is due; drop the
-      line once it moves.
+      line once it moves. Paused with no reason written in the goal: one
+      "what's holding it" talk (3.2.4) instead.
 2. **A notebook no goal links**: a connected notebook no goal in Goals
    links, that has a `Goal:` line of its own or whose goal in Goals is
    done:
@@ -123,16 +124,30 @@ shakes the plan, so the user hears only what's worth their time.
       two or three concrete first steps, your pick first and why. When
       too little is written under it to know what it's after, ask
       instead, as for a moment.
-   4. **The plan's pace**: behind it, say how far short, first. A plan
+   4. **What's holding it**: a task or project (a scheduled heading)
+      that has sat, or a goal paused with no reason written, that matters
+      to the goal: Today or Next "unmoved" for a week, Soon "untouched"
+      for two weeks. At most one per review, the one that would move the
+      goal most; a project counts as moved when anything under it moves. A
+      `talk` suggestion: in `noticed`, what has sat and since when, without
+      judging; in `pick`, ask what's holding it, with your guess from the
+      notes (it might turn out wasted, the payoff is unclear, it's too
+      big, it's paused on purpose), and one small step worth doing either
+      way: one that pays off whichever way the thing it waits on goes.
+      In `writes`, `add_subnotes` under its task or heading with the
+      answer, `Holding it: …` in the user's words. Skip a line that
+      already has a `Holding it:` subnote, until what it names has
+      changed (the interview happened, the date passed).
+   5. **The plan's pace**: behind it, say how far short, first. A plan
       step with no task, or its task stuck in Soon: name it in your notes.
-   5. **Thinking out loud**: a new or changed line that's a question, a
+   6. **Thinking out loud**: a new or changed line that's a question, a
       doubt, a hunch or "I wonder…".
-   6. **Today, overdue and Next**: every line; then Soon lines that are
+   7. **Today, overdue and Next**: every line; then Soon lines that are
       new or changed.
-   7. **The rest of the notebook** that bears on the goal: new or
+   8. **The rest of the notebook** that bears on the goal: new or
       changed lines first, then context that has sat still, such as a
       plan section or a status.
-   8. **One idea of your own**, if there's room: something that would
+   9. **One idea of your own**, if there's room: something that would
       move the goal and isn't in any notebook, from what you know of the
       goal, the user and the field, with "Not in your notes: …" in
       `noticed`; never one the learnings rule out.

@@ -37,7 +37,8 @@ the session gets to real work.
    from "Soon, with no date" the tasks that move a goal most. Leave out
    the user's own errands. A project with no open tasks, or all done, is
    offered as a talk on how to go on, with your first step, never as a
-   task you'd do. At most one option that asks the user for context.
+   task you'd do. At most one option that asks the user for context or
+   what's holding something.
 5. **Screening**: reword each saved suggestion that misses the bar in
    `${CLAUDE_PLUGIN_ROOT}/reference/points.md`; remove one that can't be
    fixed, rests on a wrong premise, or was turned down before, with
@@ -91,8 +92,9 @@ from how the user took it.
    says under "Do it" and "Then report" (read those then); once it's
    Done, `remove_point` any saved suggestion that proposed it.
 2. **An accepted suggestion**: carry out its `writes`, then
-   `remove_point`. One that asks for context: ask its questions, then
-   write the answers under the task or project, in the user's words.
+   `remove_point`. One that asks for context or what's holding something:
+   ask its questions, then write the answers under the task or project,
+   in the user's words.
 3. **A task not wanted now**: leave it as it is, and don't offer it again
    this session; no lesson.
 4. **A turned-down suggestion**: `remove_point` with the reason, and save

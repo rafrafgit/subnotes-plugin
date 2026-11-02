@@ -1198,7 +1198,8 @@ function changesSince(old, text) {
 // out of every later visit (2026-10-19). Each says whether it's new, changed,
 // unchanged, or unmoved for a week (STALL_DAYS) — the "too big for a day"
 // case. Soon lines come whole only when new or changed; the rest are named,
-// one per line, as context.
+// one per line, as context, and one untouched for two weeks (SITTING_DAYS)
+// says so, for the reviewer's "what's holding it" talk (2026-11-02).
 //
 // The snapshot keeps, per scheduled line, a fingerprint of its block and the
 // date it last changed, so "unmoved" survives across visits. A snapshot from
@@ -1206,6 +1207,7 @@ function changesSince(old, text) {
 // since that snapshot was taken.
 const SCHEDULED_GROUPS = ['Today', 'Next', 'Soon'];
 const STALL_DAYS = 7;
+const SITTING_DAYS = 14;
 const BLOCK_SHOWN = 15;      // lines shown under a scheduled line, then counted
 const DATE_TAG = /\s*\[(\d{4}-\d{2}-\d{2})\]\s*$/;
 const indentOf = line => /^\t*/.exec(line)[0].length;
@@ -1286,7 +1288,14 @@ function scheduledReport(text, old) {
           : was && was.priority.toLowerCase() !== t.priority.toLowerCase() ? `was ${was.priority}` : 'changed';
       } else if (group !== 'Soon') status = days >= STALL_DAYS ? `unmoved since ${since} (${days} days)` : `unchanged since ${since}`;
       const label = `${s.heading ? 'heading' : 'task'}${s.due ? `, due ${s.due}` : ''}`;
-      if (!status || inside) { rest.push(`- ${s.name} (${label}${inside ? ', shown above' : since ? `, unchanged since ${since}` : ''})`); continue; }
+      if (!status || inside) {
+        const age = inside ? ', shown above'
+          : !since ? ''
+          : days >= SITTING_DAYS ? `, untouched since ${since} (${days} days)`
+          : `, unchanged since ${since}`;
+        rest.push(`- ${s.name} (${label}${age})`);
+        continue;
+      }
       shownBlocks.push(s);
       const shown = s.block.slice(0, BLOCK_SHOWN);
       look.push([`${s.line.trim()}   ← ${label}, ${status}`, ...shown.map(l => `  ${l}`),
