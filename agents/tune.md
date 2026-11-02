@@ -49,7 +49,7 @@ easiest one to write.
    learning's `about`, a run's `[about: …]`), else the skill they name,
    else the one that wrote them; take it as a strong hint, not the answer.
 3. **The cause**: find the sentence that caused the behaviour, in every
-   skill involved (the run starts the journal, review, next-steps and
+   skill involved (the run starts the journal, review and
    prune workers, and reads the guides), and edit there.
 4. **A worker's output**: a lesson about what a worker hands back (points
    missing, weak or dropped) is fixed in that worker, never in the run.

@@ -2243,8 +2243,8 @@ function whatsDue() {
   let journalNew = false;
   try { journalNew = !!journal && journalHasNew(journal); } catch {}
   const queued = work.now + work.next > 0, promote = !queued && work.soon >= PROMOTE_MIN_SOON;
-  // The reviewers the refill starts: the due reviews and plan checks. What
-  // to do next is next-steps' job, started after them (2026-10-31).
+  // The reviewers the refill starts: the due reviews and plan checks; with
+  // little saved, one more for the goal that needs it most (2026-11-02).
   const reviewers = [...new Set([...review.due, ...plan.due.map(d => d.name).filter(n => n !== '(none)')])];
   const run = journalNew ? 'Journal' : review.due.length || plan.due.length ? 'Review' : prune.due ? 'Prune'
     : queued ? 'Do' : promote ? 'Do, moving Soon tasks to Next first' : 'Next steps';
@@ -2283,10 +2283,10 @@ function whatsDue() {
     `Due ${TUNE_EVERY_DAYS} days after the last, or when a change made by it rated worse since. The run starts it in the background, after its opening.`,
     ...tune.lines,
     '',
-    `## Do — ${queued ? 'has tasks' : promote ? 'Today and Next are empty: move Soon tasks up first' : 'Today and Next are empty: next steps work out what is next'}`,
+    `## Do — ${queued ? 'has tasks' : promote ? 'Today and Next are empty: move Soon tasks up first' : 'Today and Next are empty: a review works out what is next'}`,
     `${work.now} task${work.now === 1 ? '' : 's'} Today or overdue, ${work.next} Next, ${work.soon} Soon, ${work.upcoming} dated in the next ${STALL_DAYS} days, across the connected notebooks.`,
     ...named,
-    `Do works on Today and Next. When both are empty: with ${PROMOTE_MIN_SOON} or more Soon, Do first offers to move up to ${PROMOTE_MAX} of them to Next; with fewer, next-steps works out what's next.`,
+    `Do works on Today and Next. When both are empty: with ${PROMOTE_MIN_SOON} or more Soon, Do first offers to move up to ${PROMOTE_MAX} of them to Next; with fewer, a review of the goal that needs it most works out what's next.`,
     '',
     ...caughtSection(),
     // Every run is rated while the skills are being tuned: the feedback is
@@ -2395,7 +2395,7 @@ function todayQuestions(m) {
 // next-steps' new points for a goal replace their old ones for it, so a
 // stale point never outlives a fresh look; the journal's add to what's there.
 const POINT_KINDS = ['next-step', 'decision', 'plan-check', 'ongoing', 'today', 'prune', 'change', 'talk'];
-const POINT_FIELDS = ['kind', 'goal', 'about', 'saved', 'noticed', 'pick', 'options'];
+const POINT_FIELDS = ['kind', 'goal', 'about', 'saved', 'value', 'noticed', 'pick', 'options'];
 const REPLACING_SOURCES = ['review', 'next-steps'];
 const PENDING_HEADER = '# Saved for the pick\n\nPoints the workers saved for /subnotes:run, until it raises them. ' +
   'Removed once done or turned down.\n';
@@ -2436,7 +2436,7 @@ function logPoints(points, outcome, reason = '') {
   const at = localTime(new Date()).slice(0, 16);
   const blocks = points.map(p => [
     `- ${at} · ${outcome} · ${p.saved?.split(' · ')[1] ?? '?'} · ${p.goal ?? 'none'} · ${p.kind}`,
-    ...['noticed', 'pick', 'options'].filter(k => p[k]).map(k => `  ${k}: ${p[k]}`),
+    ...['value', 'noticed', 'pick', 'options'].filter(k => p[k]).map(k => `  ${k}: ${p[k]}`),
     ...(reason ? [`  reason: ${reason}`] : []),
   ].join('\n'));
   const old = readEntryFile(POINTS_LOG_PATH()) ?? POINTS_LOG_HEADER;
@@ -2451,11 +2451,11 @@ function savePoints({ source, goal, points }) {
     const kind = String(p?.kind ?? '').trim().toLowerCase();
     if (!POINT_KINDS.includes(kind)) throw new UserError(`Point ${i + 1}: \`kind\` is one of ${POINT_KINDS.join(', ')}.`);
     const out = { kind, saved: `${today()} · ${who}`, writes: [] };
-    for (const k of ['goal', 'about', 'noticed', 'pick', 'options']) {
+    for (const k of ['goal', 'about', 'value', 'noticed', 'pick', 'options']) {
       if (p[k] !== undefined && String(p[k]).trim()) out[k] = oneLine(p[k], `point's ${k}`);
     }
     if (!out.goal) out.goal = scope || 'none';
-    if (!out.noticed || !out.pick) throw new UserError(`Point ${i + 1} needs \`noticed\` and \`pick\`.`);
+    if (!out.value || !out.noticed || !out.pick) throw new UserError(`Point ${i + 1} needs \`value\`, \`noticed\` and \`pick\`.`);
     const writes = Array.isArray(p.writes) ? p.writes : p.writes ? [p.writes] : [];
     out.writes = writes.map(w => oneLine(w, 'write')).filter(w => w.toLowerCase() !== 'none');
     return out;
@@ -2835,19 +2835,20 @@ const TOOLS = [
   },
   {
     name: 'save_points',
-    description: "For the workers /subnotes:run starts: save points for the run's pick to pending.md, in the shape of reference/points.md, instead of handing them back. A review's or next-steps' points for a goal replace its earlier ones for that goal; the journal's are added. Hand back nothing worth saying once saved.",
+    description: "For the workers /subnotes:run starts: save points for the run's pick to pending.md, in the shape of reference/points.md, instead of handing them back. A review's points for a goal replace its earlier ones for that goal; the journal's are added. Hand back nothing worth saying once saved.",
     inputSchema: { type: 'object', properties: {
-      source: { type: 'string', description: 'The worker saving them, one word: review, journal, next-steps.' },
+      source: { type: 'string', description: 'The worker saving them, one word: review, journal.' },
       goal: { type: 'string', description: "The goal (or notebook) these points are for, as named in Goals. A point without its own `goal` takes this one." },
       points: { type: 'array', description: 'The points, most important first.', items: { type: 'object', properties: {
         kind: { type: 'string', enum: POINT_KINDS },
         goal: { type: 'string' },
         about: { type: 'string', description: 'The skill handing it back.' },
+        value: { type: 'string', description: "One plain line: what the user gets from it, in their work or life." },
         noticed: { type: 'string', description: 'One plain line: what was found.' },
         pick: { type: 'string', description: "One plain line: Claude's own answer; a task in bold with where it goes." },
         options: { type: 'string', description: 'Up to two others, in one line, split by " · ".' },
         writes: { type: 'array', items: { type: 'string' }, description: 'Exactly what a yes does, one tool call each; leave out when a yes writes nothing.' },
-      }, required: ['kind', 'noticed', 'pick'] } },
+      }, required: ['kind', 'value', 'noticed', 'pick'] } },
     }, required: ['source', 'points'] },
     run: savePoints,
   },

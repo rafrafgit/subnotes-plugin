@@ -24,7 +24,7 @@ works, so the next options are ready when they ask.
    `whats_due` says the Journal has a new entry.
 3. **Wait**: let every one of them finish before section 3.
 
-## 3. Next steps
+## 3. More to offer
 
 Make sure there's enough worth offering, so a session never opens with
 nothing to pick.
@@ -36,10 +36,10 @@ nothing to pick.
 2. **The goal**: when fewer than six saved suggestions are waiting (tasks
    don't count: the user may be passing them over), pick the goal whose
    plan most needs moving now, by its date, how far behind it is, and what
-   the Journal, the reviewers and Today say.
-3. **Next-steps**: start `subnotes:next-steps` (Agent tool) for that goal,
-   with why you picked it and what's lined up or blocked for it, the
-   reviewer's new suggestions included. Wait for it.
+   the Journal, the reviewers and Today say; one not reviewed in this
+   refill.
+3. **Its review**: start `subnotes:review` (Agent tool) for that goal,
+   with why you picked it and what's lined up for it. Wait for it.
 
 ## 4. Log
 
@@ -48,7 +48,7 @@ Leave one line on what happened, so the next session knows.
 1. **The log line**: write one line and stop:
 
    ```
-   Refill <date time>: review (<goals>), journal, next-steps (<goal>: <why>). <n> suggestions saved.
+   Refill <date time>: review (<goals>), journal, more for (<goal>: <why>). <n> suggestions saved.
    ```
 
 2. **Failures**: name an agent that failed or saved nothing it should

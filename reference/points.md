@@ -13,28 +13,18 @@ raise out loud, and a goal with no next step gets one.
 ## The bar
 
 Every point the user sees is judged by it, so a point that misses it is
-worse than none. Before saving one, check all six:
+worse than none. Before saving one, check all four:
 
-1. **In the user's words.** They could explain it to a friend. No names of
-   tools, workers, files or steps inside Subnotes or the plugin: not
-   "the checker", "the loop", "pending.md".
-2. **The outcome, not the mechanism.** Say what will be different for the
-   user when it's done, not how it gets done inside.
-3. **Visibly moves the goal,** in the terms of the goal's own text (its
-   What line, its number): the user would say "yes, that moves it".
-4. **Not already happening:** not a task, not a saved point, not what the
-   recent sessions were doing (the goal's notes, the latest learnings).
-5. **One thing, named.** The pick names one concrete thing Claude makes
-   or does ("I draft the Babbel cover letter, for Wednesday"), clear when
-   read alone by someone who has never seen Subnotes. Never a rule, a
-   process, or how sessions, options or suggestions work, even for a goal
-   about Subnotes itself: there, name the feature and what the user sees.
-6. **The value to the user, shown.** Say what the user gets from it, in
-   their work or life, with a short example from their own notes of what
-   they'd see ("you open the session and your Babbel application is
-   there, written from their ad; you fix two lines and send it").
-   Leave out your own reasons (ratings, streaks, days left, what a skill
-   lacks): they belong in your notes, not in what the user reads.
+1. **Where it comes from, by name**: the task, project or goal it's
+   about, as the notebook writes it, opens `noticed`.
+2. **Value**: what the user gets from it, in their work or life, in
+   their words; never your own reasons (ratings, streaks, what a skill
+   lacks), and no names of tools, files or steps inside Subnotes.
+3. **An example from the notes**: what the user would see, with its
+   facts (dates, times, names, numbers) checked against the notes.
+4. **Made, not offered**: the pick is the thing itself, or as much of it
+   as fits (a draft, the research, the message), not a promise to make
+   it; never a rule or how sessions work.
 
 Two that clear it beat three with one that doesn't.
 
@@ -46,8 +36,9 @@ One block per point, most important first:
 - kind: next-step
   goal: Earn 4k a month from freelance work
   about: review
-  noticed: One client so far against a pace of one a month, and nothing lined up.
-  pick: Ask Sam for an intro this week — **Ask Sam for an intro to her design agency** → Freelance › Clients [Next]
+  value: A second paying client in sight, so June's 4k stops resting on Acme alone.
+  noticed: Clients: one so far against a pace of one a month, and nothing lined up; Sam's agency (Freelance › Contacts) hires freelancers.
+  pick: The message, ready to send: "Hi Sam, would you introduce me to your agency's design lead? Happy to send two recent projects first." — **Ask Sam for an intro to her design agency** → Freelance › Clients [Next]
   options: Post the portfolio on LinkedIn first · Raise the day rate for new clients
   writes: add_task Freelance "Ask Sam for an intro to her design agency" section "Clients" priority Next
 ```
@@ -67,12 +58,15 @@ One block per point, most important first:
 - **goal** — the goal it serves, a notebook when no goal, or `none`.
 - **about** — the skill handing it back. A correction of this point is a
   lesson about that skill.
+- **value** — one plain line: what the user gets from it, in their work
+  or life, never what Claude or a skill gets ("my suggestions get
+  better" is not a value). The session shows it as "Value: …".
 - **noticed** — one plain line: what was found, in the user's terms,
   opening with the name of the task, project or goal it's about, as the
   notebook writes it ("Fix reviewers to not give shallow suggestions has
   sat…"), so the user knows where it comes from.
-- **pick** — one plain line: Claude's own answer (a draft, a date, a
-  wording), never homework. A task in bold, with where it goes after it.
+- **pick** — one plain line: the thing itself, made (a draft, the
+  research, a date, a wording), never homework or a promise to make it. A task in bold, with where it goes after it.
 - **options** — up to two others, one line each; leave out when there's
   nothing real to choose.
 - **writes** — exactly what a yes does, as the tool calls with their
