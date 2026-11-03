@@ -33,7 +33,7 @@ the session gets to real work.
 4. **Candidates**: from today's overview, collect the Today and Next tasks
    you can do or that need the user, then the saved suggestions under
    "Saved for the pick", in this order: `talk`, `decision`, `plan-check`,
-   `today`, `ongoing`, `next-step`; when that's fewer than three, add
+   `today`, `next-step`; when that's fewer than three, add
    from "Soon, with no date" the tasks that move a goal most. Leave out
    the user's own errands. A project with no open tasks, or all done, is
    offered as a talk on how to go on, with your first step, never as a
@@ -48,8 +48,9 @@ the session gets to real work.
    each opening with the task, project or goal it comes from, by its
    name in the notebook, then "Value:" and what the user gets from it
    (a saved suggestion's `value`), the goal it moves, and whether you
-   can do it or need them; put nothing else between the
-   items, and ask the question once, below the list. The list is the
+   can do it or need them; then one more number after the last,
+   **Something of your own**; put nothing else between the items, and
+   ask the question once, below the list. The list is the
    turn's last message, after every tool call, never only in your
    thinking:
 
@@ -58,7 +59,8 @@ the session gets to real work.
    1. **Acme proposal: the draft**. Value: out by Friday, so the client can sign (Freelance) — I can start now
    2. **Clients: ask Sam for an intro**. Value: a second client in sight (Freelance) — needs your yes
    3. **Launch my own business: a proper look at the plan**. Value: you know if March still holds, five months out — needs a talk
-   I'd start with 1. Which one, or something of your own?
+   4. **Something of your own**
+   I'd start with 1. Which one?
    ```
 
 7. **Also mention**, one line each, when today's overview has them: the

@@ -18,29 +18,19 @@ it, already made, for the session to offer.
 
 ## 2. What the goal itself needs
 
-Before section 3, save one point for each of these that applies, made like
+Before section 3, ask what the goal itself lacks to be worth working
+toward: a number to reach, a date, a plan that still holds, something
+moving it. Save one point for each case below that applies, made like
 any other (points.md), ahead of section 3's:
 
-1. **No number, or its date has passed**: a `decision` with
-   your proposed number, date or next step, from the plan.
-2. **Its plan check is due** (`whats_due` says so): a `plan-check` with
-   the belief the plan rests on, the evidence for or against it, and the
-   change you'd make. When its text changed only in wording and the
-   `plan` learning still describes it, save your notes with
-   `planUnchanged: true` instead.
-3. **An ongoing goal** (a repeat, no date): once most of its period has
-   gone since it last happened, one `ongoing` point whose pick is a
-   question, not a plan: what the user would like to do this time ("What
-   would you like to do with your friends this month?"). Don't propose
-   an activity yourself: the notes rarely say what the people in it
-   enjoy. When a planned thing's day has passed, ask whether it happened
-   instead.
-4. **A notebook no goal links**: a `decision`: should its outcome become
-   a goal (with your heading and date), or, its goal done, what is it
-   for now.
-5. **Paused or waiting** on a decision: note `Waiting until: <date> —
-   <what>` and skip section 3; with no reason written, save one `talk`
-   asking what's holding it, with a step worth doing either way.
+| Case | Point | What's in it |
+|---|---|---|
+| No number, or its date has passed | `decision` | your proposed number, date or next step, from the plan |
+| Its plan check is due (`whats_due` says so) | `plan-check` | the belief the plan rests on, the evidence for or against it, and the change you'd make. When the goal's text changed only in wording and the `plan` learning still describes it: no point; save your notes with `planUnchanged: true` |
+| An ongoing goal (a repeat, no date), most of its period gone since it last happened | `talk` | a question, not a plan: what the user would like to do this time ("What would you like to do with your friends this month?"); the notes rarely say what the people in it enjoy. When a planned thing's day has passed, ask whether it happened instead |
+| A notebook no goal links | `decision` | should its outcome become a goal (with your heading and date), or, its goal done, what is it for now |
+| Paused, or waiting on something | none, or `talk` | note `Waiting until: <date> — <what>` in your notes and skip section 3. When no reason is written anywhere, also a `talk`: what's holding it, with a step worth doing either way |
+| Anything else the goal itself lacks that would change what the user does | `decision` | what's missing and what you'd put there |
 
 ## 3. What to do next
 

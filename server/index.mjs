@@ -2436,7 +2436,7 @@ function todayQuestions(m) {
 // reference/points.md, until the run raises them. A reviewer's or
 // next-steps' new points for a goal replace their old ones for it, so a
 // stale point never outlives a fresh look; the journal's add to what's there.
-const POINT_KINDS = ['next-step', 'decision', 'plan-check', 'ongoing', 'today', 'prune', 'change', 'talk'];
+const POINT_KINDS = ['next-step', 'decision', 'plan-check', 'today', 'prune', 'change', 'talk'];
 const POINT_FIELDS = ['kind', 'goal', 'about', 'saved', 'value', 'noticed', 'pick', 'options'];
 const REPLACING_SOURCES = ['review', 'next-steps'];
 const PENDING_HEADER = '# Saved for the pick\n\nPoints the workers saved for /subnotes:run, until it raises them. ' +

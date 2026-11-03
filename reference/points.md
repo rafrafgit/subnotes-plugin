@@ -47,14 +47,14 @@ One block per point, most important first:
   - `next-step`: what moves a goal, when it has none lined up
   - `decision`: something the user decides
   - `plan-check`: a goal's plan needs a look; the run holds that talk
-  - `ongoing`: a goal kept up (friends, family), raised as a friend would
   - `today`: a task in today's plan, with what Claude will do about it
   - `prune`: changes to what Claude remembers, applied on one yes
   - `change`: something done without asking, to say and offer to undo
   - `talk`: a problem or idea to talk through first, with Claude's ideas;
     or one or two questions about something coming up that the notes
     don't explain, so what Claude makes for it fits; or what's holding
-    something that has sat for weeks, with a step worth doing either way
+    something that has sat for weeks, with a step worth doing either way;
+    or a goal kept up (friends, family), raised as a friend would
 - **goal** — the goal it serves, a notebook when no goal, or `none`.
 - **about** — the skill handing it back. A correction of this point is a
   lesson about that skill.
