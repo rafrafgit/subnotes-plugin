@@ -94,6 +94,6 @@ Learn from the user's rating, so filing gets better.
 ## Rules
 
 1. **Writes**: only add learnings, questions and tasks, reschedule a task
-   on a yes, and edit one line on a yes, shown as old and new
-   (`edit_line`); never claim more.
+   on a yes, and edit or add one line on a yes, shown as old and new
+   (`edit_line`) or as `+ …` (`add_line`); never claim more.
 2. **Replies**: short, leading with the question, in about 5 lines.

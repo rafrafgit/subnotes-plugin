@@ -504,6 +504,31 @@ function lineWords(line) {
   return { kind: 'line', text: line.slice(LINE_MARKER.exec(line)[0].length).trim() };
 }
 
+// The one line of any kind with words, a heading too, that `wanted` names —
+// checked against the export so a wrong match fails in the conversation; the
+// app checks again. Null when the notebook can't be read.
+function findLine(nb, wanted) {
+  let content = null;
+  try {
+    content = readFileSync(join(DIR, nb.file), 'utf8');
+  } catch {}
+  if (content === null) return null;
+  const key = (lineWords(`• ${wanted}`)?.text || wanted).toLowerCase();
+  let inCode = false;
+  const hits = [];
+  for (const line of content.split('\n')) {
+    if (line.startsWith('```')) { inCode = !inCode; continue; }
+    if (inCode) continue;
+    const found = lineWords(line);
+    if (found && found.text.toLowerCase() === key) hits.push(found);
+  }
+  if (!hits.length) throw new UserError(
+    `"${nb.name}" has no line "${wanted}". Pass the line's words as read_notebook shows them, without its marker or schedule tag.`);
+  if (hits.length > 1) throw new UserError(
+    `"${nb.name}" has ${hits.length} lines "${wanted}". A write places exactly one, so this can't be placed — tell the user instead.`);
+  return hits[0];
+}
+
 // Rewords one existing line on the user's yes — so a skill makes an agreed
 // wording itself instead of handing the user the edit (ONE_LINE_EDIT_SPEC.md).
 // Any line but a heading, a table row or code; never in the Journal. Only the
@@ -521,29 +546,10 @@ function editLine({ notebook, match, text }) {
   if (/^(• |#{1,6} |- |\d+\. |> |\||```|⟦)/.test(words) || words === '---' || /\[[^\]]*\]$/.test(words)) throw new UserError(
     `"${words}" starts with a marker or ends with a schedule tag. Send only the line's words: its kind and schedule stay as they are.`);
 
-  let content = null;
-  try {
-    content = readFileSync(join(DIR, nb.file), 'utf8');
-  } catch {}
-  let old = wanted;
-  if (content !== null) {
-    const key = (lineWords(`• ${wanted}`)?.text || wanted).toLowerCase();
-    let inCode = false;
-    const hits = [];
-    for (const line of content.split('\n')) {
-      if (line.startsWith('```')) { inCode = !inCode; continue; }
-      if (inCode) continue;
-      const found = lineWords(line);
-      if (found && found.text.toLowerCase() === key) hits.push(found);
-    }
-    if (!hits.length) throw new UserError(
-      `"${nb.name}" has no line "${wanted}". Pass the line's words as read_notebook shows them, without its marker or schedule tag.`);
-    if (hits.length > 1) throw new UserError(
-      `"${nb.name}" has ${hits.length} lines "${wanted}". An edit changes exactly one, so this can't be placed — tell the user instead.`);
-    if (hits[0].kind === 'heading') throw new UserError(
-      `"${wanted}" is a heading. Renaming a section isn't an edit skills make — tell the user instead.`);
-    old = hits[0].text;
-  }
+  const found = findLine(nb, wanted);
+  if (found?.kind === 'heading') throw new UserError(
+    `"${wanted}" is a heading. Renaming a section isn't an edit skills make — tell the user instead.`);
+  const old = found?.text ?? wanted;
 
   const payload = {
     connectorVersion: CONNECTOR_VERSION,
@@ -558,6 +564,42 @@ function editLine({ notebook, match, text }) {
   return `Queued in "${nb.name}":\n  − ${old}\n  + ${words}` +
     `\n\nSubnotes applies it when it is running, or at next launch if it is closed. ` +
     `A Subnotes older than this plugin can't apply it and sets it aside. To undo, edit it back.`;
+}
+
+// Writes one new line that isn't a task — body text, a list item ("- ",
+// "4. ") or a quote — after one existing line, on the user's yes: so a skill
+// writes an agreed line, such as a plan's next numbered step, instead of
+// handing it to the user as a task. It lands at the level of the line it
+// follows: after a subnote or subtask, as the next subnote of the same
+// parent; after any other line, a heading included, after that line's
+// subnotes. The marker is the one `text` starts with; nothing is renumbered.
+function addLine({ notebook, after, text }) {
+  const m = manifest();
+  const nb = findNotebook(m, notebook);
+  if (isJournal(nb)) throw new UserError(
+    `"${nb.name}" is the Journal, the user's own writing: skills read it and never change it.`);
+  const wanted = String(after ?? '').trim();
+  if (!wanted) throw new UserError('Name the line to write after: its words, as read_notebook shows them.');
+  const words = String(text ?? '').trim();
+  if (!words || words.includes('\n')) throw new UserError('The new line is one line, and not empty. Add one line per ask.');
+  if (/^(• |#{1,6} |\||```|⟦)/.test(words) || words === '---' || /\[[^\]]*\]$/.test(words)) throw new UserError(
+    `"${words}" is a task, a heading, a table row or carries a schedule. add_line writes body text, a list item or a quote; use add_task for a task.`);
+
+  const found = findLine(nb, wanted);
+  const place = found?.text ?? wanted;
+  const payload = {
+    connectorVersion: CONNECTOR_VERSION,
+    ...(PLUGIN_VERSION ? { pluginVersion: PLUGIN_VERSION } : {}),
+    id: randomUUID().slice(0, 8),
+    op: 'add_line',
+    notebook: nb.name,
+    match: place,
+    text: words,
+  };
+  writeInbox(payload);
+  return `Queued in "${nb.name}", after "${place}":\n  + ${words}` +
+    `\n\nSubnotes applies it when it is running, or at next launch if it is closed. ` +
+    `A Subnotes older than this plugin can't apply it and sets it aside.`;
 }
 
 // MARK: - Review notes
@@ -2680,6 +2722,16 @@ const TOOLS = [
       text: { type: 'string', description: 'The new words, one line, with no marker or schedule tag.' },
     }, required: ['notebook', 'match', 'text'] },
     run: editLine,
+  },
+  {
+    name: 'add_line',
+    description: "Write one new line that isn't a task — body text, a list item or a numbered step, a quote — after one existing line, only after showing the user the line and where it goes and getting their yes. Lands at that line's level: after a subnote as a subnote, else after the line's subnotes. Never the Journal notebook; one line per ask. For a task use add_task; for detail under a task or heading, add_subnotes.",
+    inputSchema: { type: 'object', properties: {
+      notebook: { type: 'string' },
+      after: { type: 'string', description: "The words of the line it goes after, as read_notebook shows them, without its marker, schedule tag or # marker." },
+      text: { type: 'string', description: 'The new line, one line, with its list or quote marker if it has one ("4. ", "- ", "> "); no task marker, heading or schedule tag.' },
+    }, required: ['notebook', 'after', 'text'] },
+    run: addLine,
   },
   {
     name: 'read_learnings',

@@ -104,5 +104,8 @@ for the user, together.
 - A task that is a rewording of a line already in a notebook: show it as
   old and new (`− …` / `+ …`) and, on a yes, `edit_line` — one line per ask,
   never a heading or the Journal. To undo, edit it back.
+- A new line that isn't a task (a plan's next numbered step, a list
+  item): show it as `+ …` after the line it follows and, on a yes,
+  `add_line`. Never hand it to the user as a task to type in.
 - Keep replies short: lead with the question, in about 5 lines, each option
   in one line. Detail goes in the notebook, not the chat.

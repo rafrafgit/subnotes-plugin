@@ -100,7 +100,7 @@ how a worker thinks:
   noticed: one plain line
   pick: one plain line, with Claude's own answer (a draft, a date)
   options: up to two others, one line each
-  writes: what a yes does — add_task …, set_schedule …, edit_line …
+  writes: what a yes does — add_task …, set_schedule …, edit_line …, add_line …
   kind: next-step | decision | plan-check | ongoing | prune | info
 ```
 

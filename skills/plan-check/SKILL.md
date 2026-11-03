@@ -128,11 +128,13 @@ the next check reflect it.
    with "Learned: …". A plain yes teaches nothing.
 2. **New wording for a line already there** (a goal's What, a plan line):
    `edit_line`, as shown.
-3. **New lines or a heading**: a task at the end of the section they go
-   in ("Add as a part of the 4k goal"), with the lines as subnotes and
-   "Why: agreed in the plan check, <today>" last; not when they've written
-   it in already.
-4. **Next steps**: tasks in the first person ("Ask my manager…"), one
+3. **A new line** (a plan's next numbered step, a goal's Status):
+   `add_line` after the line it follows, as shown (`+ 4. …`).
+4. **A new heading**: a task at the end of the section it goes in ("Add
+   as a part of the 4k goal"), with its lines as subnotes and "Why: agreed
+   in the plan check, <today>" last; not when they've written it in
+   already.
+5. **Next steps**: tasks in the first person ("Ask my manager…"), one
    physical action each, in the section the work belongs in (`add_tasks`).
 
 ## 7. Record it, and hand back
@@ -156,9 +158,9 @@ Record the check, so the next one starts from it and knows when it's due.
 
 ## Rules
 
-1. **Writes**: only add tasks, learnings and questions, and edit one line
-   on the user's yes; never a heading (a goal's name), a notebook's goal,
-   or more than one line per edit; never claim more.
+1. **Writes**: only add tasks, learnings and questions, and edit or add
+   one line on the user's yes; never a heading (a goal's name), a
+   notebook's goal, or more than one line per edit; never claim more.
 2. **Yes first**: no task or line without their yes; one yes covers every
    write shown with it.
 3. **Replies**: short, leading with the question, each option in one

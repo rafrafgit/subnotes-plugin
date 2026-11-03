@@ -13,24 +13,28 @@ it, already made, for the session to offer.
    (or the notebook), `read_notebook` and `read_learnings` for the
    notebook marked Goals, and `${CLAUDE_PLUGIN_ROOT}/reference/points.md`,
    the format.
-2. **Stale notes**: drop a line from your notes that names something no
-   notebook has any more.
+2. **Prune your notes**: delete any line in your review notes that names
+   a task or heading the notebooks you just read no longer have.
 
 ## 2. What the goal itself needs
 
 Before section 3, save one point for each of these that applies, made like
 any other (points.md), ahead of section 3's:
 
-1. **No number or no date, or its date has passed**: a `decision` with
+1. **No number, or its date has passed**: a `decision` with
    your proposed number, date or next step, from the plan.
 2. **Its plan check is due** (`whats_due` says so): a `plan-check` with
    the belief the plan rests on, the evidence for or against it, and the
    change you'd make. When its text changed only in wording and the
    `plan` learning still describes it, save your notes with
    `planUnchanged: true` instead.
-3. **An ongoing goal** (a repeat, no date): one warm `ongoing` point:
-   did the planned thing happen; or, with most of its period gone, one
-   thing the people in it enjoy, with a day.
+3. **An ongoing goal** (a repeat, no date): once most of its period has
+   gone since it last happened, one `ongoing` point whose pick is a
+   question, not a plan: what the user would like to do this time ("What
+   would you like to do with your friends this month?"). Don't propose
+   an activity yourself: the notes rarely say what the people in it
+   enjoy. When a planned thing's day has passed, ask whether it happened
+   instead.
 4. **A notebook no goal links**: a `decision`: should its outcome become
    a goal (with your heading and date), or, its goal done, what is it
    for now.
