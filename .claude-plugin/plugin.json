@@ -10,7 +10,7 @@
     "folder": {
       "type": "string",
       "title": "Subnotes Connector folder",
-      "description": "Optional. Leave blank unless Subnotes stores its data somewhere unusual — the default is the folder Subnotes exports to inside its own app container.",
+      "description": "Optional. Leave blank unless Subnotes stores its data somewhere unusual — the plugin finds the folder Subnotes exports to (~/Subnotes, or the one you picked in Subnotes).",
       "required": false
     }
   },

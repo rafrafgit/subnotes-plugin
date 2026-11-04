@@ -114,28 +114,28 @@ written to disk there, so this plugin cannot read it even if it misbehaves — i
 is invisible rather than private-but-visible.
 
 The server never touches the app's database. It reads text files the app
-exports and writes JSON files the app picks up, inside the app's own container.
+exports and writes JSON files the app picks up, in the connector folder:
+`~/Subnotes` unless you picked another one in Subnotes.
 It has no dependencies: `node:fs`, `node:path`, `node:crypto` and
 `node:readline` only, speaking JSON-RPC over stdio.
 
 ## If it can't read your notebooks
 
-macOS keeps one app's files out of reach of another. If Claude Code has not
-been granted Full Disk Access, the plugin can see that the Subnotes folder
-exists but cannot open anything in it, and every tool fails with a permission
-error.
+An older Subnotes keeps the connector folder inside the app's own container,
+and since macOS 27 macOS keeps that out of reach of other apps: every tool
+fails with a permission error. Update Subnotes: it moves the folder to
+`~/Subnotes`, which needs no permission.
 
-Grant it in **System Settings → Privacy & Security → Full Disk Access**, to
-whichever app is actually running Claude Code — your terminal, or Claude Code
-itself — then restart that app. The grant does not transfer between them, so
-running from a terminal you have not granted looks exactly like a plugin that
-stopped working on its own.
+Until you can, grant Full Disk Access in **System Settings → Privacy &
+Security → Full Disk Access**, to whichever app is actually running Claude
+Code — your terminal, or Claude Code itself — then restart that app. The grant
+does not transfer between them.
 
 ## Configuration
 
-None, normally. The server defaults to the folder Subnotes exports to inside
-its own app container. The optional `folder` setting is there only for an
-unusual install location.
+None, normally. The server finds the folder Subnotes exports to: `~/Subnotes`,
+the folder you picked in Subnotes, or, with an older Subnotes, the app's own
+container. The optional `folder` setting is there only for an unusual setup.
 
 ## Development
 

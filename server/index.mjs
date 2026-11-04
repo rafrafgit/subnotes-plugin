@@ -43,17 +43,34 @@ const PLUGIN_VERSION = (() => {
 })();
 const PRIORITIES = ['Today', 'Next', 'Soon', 'Someday'];
 
-// The connector folder lives at a fixed, known path inside the app's own
-// container. It is not user-chosen, so the plugin does not ask: an install
-// prompt demanding a constant is a step that can only be got wrong, and it
-// used to deadlock first run — the folder does not exist until a notebook is
-// connected, so there was nothing to copy the path from yet.
-//
-// The `folder` user config remains as an override for an unusual setup; an
-// unset one arrives here as an empty string from ${user_config.folder}, not as
-// undefined, which is why this tests for truthiness rather than existence.
-const DEFAULT_DIR = join(homedir(), 'Library/Containers/com.subnotes.app/Data/Documents/Connector');
-const DIR = process.env.SUBNOTES_DIR?.trim() || DEFAULT_DIR;
+// Where the connector folder is (CONNECTOR_FOLDER_SPEC.md, 2026-11-04). It used
+// to live only in the app's own container, which needed no permission until
+// macOS 27 began protecting third-party containers: since then, reading it
+// takes Full Disk Access. Subnotes now keeps it in a folder the user picks,
+// ~/Subnotes by default, which needs none. Looked for in order:
+//   1. the `folder` setting (SUBNOTES_DIR), for an unusual setup;
+//   2. the path Subnotes writes to connector-folder.txt in its app group,
+//      which any process can read, when the user picked another folder;
+//   3. ~/Subnotes;
+//   4. the old container, for a Subnotes not yet updated. Its users have Full
+//      Disk Access already, or nothing works for them.
+// The first that holds a manifest wins. With none, ~/Subnotes, or the
+// container when it exists, so the messages below name the right fix.
+// An unset `folder` arrives as an empty string from ${user_config.folder},
+// not undefined, which is why this tests for truthiness.
+const CONTAINER_DIR = join(homedir(), 'Library/Containers/com.subnotes.app/Data/Documents/Connector');
+const HOME_DIR = join(homedir(), 'Subnotes');
+const POINTER = join(homedir(), 'Library/Group Containers/group.com.subnotes.app/connector-folder.txt');
+function connectorDir() {
+  const set = process.env.SUBNOTES_DIR?.trim();
+  if (set) return set;
+  let pointed = null;
+  try { pointed = readFileSync(POINTER, 'utf8').trim() || null; } catch {}
+  const candidates = [pointed, HOME_DIR, CONTAINER_DIR].filter(Boolean);
+  return candidates.find(d => existsSync(join(d, 'manifest.json')))
+    ?? (pointed && existsSync(pointed) ? pointed : existsSync(CONTAINER_DIR) && !existsSync(HOME_DIR) ? CONTAINER_DIR : HOME_DIR);
+}
+const DIR = connectorDir();
 
 // Every message the user could see when something is wrong says which of the
 // two halves to fix. A bare failure is the one outcome the manifest exists to
@@ -81,6 +98,8 @@ function manifest() {
     // Claude Code itself — and it does not transfer between them, so running
     // from a different terminal than the one that was granted looks exactly
     // like a plugin that broke by itself.
+    if ((e.code === 'EPERM' || e.code === 'EACCES') && DIR === CONTAINER_DIR) throw new UserError(
+      `macOS is blocking access to the Subnotes folder at ${DIR}: since macOS 27 it protects the folder inside the app. Update Subnotes, which moves the folder to ~/Subnotes where no permission is needed. Until then, grant Full Disk Access to the app running Claude Code (your terminal, or Claude Code itself) in System Settings > Privacy & Security > Full Disk Access, then restart it.`);
     if (e.code === 'EPERM' || e.code === 'EACCES') throw new UserError(
       `macOS is blocking access to the Subnotes folder at ${DIR}. Grant Full Disk Access to the app running Claude Code (your terminal, or Claude Code itself) in System Settings > Privacy & Security > Full Disk Access, then restart it. Nothing is wrong with Subnotes or the plugin — this is the permission that lets one app read another's files.`);
     throw new UserError(`The Subnotes manifest could not be read (${e.message}). Reopening Subnotes will rewrite it.`);
