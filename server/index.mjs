@@ -2983,6 +2983,18 @@ function handle(msg) {
   }
 }
 
+// From the shell, for bin/today.sh (2026-11-04): /subnotes:run's command file
+// runs it before Claude's first turn, so the session opens on what's on for
+// today with no tool loading or MCP round trip — under ten seconds.
+//   --today       today_context's text, then exit
+//   --agent-dir   the agent folder the refill takes, then exit
+if (process.argv.includes('--agent-dir')) { process.stdout.write(AGENT_DIR + '\n'); process.exit(0); }
+if (process.argv.includes('--today')) {
+  try { process.stdout.write(todayContext() + '\n'); }
+  catch (e) { process.stdout.write(`Today's overview failed: ${e.message}. Call today_context instead.\n`); }
+  process.exit(0);
+}
+
 createInterface({ input: process.stdin }).on('line', line => {
   if (!line.trim()) return;
   let msg;
