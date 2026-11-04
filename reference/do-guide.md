@@ -107,5 +107,9 @@ for the user, together.
 - A new line that isn't a task (a plan's next numbered step, a list
   item): show it as `+ …` after the line it follows and, on a yes,
   `add_line`. Never hand it to the user as a task to type in.
+- A new project or section (a heading with its context and first tasks):
+  show the whole section and the heading it goes under and, on a yes,
+  `add_section`. When it says Subnotes can't write sections yet, say so in
+  one line and offer the tasks under an existing heading instead.
 - Keep replies short: lead with the question, in about 5 lines, each option
   in one line. Detail goes in the notebook, not the chat.

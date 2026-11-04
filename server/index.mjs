@@ -321,7 +321,7 @@ function validateTask(t, nb) {
   // actually has rather than the one Claude typed.
   const canonical = section ? (nb.sections ?? []).find(s => s.toLowerCase() === section.toLowerCase()) : null;
 
-  const subnotes = (t.subnotes ?? []).map(s => String(s).trim()).filter(Boolean);
+  const subnotes = (t.subnotes ?? []).map(subnoteLine).filter(Boolean);
   return { text, ...(priority ? { priority } : {}), ...(canonical ? { section: canonical } : {}), ...(subnotes.length ? { subnotes } : {}) };
 }
 
@@ -408,12 +408,22 @@ function taskWords(line) {
 // here against the export so a wrong match fails in the conversation, and again
 // by the app when it applies the write, since the user may have changed the
 // line in between (the match precondition in the app's CLAUDE_CODE_PLUGIN_SPEC.md).
+// One subnote as it's written. A subnote can't be a heading: it belongs to
+// one line and has no section to name, and the app shows `## Decisions` in a
+// subnote as plain text with the hashes. So a line Claude starts with `#` is
+// kept as the bold label it meant: `**Decisions**` (decided 2026-11-04).
+function subnoteLine(s) {
+  const line = String(s ?? '').trim();
+  const heading = line.match(/^#{1,6}\s+(.+?)\s*#*$/);
+  return heading ? `**${heading[1].replace(/^\*\*(.*)\*\*$/, '$1')}**` : line;
+}
+
 function addSubnotes({ notebook, match, subnotes }) {
   const m = manifest();
   const nb = findNotebook(m, notebook);
   const wanted = String(match ?? '').trim();
   if (!wanted) throw new UserError('Name the task to write under: its text, as read_notebook shows it.');
-  const lines = (Array.isArray(subnotes) ? subnotes : [subnotes]).map(s => String(s ?? '').trim()).filter(Boolean);
+  const lines = (Array.isArray(subnotes) ? subnotes : [subnotes]).map(subnoteLine).filter(Boolean);
   if (!lines.length) throw new UserError('No subnotes given.');
   if (lines.some(l => l.includes('\n'))) throw new UserError('A subnote is one line. Send several lines as several subnotes.');
 
@@ -622,6 +632,91 @@ function addLine({ notebook, after, text }) {
   return `Queued in "${nb.name}", after "${place}":\n  + ${words}` +
     `\n\nSubnotes applies it when it is running, or at next launch if it is closed. ` +
     `A Subnotes older than this plugin can't apply it and sets it aside.`;
+}
+
+// Writes a new section — a heading with its subnotes and first tasks, all
+// in one write — on the user's yes (ADD_SECTION_SPEC.md), so an agent can
+// write up a project. One write, not a heading then add_task: the tasks are
+// validated against the manifest, which has no new heading until the app has
+// applied it. Offered only by an app that lists add_section in the manifest's
+// `operations`: the plugin ships before the Mac update that brings it.
+function addSection({ notebook, text, under, schedule, subnotes, tasks }) {
+  const m = manifest();
+  if (!(m.operations ?? []).includes('add_section')) throw new UserError(
+    "This Subnotes can't write a section yet: it comes with the next Subnotes update. " +
+    'Tell the user, and offer the section as text they can paste, or add its tasks under an existing heading.');
+  const nb = findNotebook(m, notebook);
+  if (isJournal(nb)) throw new UserError(
+    `"${nb.name}" is the Journal, the user's own writing: skills read it and never change it.`);
+
+  const title = String(text ?? '').trim();
+  if (!title || title.includes('\n')) throw new UserError("The section's name is one line, and not empty.");
+  if (/^(• |#{1,6} |- |> |\d+\. |\||```|⟦)/.test(title) || /\[[^\]]*\]$/.test(title)) throw new UserError(
+    `"${title}" can't be a section's name: plain words only, no marker or schedule tag. Put the schedule in schedule.`);
+
+  const headings = nb.headings ?? (nb.sections ?? []).map(name => ({ name, level: 3 }));
+  const same = (a, b) => a.toLowerCase() === b.toLowerCase();
+  const taken = headings.find(h => same(h.name, title));
+  if (taken) throw new UserError(
+    `"${nb.name}" already has a heading "${taken.name}". Headings are found by name, so pick another name, or add_subnotes / add_task under the one that's there.`);
+
+  let level, place;
+  const wanted = String(under ?? '').trim();
+  if (wanted) {
+    const hits = headings.filter(h => same(h.name, wanted));
+    if (!hits.length) throw new UserError(
+      `"${nb.name}" has no heading "${wanted}". Its headings:\n${onePerLine(headings.map(h => h.name))}`);
+    if (hits.length > 1) throw new UserError(`"${nb.name}" has ${hits.length} headings "${wanted}"; name one that's unique.`);
+    if (hits[0].level >= 4) throw new UserError(
+      `"${hits[0].name}" is a Heading 4, the deepest level: a section can't go under it. Use its parent, or add_task under it.`);
+    level = hits[0].level + 1;
+    place = `the last section under "${hits[0].name}"`;
+  } else {
+    level = headings.length ? Math.min(...headings.map(h => h.level)) : 2;
+    place = 'the end of the notebook';
+  }
+
+  const when = schedule == null || String(schedule).trim() === '' ? null : String(schedule).trim();
+  const bucket = when && PRIORITIES.find(p => same(p, when));
+  if (when && !bucket && !/^\d{4}-\d{2}-\d{2}$/.test(when)) throw new UserError(
+    `"${when}" is not a section's schedule. Use ${PRIORITIES.join(', ')} or a date as yyyy-MM-dd.`);
+
+  const notes = (Array.isArray(subnotes) ? subnotes : subnotes ? [subnotes] : []).map(subnoteLine).filter(Boolean);
+  if (notes.some(l => l.includes('\n'))) throw new UserError('A subnote is one line. Send several lines as several subnotes.');
+  const shaped = (tasks ?? []).map(t => {
+    const words = String(t?.text ?? '').trim();
+    if (!words || words.includes('\n')) throw new UserError('A task is one line, and not empty. Put the detail in its subnotes.');
+    const priority = t.priority ?? null;
+    if (priority !== null && !PRIORITIES.includes(priority)) throw new UserError(
+      `Priority must be one of ${PRIORITIES.join(', ')} — got "${priority}".`);
+    const lines = (t.subnotes ?? []).map(subnoteLine).filter(Boolean);
+    return { text: words, ...(priority ? { priority } : {}), ...(lines.length ? { subnotes: lines } : {}) };
+  });
+
+  const payload = {
+    connectorVersion: CONNECTOR_VERSION,
+    ...(PLUGIN_VERSION ? { pluginVersion: PLUGIN_VERSION } : {}),
+    id: randomUUID().slice(0, 8),
+    op: 'add_section',
+    notebook: nb.name,
+    text: title,
+    ...(wanted ? { under: headings.find(h => same(h.name, wanted)).name } : {}),
+    ...(when ? { schedule: bucket ?? when } : {}),
+    ...(notes.length ? { subnotes: notes } : {}),
+    ...(shaped.length ? { tasks: shaped } : {}),
+  };
+  writeInbox(payload);
+  const preview = [
+    `${'#'.repeat(level)} ${title}${when && bucket !== 'Someday' ? ` [${bucket ?? when}]` : ''}`,
+    ...notes.map(l => `    ${l}`),
+    // A task without a priority starts with the section's schedule (app side).
+    ...shaped.flatMap(t => {
+      const tag = t.priority ?? (when ? bucket ?? when : null);
+      return [`• ${t.text}${tag && tag !== 'Someday' ? ` [${tag}]` : ''}`, ...(t.subnotes ?? []).map(l => `    ${l}`)];
+    }),
+  ];
+  return `Queued in "${nb.name}", as ${place}:\n${preview.map(l => `  ${l}`).join('\n')}` +
+    `\n\nSubnotes applies it when it is running, or at next launch if it is closed.`;
 }
 
 // MARK: - Review notes
@@ -2676,7 +2771,7 @@ const taskShape = {
     text: { type: 'string', description: 'The task, one line, naming a physical visible action.' },
     section: { type: 'string', description: 'An EXISTING section heading from list_notebooks. Omit to add at the top.' },
     priority: { type: 'string', enum: PRIORITIES, description: "Leave out to use the section's schedule (Someday if it has none)." },
-    subnotes: { type: 'array', items: { type: 'string' }, description: 'Detail lines shown under the task. Paths and links go here, not in the text.' },
+    subnotes: { type: 'array', items: { type: 'string' }, description: 'Detail lines shown under the task. Paths and links go here, not in the text. Never a heading: a line starting with # is saved as a bold label.' },
   },
   required: ['text'],
 };
@@ -2721,7 +2816,7 @@ const TOOLS = [
     inputSchema: { type: 'object', properties: {
       notebook: { type: 'string' },
       match: { type: 'string', description: "The task's or heading's text, as read_notebook shows it, without its schedule tag or # marker." },
-      subnotes: { type: 'array', items: { type: 'string' }, description: 'The lines to add, one subnote each.' },
+      subnotes: { type: 'array', items: { type: 'string' }, description: 'The lines to add, one subnote each. Never a heading: a line starting with # is saved as a bold label; for a new section, ask the user.' },
     }, required: ['notebook', 'match', 'subnotes'] },
     run: addSubnotes,
   },
@@ -2754,6 +2849,27 @@ const TOOLS = [
       text: { type: 'string', description: 'The new line, one line, with its list or quote marker if it has one ("4. ", "- ", "> "); no task marker, heading or schedule tag.' },
     }, required: ['notebook', 'after', 'text'] },
     run: addLine,
+  },
+  {
+    name: 'add_section',
+    description: "Write a new section: a heading with its subnotes and first tasks, in one write — such as a project written up from a talk. Only after showing the user the whole section and where it goes, and getting their yes. Under an existing heading it becomes the last section there, one level deeper (never under a Heading 4); without one, at the end of the notebook. Refuses a name the notebook already has as a heading, and the Journal. Needs a Subnotes that lists add_section; an older one refuses before anything is queued.",
+    inputSchema: { type: 'object', properties: {
+      notebook: { type: 'string' },
+      text: { type: 'string', description: "The heading's name: plain words, no # marker and no schedule tag." },
+      under: { type: 'string', description: 'An EXISTING heading from list_notebooks to put it under, by its name without schedule. Omit for the end of the notebook.' },
+      schedule: { type: 'string', description: "The section's schedule: Today, Next, Soon, Someday or a date as yyyy-MM-dd. Omit for none." },
+      subnotes: { type: 'array', items: { type: 'string' }, description: 'Lines under the heading, such as what it is for. Never a heading: a line starting with # is saved as a bold label.' },
+      tasks: { type: 'array', description: "Its first tasks, in order. A task without a priority starts with the section's schedule.", items: {
+        type: 'object',
+        properties: {
+          text: { type: 'string', description: 'The task, one line, naming a physical visible action.' },
+          priority: { type: 'string', enum: PRIORITIES },
+          subnotes: { type: 'array', items: { type: 'string' }, description: 'Detail lines under the task. Never a heading.' },
+        },
+        required: ['text'],
+      } },
+    }, required: ['notebook', 'text'] },
+    run: addSection,
   },
   {
     name: 'read_learnings',
