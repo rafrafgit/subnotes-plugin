@@ -48,7 +48,7 @@ const PRIORITIES = ['Today', 'Next', 'Soon', 'Someday'];
 // macOS 27 began protecting third-party containers: since then, reading it
 // takes Full Disk Access. Subnotes now keeps it in a folder the user picks,
 // ~/Subnotes by default, which needs none. Looked for in order:
-//   1. the `folder` setting (SUBNOTES_DIR), for an unusual setup;
+//   1. the `folder` setting (SUBNOTES_DIR), for an unusual setup (below);
 //   2. the path Subnotes writes to connector-folder.txt in its app group,
 //      which any process can read, when the user picked another folder;
 //   3. ~/Subnotes;
@@ -61,11 +61,14 @@ const PRIORITIES = ['Today', 'Next', 'Soon', 'Someday'];
 const CONTAINER_DIR = join(homedir(), 'Library/Containers/com.subnotes.app/Data/Documents/Connector');
 const HOME_DIR = join(homedir(), 'Subnotes');
 const POINTER = join(homedir(), 'Library/Group Containers/group.com.subnotes.app/connector-folder.txt');
+// A `folder` setting wins only while it holds a manifest: early installs had
+// to set it, mostly to the old container, which the app empties when it moves
+// the folder (2026-11-04).
 function connectorDir() {
-  const set = process.env.SUBNOTES_DIR?.trim();
-  if (set) return set;
+  const set = process.env.SUBNOTES_DIR?.trim() || null;
   let pointed = null;
   try { pointed = readFileSync(POINTER, 'utf8').trim() || null; } catch {}
+  if (set && (existsSync(join(set, 'manifest.json')) || ![pointed, HOME_DIR].some(d => d && existsSync(join(d, 'manifest.json'))))) return set;
   const candidates = [pointed, HOME_DIR, CONTAINER_DIR].filter(Boolean);
   return candidates.find(d => existsSync(join(d, 'manifest.json')))
     ?? (pointed && existsSync(pointed) ? pointed : existsSync(CONTAINER_DIR) && !existsSync(HOME_DIR) ? CONTAINER_DIR : HOME_DIR);
