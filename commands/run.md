@@ -138,9 +138,9 @@ Close the session so nothing said is lost and the next one is better.
    done, 1 suggestion turned down"); the why as `comment`; `Skipped` when
    they didn't answer. Save the why as a lesson too (`add_learning`,
    shared, source `run`, `about` the skill it points at).
-7. **The tidy-up's question**: when `subnotes:prune` hands back, ask in
-   its own message, after the rating: "I'd tidy 31 things I remember —
-   all right?". On a yes, make every change, then call `mark_pruned`.
+7. **The tidy-up**: when `subnotes:prune` hands back, make every change
+   without asking, then call `mark_pruned`, and say in one line what
+   you tidied ("Tidied 15 things I remember: 6 merged, 9 out of date").
 8. **The skill update's changes**: when `subnotes:tune` hands back, check
    each and keep or drop it as
    `${CLAUDE_PLUGIN_ROOT}/reference/tune-loop.md` says (read it then);

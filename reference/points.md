@@ -48,7 +48,7 @@ One block per point, most important first:
   - `decision`: something the user decides
   - `plan-check`: a goal's plan needs a look; the run holds that talk
   - `today`: a task in today's plan, with what Claude will do about it
-  - `prune`: changes to what Claude remembers, applied on one yes
+  - `prune`: changes to what Claude remembers, applied without asking
   - `change`: something done without asking, to say and offer to undo
   - `talk`: a problem or idea to talk through first, with Claude's ideas;
     or one or two questions about something coming up that the notes
