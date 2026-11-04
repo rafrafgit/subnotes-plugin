@@ -58,6 +58,9 @@ easiest one to write.
    - one person's taste ("they like short replies at night"): only
      behaviour that's right for any user goes in, and no example from the
      user's notebooks;
+   - new behaviour a lesson suggests, rather than a fix for something the
+     user reported: hand it back as one `talk` suggestion, `about: tune`,
+     for the user to decide first;
    - this tune or its checker;
    - a lesson already fixed: written `at` a commit (a run's `[at: …]`)
      whose skill file changed since in the way it asks:
