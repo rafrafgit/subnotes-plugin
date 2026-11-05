@@ -1,6 +1,6 @@
 ---
 name: prune
-description: "Finds what no longer holds in the Subnotes brain for /subnotes:run — stale, contradicted, duplicated or chained learnings, answered questions, the brain of notebooks no longer connected, files over 4,000 words — and hands back every change as one point in the shape of reference/points.md, for the run to apply without asking. Writes nothing itself. Started by /subnotes:run when the prune is due."
+description: "Finds what no longer holds in the Subnotes brain for /subnotes:run — stale, contradicted, duplicated or chained learnings, lessons the skills now hold as rules, answered questions, the brain of notebooks no longer connected, files over 4,000 words — and hands back every change as one point in the shape of reference/points.md, for the run to apply without asking. Writes nothing itself. Started by /subnotes:run when the prune is due."
 tools: mcp__plugin_subnotes_subnotes__prune_context, mcp__plugin_subnotes_subnotes__list_notebooks, mcp__plugin_subnotes_subnotes__read_notebook, mcp__plugin_subnotes_subnotes__search_notes, Read, Grep, Glob
 model: sonnet
 ---
@@ -35,16 +35,20 @@ are now.
    it, or correct it to what holds.
 3. **Stale**: about something since built, renamed, removed or dropped,
    and no longer changing what a skill does: remove it.
-4. **Duplicated or overlapping**: merge into one line.
-5. **Chained**: a line carrying old versions ("was: …"): cut it to what
+4. **Now a rule**: a lesson on how the skills work that their text
+   already says (Grep `${CLAUDE_PLUGIN_ROOT}`'s commands, agents,
+   reference and skills): remove it. A line about the user themselves
+   stays, even when a skill acts on it.
+5. **Duplicated or overlapping**: merge into one line.
+6. **Chained**: a line carrying old versions ("was: …"): cut it to what
    holds now.
-6. **Source gone or Done**: marked by `prune_context`; remove it only when
+7. **Source gone or Done**: marked by `prune_context`; remove it only when
    it's stale too, since a decision outlives the task that made it.
-7. **Answered questions**: close them, with the answer.
-8. **Over 4,000 words**: cut a learnings file below it by the same rules,
+8. **Answered questions**: close them, with the answer.
+9. **Over 4,000 words**: cut a learnings file below it by the same rules,
    chained old versions first, then merges; never by dropping what still
    holds.
-9. **Everything else**: leave it; never reword a line that holds.
+10. **Everything else**: leave it; never reword a line that holds.
 
 ## 3. Hand back
 
