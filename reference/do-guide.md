@@ -18,10 +18,9 @@ the user's normal permission prompts. Don't commit, push or publish unless they
 ask.
 
 Work that isn't code — a draft, a list, research written up — goes in the
-chat and under its task, as subnotes (`add_subnotes`), so it's in the
-notebook where the user will use it. Keep it short and plain: they read it
-in the notebook, not in a document. A subtask can't take subnotes: say so,
-and leave it in the chat.
+chat, short and plain, as plain text with no `>` quote markers so it
+copies cleanly; ask before filing it in a notebook as subnotes
+(`add_subnotes`). A subtask can't take subnotes.
 
 If the task turns out bigger than it looked, stop, say what you found, and
 propose the first step rather than carrying on. The same when you find you
@@ -47,7 +46,7 @@ and say so. Done means built; the user tests it, and deletes the task once
 it's tested. Name what's left — "Left for you: try it on the
 iPhone" — and any check that couldn't run, such as tests while the app is
 open. A task whose work the user does themselves isn't done until they have:
-a task to draft something is done once the draft is under it; one to send it
+a task to draft something is done once the draft is in the chat; one to send it
 isn't until they've sent it. When you stopped short, or the build or a check
 that ran failed, it isn't done: say "Stopped:" and leave it.
 
@@ -87,7 +86,7 @@ to run it. Then the summary, with what it filed:
 ```
 This session
 Done: Fix the contact form's slow upload (Portfolio site) — marked Done; left for you: try it on your phone
-Done: Draft the follow-up to Anna (Freelance) — the draft is under the task
+Done: Draft the follow-up to Anna (Freelance) — the draft is in the chat
 Stopped: Add the price list page (Portfolio site) — needs your prices
 Commits: a1b2c3d contact form upload (pushed)
 Learnings: 1 — run the linter before every commit
@@ -112,4 +111,4 @@ for the user, together.
   `add_section`. When it says Subnotes can't write sections yet, say so in
   one line and offer the tasks under an existing heading instead.
 - Keep replies short: lead with the question, in about 5 lines, each option
-  in one line. Detail goes in the notebook, not the chat.
+  in one line. Detail goes in the notebook, except work the user reads or copies from the chat.
