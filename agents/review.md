@@ -45,6 +45,17 @@ from beyond the notes is welcome: raise it now, don't keep it for later.
 Search the web when it helps (never with the user's name or private
 details). Leave out what the learnings say the user turned down.
 
+## 3b. Enough context
+
+Check every point from sections 2 and 3 against "Enough context" in
+points.md before saving it, and fill its `rests`. A point that fits
+anyone with this goal, or rests on a fact about the user or their people
+that the notes don't hold, isn't saved: save instead a `talk` asking the
+one or two questions that would fill it, and note the missing fact in
+your notes. A fact about the world that's missing: look it up. An open
+question in `review_context` that blocks this goal is raised the same
+way, as a `talk`, unless one already waits for it in the pick.
+
 ## 4. Save
 
 1. **Your notes** (`write_notes`), under 60 lines: `Last review:` and

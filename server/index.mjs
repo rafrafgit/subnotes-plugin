@@ -2554,7 +2554,7 @@ function todayQuestions(m) {
 // next-steps' new points for a goal replace their old ones for it, so a
 // stale point never outlives a fresh look; the journal's add to what's there.
 const POINT_KINDS = ['next-step', 'decision', 'plan-check', 'today', 'prune', 'change', 'talk'];
-const POINT_FIELDS = ['kind', 'goal', 'about', 'saved', 'value', 'noticed', 'pick', 'options'];
+const POINT_FIELDS = ['kind', 'goal', 'about', 'saved', 'value', 'noticed', 'rests', 'pick', 'options'];
 const REPLACING_SOURCES = ['review', 'next-steps'];
 const PENDING_HEADER = '# Saved for the pick\n\nPoints the workers saved for /subnotes:run, until it raises them. ' +
   'Removed once done or turned down.\n';
@@ -2595,7 +2595,7 @@ function logPoints(points, outcome, reason = '') {
   const at = localTime(new Date()).slice(0, 16);
   const blocks = points.map(p => [
     `- ${at} · ${outcome} · ${p.saved?.split(' · ')[1] ?? '?'} · ${p.goal ?? 'none'} · ${p.kind}`,
-    ...['value', 'noticed', 'pick', 'options'].filter(k => p[k]).map(k => `  ${k}: ${p[k]}`),
+    ...['value', 'noticed', 'rests', 'pick', 'options'].filter(k => p[k]).map(k => `  ${k}: ${p[k]}`),
     ...(reason ? [`  reason: ${reason}`] : []),
   ].join('\n'));
   const old = readEntryFile(POINTS_LOG_PATH()) ?? POINTS_LOG_HEADER;
@@ -2610,11 +2610,14 @@ function savePoints({ source, goal, points }) {
     const kind = String(p?.kind ?? '').trim().toLowerCase();
     if (!POINT_KINDS.includes(kind)) throw new UserError(`Point ${i + 1}: \`kind\` is one of ${POINT_KINDS.join(', ')}.`);
     const out = { kind, saved: `${today()} · ${who}`, writes: [] };
-    for (const k of ['goal', 'about', 'value', 'noticed', 'pick', 'options']) {
+    for (const k of ['goal', 'about', 'value', 'noticed', 'rests', 'pick', 'options']) {
       if (p[k] !== undefined && String(p[k]).trim()) out[k] = oneLine(p[k], `point's ${k}`);
     }
     if (!out.goal) out.goal = scope || 'none';
     if (!out.value || !out.noticed || !out.pick) throw new UserError(`Point ${i + 1} needs \`value\`, \`noticed\` and \`pick\`.`);
+    // A review names what its point rests on, so a guess about the user's
+    // life becomes a question instead of a shallow idea (2026-11-05).
+    if (who === 'review' && !out.rests) throw new UserError(`Point ${i + 1} needs \`rests\`: the facts it rests on, each with where in the notes it is, as reference/points.md says.`);
     const writes = Array.isArray(p.writes) ? p.writes : p.writes ? [p.writes] : [];
     out.writes = writes.map(w => oneLine(w, 'write')).filter(w => w.toLowerCase() !== 'none');
     return out;
@@ -3035,6 +3038,7 @@ const TOOLS = [
         about: { type: 'string', description: 'The skill handing it back.' },
         value: { type: 'string', description: "One plain line: what the user gets from it, in their work or life." },
         noticed: { type: 'string', description: 'One plain line: what was found.' },
+        rests: { type: 'string', description: "One line: the facts the pick rests on, each with where it is (notebook › section, a learning, the web), split by \" · \". Required from a review." },
         pick: { type: 'string', description: "One plain line: Claude's own answer; a task in bold with where it goes." },
         options: { type: 'string', description: 'Up to two others, in one line, split by " · ".' },
         writes: { type: 'array', items: { type: 'string' }, description: 'Exactly what a yes does, one tool call each; leave out when a yes writes nothing.' },

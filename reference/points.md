@@ -13,7 +13,7 @@ raise out loud, and a goal with no next step gets one.
 ## The bar
 
 Every point the user sees is judged by it, so a point that misses it is
-worse than none. Before saving one, check all four:
+worse than none. Before saving one, check all five:
 
 1. **Where it comes from, by name**: the task, project or goal it's
    about, as the notebook writes it, opens `noticed`.
@@ -25,8 +25,37 @@ worse than none. Before saving one, check all four:
 4. **Made, not offered**: the pick is the thing itself, or as much of it
    as fits (a draft, the research, the message), not a promise to make
    it; never a rule or how sessions work.
+5. **Enough context**: it fits this user, not anyone with the same goal,
+   and every fact about the user and their people it rests on is in the
+   notes (see "Enough context" below). One that isn't becomes the
+   question that would fill it.
 
 Two that clear it beat three with one that doesn't.
+
+## Enough context
+
+A shallow idea comes from missing context: nobody can suggest a good
+Saturday with someone without knowing what the two of them enjoy. Two
+tests, on every point before it's saved:
+
+1. **Anyone's idea?** Put a stranger with the same goal in the user's
+   place. If the pick fits them just as well, it came from general
+   knowledge, not from the user's life: it's shallow.
+2. **What it rests on**: list the facts the pick needs in `rests`, each
+   with where it is.
+   - About the user and their people (what they like, want, have tried,
+     can do, who they know): only the notes and learnings count. One
+     that's missing can't be guessed or looked up.
+   - About the world (who hires, what a tool does, a date): look it up
+     when it's missing.
+
+When a fact about the user is missing, don't save the idea. Save a
+`talk` whose pick is the one or two questions that would fill it, asked
+plainly ("What do you and Meike like doing on a Saturday?"), with
+`rests` naming what's missing (`missing: what Meike enjoys`). An open
+question that blocks the goal is raised this way too, not only filed.
+The run writes the answer under the goal, in the user's words, so it
+isn't asked again.
 
 ## The shape
 
@@ -38,6 +67,7 @@ One block per point, most important first:
   about: review
   value: A second paying client in sight, so June's 4k stops resting on Acme alone.
   noticed: Clients: one so far against a pace of one a month, and nothing lined up; Sam's agency (Freelance › Contacts) hires freelancers.
+  rests: one client so far (Freelance › Clients) · Sam works at an agency that hires freelancers (Freelance › Contacts) · two recent projects to show (Freelance › Portfolio)
   pick: The message, ready to send: "Hi Sam, would you introduce me to your agency's design lead? Happy to send two recent projects first." — **Ask Sam for an intro to her design agency** → Freelance › Clients [Next]
   options: Post the portfolio on LinkedIn first · Raise the day rate for new clients
   writes: add_task Freelance "Ask Sam for an intro to her design agency" section "Clients" priority Next
@@ -65,6 +95,9 @@ One block per point, most important first:
   opening with the name of the task, project or goal it's about, as the
   notebook writes it ("Fix reviewers to not give shallow suggestions has
   sat…"), so the user knows where it comes from.
+- **rests** — one line: the facts the pick rests on, each with where it
+  is (notebook › section, a learning, the web), split by " · "; a fact
+  about the user that's missing as `missing: …`. Required from a review.
 - **pick** — one plain line: the thing itself, made (a draft, the
   research, a date, a wording), never homework or a promise to make it. A task in bold, with where it goes after it.
 - **options** — up to two others, one line each; leave out when there's

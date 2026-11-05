@@ -36,31 +36,43 @@ choose what to work on in their own words.
    the user's own errands here.
 3. **Ideas**: one line each for the saved suggestions under "Saved for
    the pick", `talk` first, then `decision`, `plan-check`, `today`,
-   `next-step`: the goal or task it comes from, then what's ready or the
-   question it asks. Leave out one the learnings say was turned down.
-4. **Your pick and the ask**: one line on where you'd start and why, then
-   ask what they want to do. They can name one, several, or something
-   else:
+   `next-step`: the goal or task it comes from, then the question it asks
+   or the work that's made. Leave out one the learnings say was turned
+   down.
+4. **Made work shows**: when a suggestion's pick holds work you made (a
+   message, a headline, a decision, a draft), show it, never just that
+   it's ready: short work in full, quoted on an indented line under the
+   idea; longer work as its first line or gist, so the user can use it or
+   judge it without asking what it is.
+5. **Numbers**: number the tasks, projects and ideas in one run, 1, 2,
+   3…, across both lists, and end with one more number, **Something of
+   your own**, so the user can answer with numbers. Dated soon and the
+   lines under "Also mention" get no number.
+6. **Your pick and the ask**: one line on where you'd start, by its
+   number, and why, then ask what they want to do. They can name one,
+   several, or something else:
 
    ```
    On for today:
-   - **Acme proposal: the draft** — I can start now
-   - **Clients** (project, no tasks yet) — I'd list who could introduce you
+   1. **Acme proposal: the draft** — I can start now
+   2. **Clients** (project, no tasks yet) — I'd list who could introduce you
    - Dated soon: invoice March (Fri)
 
    Ideas:
-   - **Freelance: ask Sam for an intro** — the message is ready to send
-   - **Launch my own business: the plan** — does March still hold?
+   3. **Freelance: ask Sam for an intro** — the message, ready to send:
+      "Hi Sam, would you introduce me to your agency's design lead?"
+   4. **Launch my own business: the plan** — does March still hold?
+   5. **Something of your own**
 
-   I'd start with the Acme draft: it's due Friday. What do you want to do?
+   I'd start with 1, the Acme draft: it's due Friday. What do you want to do?
    ```
 
-5. **Also mention**, one line each, when today's overview has them: the
+7. **Also mention**, one line each, when today's overview has them: the
    user's errands today; what was filed from direct chats, so they can
    correct it (`correct_learning`, `close_question`); a refill that failed.
-6. **Nothing on**: say nothing's lined up yet, and ask what's on their
+8. **Nothing on**: say nothing's lined up yet, and ask what's on their
    mind (section 4).
-7. **When they pick an idea**: load the Subnotes tools then, if they
+9. **When they pick an idea**: load the Subnotes tools then, if they
    aren't loaded. Check it against the bar in
    `${CLAUDE_PLUGIN_ROOT}/reference/points.md` before you act on it: reword
    what falls short; when it rests on a wrong premise, say so in one line,
@@ -85,8 +97,9 @@ from how the user took it.
    Done, `remove_point` any saved suggestion that proposed it.
 2. **An accepted suggestion**: carry out its `writes`, then
    `remove_point`. One that asks for context or what's holding something:
-   ask its questions, then write the answers under the task or project,
-   in the user's words.
+   ask its questions, then write the answers under the goal, task or
+   project they fill (`add_subnotes`), in the user's words, and
+   `close_question` an open question they answer.
 3. **A task not wanted now**: leave it as it is, and don't offer it again
    this session; no lesson.
 4. **A turned-down suggestion**: `remove_point` with the reason, and save
@@ -96,8 +109,10 @@ from how the user took it.
    (Skill tool), and give it all the time it needs.
 6. **A decision or answer**: save it with `add_learning`, or
    `close_question` when it answers an open question.
-7. **What's next**: after each report, call `today_context` and show
-   what's left as in section 1, shorter: only what changed or is new.
+7. **What's next**: once a task or suggestion is done, call
+   `today_context` and show the whole list again as in section 1, numbered
+   afresh, without what's done or turned down, and ask what's next; mark
+   what's new since the last list with "(new)".
 8. **Nothing left**: when the user has turned everything down and nothing
    new came in, say nothing's lined up and go to section 5.
 
