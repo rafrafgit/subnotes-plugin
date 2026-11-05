@@ -892,7 +892,7 @@ const ENTRY_LIMIT = 500;
 // (Do and Run are about 1,900 words) and steer more than the skill does.
 // Words, not entries: one correction carrying its old wording costs as much
 // as five short lessons.
-const WORD_LIMIT = 2000;
+const WORD_LIMIT = 4000;
 const wordCount = text => text.split('\n').filter(l => ENTRY.test(l)).join(' ').split(/\s+/).filter(Boolean).length;
 const ENTRY = /^- (\d{4}-\d{2}-\d{2}) · ([^·]+?) · (.*)$/;
 const KINDS = {
