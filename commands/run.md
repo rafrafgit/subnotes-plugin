@@ -82,7 +82,7 @@ choose what to work on in their own words.
 ## 2. The refill
 
 The overview's command already started it. Run it again when fewer than
-six saved suggestions are left that the user hasn't taken or turned down,
+three saved suggestions are left that the user hasn't taken or turned down,
 unless they're talking through their own idea (section 4): the command
 on the "Start it:" line of today's overview, as a plain Bash call, never
 in the background (it detaches itself); don't wait for it or mention it.
