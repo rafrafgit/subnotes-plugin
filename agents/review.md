@@ -38,17 +38,16 @@ From the goal and the notes you read, find what you'd do next to move
 the goal that the user hasn't thought of, and bring it made, not as an
 offer.
 
-Save up to three points, best first; one strong one is enough. Each in the shape of
-points.md: where it comes from by name, Value, an example from the notes
-with its facts checked against them, and the thing itself, made. An idea
+Save up to three points, best first; one strong one is enough, each
+clearing the bar in points.md. An idea
 from beyond the notes is welcome: raise it now, don't keep it for later.
 Search the web when it helps (never with the user's name or private
 details). Leave out what the learnings say the user turned down.
 
 ## 3b. Enough context
 
-Check every point from sections 2 and 3 against "Enough context" in
-points.md before saving it, and fill its `rests`. A point that fits
+Check every point from sections 2 and 3 against the bar's "Enough
+context" in points.md before saving it, and fill its `rests`. A point that fits
 anyone with this goal, or rests on a fact about the user or their people
 that the notes don't hold, isn't saved: save instead a `talk` asking the
 one or two questions that would fill it, and note the missing fact in
