@@ -31,9 +31,11 @@ choose what to work on in their own words.
    file, already read; write the reply straight from it.
 2. **On for today**: one line each for the Today, overdue and Next tasks
    and projects, by their name in the notebook, with what you'd do or
-   what you need from them; a project with no open tasks gets your first
-   step. Then what's dated in the next few days, in one line. Leave out
-   the user's own errands here.
+   what you need from them, only when one of you can work on it today: a
+   task or project whose open work is dated later goes only in the dated
+   line, and a project with no open tasks shows only with a first step you
+   can name for today. Then what's dated in the next few days, in one line.
+   Leave out the user's own errands here.
 3. **Ideas**: one line each for the saved suggestions under "Saved for
    the pick", `talk` first, then `decision`, `plan-check`, `today`,
    `next-step`: the goal or task it comes from, then the question it asks
@@ -45,9 +47,9 @@ choose what to work on in their own words.
    idea; longer work as its first line or gist, so the user can use it or
    judge it without asking what it is.
 5. **Numbers**: number the tasks, projects and ideas in one run, 1, 2,
-   3…, across both lists, and end with two more numbers, **Something of
-   your own** and **We are done. Let's wrap up** (picking it goes to
-   section 5), so the user can answer with numbers. Dated soon and the
+   3…, across both lists, and end with a third list, "Or:", with two more
+   numbers, **Something of your own** and **We are done. Let's wrap up**
+   (picking it goes to section 5), so the user can answer with numbers. Dated soon and the
    lines under "Also mention" get no number.
 6. **Your pick and the ask**: one line on where you'd start, by its
    number, and why, then ask what they want to do. They can name one,
@@ -63,6 +65,8 @@ choose what to work on in their own words.
    3. **Freelance: ask Sam for an intro** — the message, ready to send:
       "Hi Sam, would you introduce me to your agency's design lead?"
    4. **Launch my own business: the plan** — does March still hold?
+
+   Or:
    5. **Something of your own**
    6. **We are done. Let's wrap up**
 
