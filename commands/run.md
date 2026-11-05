@@ -45,8 +45,9 @@ choose what to work on in their own words.
    idea; longer work as its first line or gist, so the user can use it or
    judge it without asking what it is.
 5. **Numbers**: number the tasks, projects and ideas in one run, 1, 2,
-   3…, across both lists, and end with one more number, **Something of
-   your own**, so the user can answer with numbers. Dated soon and the
+   3…, across both lists, and end with two more numbers, **Something of
+   your own** and **We are done. Let's wrap up** (picking it goes to
+   section 5), so the user can answer with numbers. Dated soon and the
    lines under "Also mention" get no number.
 6. **Your pick and the ask**: one line on where you'd start, by its
    number, and why, then ask what they want to do. They can name one,
@@ -63,6 +64,7 @@ choose what to work on in their own words.
       "Hi Sam, would you introduce me to your agency's design lead?"
    4. **Launch my own business: the plan** — does March still hold?
    5. **Something of your own**
+   6. **We are done. Let's wrap up**
 
    I'd start with 1, the Acme draft: it's due Friday. What do you want to do?
    ```
