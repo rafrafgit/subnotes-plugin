@@ -40,6 +40,12 @@ nothing to pick.
    refill.
 3. **Its review**: start `subnotes:review` (Agent tool) for that goal,
    with why you picked it and what's lined up for it. Wait for it.
+4. **A question to think through**: when no saved suggestion's pick
+   starts with "To think through:", pick the goal whose notes hold the
+   strongest tension (what the user wrote against what they do, an
+   untested belief, a big open question), one not reviewed in this
+   refill, and start `subnotes:review` for it, asking only for its
+   section 3b question. Wait for it.
 
 ## 4. Log
 

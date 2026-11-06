@@ -58,7 +58,10 @@ One block per point, most important first:
     this", and why)
   - `prune`: changes to what Claude remembers, applied without asking
   - `change`: something done without asking; `writes` says how to undo it
-  - `talk`: something to talk through first, with Claude's ideas; the
+  - `talk`: something to talk through first, with Claude's ideas; a
+    question worth thinking through, from a tension or untested belief in
+    the notes, its pick starting "To think through:" with Claude's view
+    and a sketch; the
     questions that fill missing context; what's holding something that
     has sat for weeks, with a step worth doing either way; or a goal kept
     up (friends, family), raised as a friend would

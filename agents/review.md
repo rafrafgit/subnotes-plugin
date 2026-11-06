@@ -59,9 +59,23 @@ the fix made (the rewritten line, the missing slide, the clearer step).
 No finding that clears the bar, no point. Skip this section when there's
 nothing made for someone, or the goal is paused.
 
-## 3b. Enough context
+## 3b. A question worth talking through
 
-Check every point from sections 2, 3 and 3a against the bar's "Enough
+Look for one thing in the notes worth talking through with a friend: a
+tension between what the user wrote and what they do, a belief the plan
+rests on that nothing has tested, or a big open question on this goal,
+in the user's own words as the notes put them.
+
+Save at most one, outside section 3's three, as a `talk` whose `pick`
+starts with "To think through:", then the question in one line, then
+your view in one or two lines, with a sketch of what it would look like,
+so the talk starts from something. Never a missing fact (that's 3c) or
+a yes/no on a step. No tension worth raising, no point. A paused goal
+counts: what's holding it is often the best question.
+
+## 3c. Enough context
+
+Check every point from sections 2, 3, 3a and 3b against the bar's "Enough
 context" in points.md before saving it, and fill its `rests`. A point that fits
 anyone with this goal, or rests on a fact about the user or their people
 that the notes don't hold, isn't saved: save instead a `talk` asking the

@@ -37,7 +37,9 @@ choose what to work on in their own words.
    can name for today. Then what's dated in the next few days, in one line.
    Leave out the user's own errands here.
 3. **Ideas**: one line each for the saved suggestions under "Saved for
-   the pick", `talk` first, then `decision`, `plan-check`, `today`,
+   the pick", a `talk` whose pick starts "To think through:" first (its
+   question and your view, without the label), then other `talk`, then
+   `decision`, `plan-check`, `today`,
    `next-step`: the goal or task it comes from, then the question it asks
    or the work that's made. Leave out one the learnings say was turned
    down.
